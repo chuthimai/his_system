@@ -1,5 +1,5 @@
 import { HealthInsurance } from 'src/insurances/entities/health-insurance.entity';
-import { PatientRecord } from 'src/patient-records/entities/patient-record.entity';
+import { PatientRecord } from 'src/records/entities/patient-record.entity';
 import {
   Column,
   Entity,

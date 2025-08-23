@@ -8,6 +8,8 @@ import {
 } from 'typeorm';
 import { InvoiceService } from './invoice-service.entity';
 import { Location } from 'src/schedules/entities/location.entity';
+import { AssessmentItem } from 'src/assessments/entities/assessment-item.entity';
+import { ServiceReport } from 'src/reports/entities/service-report.entity';
 
 @Entity('services')
 export class Service {
@@ -41,4 +43,10 @@ export class Service {
 
   @OneToMany(() => InvoiceService, (invoiceService) => invoiceService.service)
   invoiceServices: InvoiceService[];
+
+  @OneToMany(() => AssessmentItem, (assessmentItem) => assessmentItem.service)
+  assessmentItems: AssessmentItem[];
+
+  @OneToMany(() => ServiceReport, (serviceReport) => serviceReport.service)
+  serviceReports: ServiceReport[];
 }

@@ -12,6 +12,7 @@ import { Qualification } from 'src/specializations/entities/qualification.entity
 import { Specialty } from 'src/specializations/entities/specialty.entity';
 import { Appointment } from 'src/appointments/entities/appointment.entity';
 import { Prescription } from 'src/medicines/entities/prescription.entity';
+import { ServiceReport } from 'src/reports/entities/service-report.entity';
 
 @Entity('physicians')
 export class Physician {
@@ -41,4 +42,10 @@ export class Physician {
 
   @OneToMany(() => Prescription, (prescription) => prescription.physician)
   prescriptions: Prescription[];
+
+  @OneToMany(() => ServiceReport, (serviceReport) => serviceReport.performer)
+  servicePerformanceReports: ServiceReport[];
+
+  @OneToMany(() => ServiceReport, (serviceReport) => serviceReport.requester)
+  serviceRequestReports: ServiceReport[];
 }

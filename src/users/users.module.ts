@@ -10,7 +10,8 @@ import { InsurancesModule } from 'src/insurances/insurances.module';
 import { SchedulesModule } from 'src/schedules/schedules.module';
 import { AppointmentsModule } from 'src/appointments/appointments.module';
 import { MedicinesModule } from 'src/medicines/medicines.module';
-import { PatientRecordsModule } from 'src/patient-records/patient-records.module';
+import { RecordsModule } from 'src/records/records.module';
+import { ReportsModule } from 'src/reports/reports.module';
 
 @Module({
   imports: [
@@ -20,7 +21,8 @@ import { PatientRecordsModule } from 'src/patient-records/patient-records.module
     forwardRef(() => SchedulesModule),
     forwardRef(() => AppointmentsModule),
     forwardRef(() => MedicinesModule),
-    forwardRef(() => PatientRecordsModule),
+    forwardRef(() => RecordsModule),
+    forwardRef(() => ReportsModule),
   ],
   controllers: [UsersController],
   providers: [UsersService],

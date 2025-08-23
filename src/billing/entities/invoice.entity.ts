@@ -1,5 +1,13 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { InvoiceService } from './invoice-service.entity';
+import { PatientRecord } from 'src/records/entities/patient-record.entity';
 
 @Entity('invoices')
 export class Invoice {
@@ -23,4 +31,14 @@ export class Invoice {
 
   @OneToMany(() => InvoiceService, (invoiceService) => invoiceService.invoice)
   invoiceServices: InvoiceService[];
+
+  @Column({ name: 'patient_record_identifier' })
+  patientRecordIdentifier: number;
+
+  @ManyToOne(() => PatientRecord, (patientRecord) => patientRecord.invoices)
+  @JoinColumn({
+    name: 'patient_record_identifier',
+    referencedColumnName: 'identifier',
+  })
+  patientRecord: PatientRecord;
 }

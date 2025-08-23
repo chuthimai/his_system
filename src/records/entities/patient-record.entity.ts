@@ -1,3 +1,4 @@
+import { Invoice } from 'src/billing/entities/invoice.entity';
 import { Prescription } from 'src/medicines/entities/prescription.entity';
 import { User } from 'src/users/entities/user.entity';
 import {
@@ -5,6 +6,7 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
@@ -39,4 +41,7 @@ export class PatientRecord {
     referencedColumnName: 'identifier',
   })
   patient: User;
+
+  @OneToMany(() => Invoice, (invoice) => invoice.patientRecord)
+  invoices: Invoice[];
 }

@@ -21,17 +21,17 @@ export class Location {
   @Column()
   type: string;
 
-  @Column({ name: 'parent_location_identifier' })
-  parentLocationIdentifier: number;
+  @Column({ name: 'parent_identifier' })
+  parentIdentifier: number;
 
   @ManyToOne(() => Location, (location) => location.children)
   @JoinColumn({
-    name: 'parent_location_identifier',
+    name: 'parent_identifier',
     referencedColumnName: 'identifier',
   })
-  parentLocation: Location;
+  parent: Location;
 
-  @OneToMany(() => Location, (location) => location.parentLocation)
+  @OneToMany(() => Location, (location) => location.parent)
   children: Location[];
 
   @OneToMany(() => WorkSchedule, (workSchedule) => workSchedule.location)

@@ -9,8 +9,10 @@ import { InsurancesModule } from './insurances/insurances.module';
 import { SchedulesModule } from './schedules/schedules.module';
 import { AppointmentsModule } from './appointments/appointments.module';
 import { MedicinesModule } from './medicines/medicines.module';
-import { PatientRecordsModule } from './patient-records/patient-records.module';
+import { RecordsModule } from './records/records.module';
 import { BillingModule } from './billing/billing.module';
+import { AssessmentsModule } from './assessments/assessments.module';
+import { ReportsModule } from './reports/reports.module';
 
 @Module({
   imports: [
@@ -37,8 +39,10 @@ import { BillingModule } from './billing/billing.module';
     SchedulesModule,
     AppointmentsModule,
     MedicinesModule,
-    PatientRecordsModule,
+    RecordsModule,
     BillingModule,
+    AssessmentsModule,
+    ReportsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
