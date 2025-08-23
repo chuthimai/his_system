@@ -6,17 +6,21 @@ import { User } from './entities/user.entity';
 import { Staff } from './entities/staff.entity';
 import { Physician } from './entities/physician.entity';
 import { SpecializationsModule } from 'src/specializations/specializations.module';
-import { HealthInsurancesModule } from 'src/health-insurances/health-insurances.module';
+import { InsurancesModule } from 'src/insurances/insurances.module';
 import { SchedulesModule } from 'src/schedules/schedules.module';
 import { AppointmentsModule } from 'src/appointments/appointments.module';
+import { MedicinesModule } from 'src/medicines/medicines.module';
+import { PatientRecordsModule } from 'src/patient-records/patient-records.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([User, Staff, Physician]),
     forwardRef(() => SpecializationsModule),
-    forwardRef(() => HealthInsurancesModule),
+    forwardRef(() => InsurancesModule),
     forwardRef(() => SchedulesModule),
     forwardRef(() => AppointmentsModule),
+    forwardRef(() => MedicinesModule),
+    forwardRef(() => PatientRecordsModule),
   ],
   controllers: [UsersController],
   providers: [UsersService],

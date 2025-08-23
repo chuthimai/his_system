@@ -11,6 +11,7 @@ import { Staff } from './staff.entity';
 import { Qualification } from 'src/specializations/entities/qualification.entity';
 import { Specialty } from 'src/specializations/entities/specialty.entity';
 import { Appointment } from 'src/appointments/entities/appointment.entity';
+import { Prescription } from 'src/medicines/entities/prescription.entity';
 
 @Entity('physicians')
 export class Physician {
@@ -37,4 +38,7 @@ export class Physician {
 
   @OneToMany(() => Appointment, (appointment) => appointment.physician)
   appointments: Appointment[];
+
+  @OneToMany(() => Prescription, (prescription) => prescription.physician)
+  prescriptions: Prescription[];
 }

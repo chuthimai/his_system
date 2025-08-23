@@ -7,8 +7,8 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Shift } from './shift.entity';
-import { Location } from 'src/locations/entities/location.entity';
 import { StaffWorkSchedule } from './staff-work-schedule.entity';
+import { Location } from './location.entity';
 
 @Entity('work_schedules')
 export class WorkSchedule {

@@ -5,10 +5,12 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UsersModule } from './users/users.module';
 import { SpecializationsModule } from './specializations/specializations.module';
-import { HealthInsurancesModule } from './health-insurances/health-insurances.module';
-import { LocationsModule } from './locations/locations.module';
+import { InsurancesModule } from './insurances/insurances.module';
 import { SchedulesModule } from './schedules/schedules.module';
 import { AppointmentsModule } from './appointments/appointments.module';
+import { MedicinesModule } from './medicines/medicines.module';
+import { PatientRecordsModule } from './patient-records/patient-records.module';
+import { BillingModule } from './billing/billing.module';
 
 @Module({
   imports: [
@@ -31,10 +33,12 @@ import { AppointmentsModule } from './appointments/appointments.module';
     }),
     UsersModule,
     SpecializationsModule,
-    HealthInsurancesModule,
-    LocationsModule,
+    InsurancesModule,
     SchedulesModule,
     AppointmentsModule,
+    MedicinesModule,
+    PatientRecordsModule,
+    BillingModule,
   ],
   controllers: [AppController],
   providers: [AppService],

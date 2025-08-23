@@ -1,4 +1,5 @@
-import { HealthInsurance } from 'src/health-insurances/entities/health-insurance.entity';
+import { HealthInsurance } from 'src/insurances/entities/health-insurance.entity';
+import { PatientRecord } from 'src/patient-records/entities/patient-record.entity';
 import {
   Column,
   Entity,
@@ -46,4 +47,7 @@ export class User {
     referencedColumnName: 'identifier',
   })
   healthInsurance: HealthInsurance;
+
+  @OneToMany(() => PatientRecord, (patientRecord) => patientRecord.patient)
+  patientRecords: PatientRecord[];
 }
