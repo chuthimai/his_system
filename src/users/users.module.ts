@@ -12,6 +12,7 @@ import { AppointmentsModule } from 'src/appointments/appointments.module';
 import { MedicinesModule } from 'src/medicines/medicines.module';
 import { RecordsModule } from 'src/records/records.module';
 import { ReportsModule } from 'src/reports/reports.module';
+import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
   imports: [
@@ -23,9 +24,10 @@ import { ReportsModule } from 'src/reports/reports.module';
     forwardRef(() => MedicinesModule),
     forwardRef(() => RecordsModule),
     forwardRef(() => ReportsModule),
+    forwardRef(() => AuthModule),
   ],
   controllers: [UsersController],
   providers: [UsersService],
-  exports: [TypeOrmModule],
+  exports: [TypeOrmModule, UsersService],
 })
 export class UsersModule {}
