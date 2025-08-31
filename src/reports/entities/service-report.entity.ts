@@ -19,13 +19,13 @@ export class ServiceReport {
   @Column()
   method: string;
 
-  @Column()
+  @Column({ type: 'boolean', default: false }) // true ~ completed
   status: boolean;
 
-  @Column({ name: 'effective_time' })
+  @Column({ name: 'effective_time', type: 'date' })
   effectiveTime: string;
 
-  @Column({ name: 'record_time' })
+  @Column({ name: 'record_time', type: 'datetime' })
   recordedTime: string;
 
   @Column({ name: 'service_identifier' })

@@ -19,7 +19,7 @@ export class PrescribedMedication {
   @Column({ name: 'dose_instruction' })
   doseInstruction: string;
 
-  @Column()
+  @Column({ nullable: true })
   note: string;
 
   @Column({ name: 'medication_identifier' })

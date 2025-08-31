@@ -17,19 +17,19 @@ export class User {
   @Column()
   name: string;
 
-  @Column()
+  @Column({ nullable: true })
   telecom: string;
 
-  @Column()
+  @Column({ nullable: true })
   email: string;
 
-  @Column()
-  gender: string;
+  @Column({ type: 'boolean' })
+  gender: boolean;
 
-  @Column({ name: 'birth_date' })
+  @Column({ name: 'birth_date', type: 'date' })
   birthDate: string;
 
-  @Column()
+  @Column({ nullable: true })
   photo: string;
 
   @Column()

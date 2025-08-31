@@ -9,13 +9,12 @@ export class Specialty {
   @Column()
   name: string;
 
-  @Column()
+  @Column({ nullable: true })
   description: string;
 
-  @Column()
+  @Column({ nullable: true })
   contact: string;
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
   @OneToMany(() => Physician, (physician) => physician.specialty)
   physicians: Physician[];
 }

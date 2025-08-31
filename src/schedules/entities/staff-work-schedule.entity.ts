@@ -18,7 +18,7 @@ export class StaffWorkSchedule {
   @Column()
   duty: string;
 
-  @Column()
+  @Column({ type: 'boolean', default: true }) // false ~ day off work
   active: boolean;
 
   @Column({ name: 'work_schedule_identifier' })

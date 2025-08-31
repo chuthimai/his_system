@@ -15,7 +15,7 @@ export class WorkSchedule {
   @PrimaryGeneratedColumn()
   identifier: number;
 
-  @Column()
+  @Column({ type: 'date' })
   date: string;
 
   @Column({ name: 'location_identifier' })

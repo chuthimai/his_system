@@ -22,13 +22,13 @@ export class Service {
   @Column()
   name: string;
 
-  @Column({ name: 'detail_description' })
+  @Column({ name: 'detail_description', nullable: true })
   detailDescription: string;
 
   @Column()
   price: number;
 
-  @Column()
+  @Column({ type: 'boolean', default: true }) // false - inactive
   active: boolean;
 
   @Column({ name: 'location_identifier' })

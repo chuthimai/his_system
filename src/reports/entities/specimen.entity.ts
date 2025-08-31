@@ -18,10 +18,10 @@ export class Specimen {
   @Column()
   condition: string;
 
-  @Column()
+  @Column({ type: 'boolean', default: false }) // true ~ cancelled?
   status: boolean;
 
-  @Column({ name: 'received_time' })
+  @Column({ name: 'received_time', type: 'datetime' })
   receivedTime: string;
 
   @Column({ name: 'laboratory_report_identifier' })

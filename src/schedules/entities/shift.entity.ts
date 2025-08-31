@@ -3,17 +3,16 @@ import { WorkSchedule } from './work-schedule.entity';
 
 @Entity('shifts')
 export class Shift {
-  [x: string]: any;
   @PrimaryGeneratedColumn()
   identifier: number;
 
   @Column()
   name: string;
 
-  @Column({ name: 'start_time' })
+  @Column({ name: 'start_time', type: 'time' })
   startTime: string;
 
-  @Column({ name: 'end_time' })
+  @Column({ name: 'end_time', type: 'time' })
   endTime: string;
 
   @OneToMany(() => WorkSchedule, (workSchedule) => workSchedule.shift)

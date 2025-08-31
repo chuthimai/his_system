@@ -23,10 +23,10 @@ export class Invoice {
   @Column({ name: 'total_gross' })
   totalGross: number;
 
-  @Column()
+  @Column({ type: 'boolean', default: false }) // true ~ completed
   status: boolean;
 
-  @Column({ name: 'created_time' })
+  @Column({ name: 'created_time', type: 'datetime' })
   createdTime: boolean;
 
   @OneToMany(() => InvoiceService, (invoiceService) => invoiceService.invoice)

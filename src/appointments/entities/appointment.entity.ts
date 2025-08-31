@@ -13,13 +13,13 @@ export class Appointment {
   @PrimaryGeneratedColumn()
   identifier: number;
 
-  @Column()
+  @Column({ type: 'boolean', default: true }) // false ~ cancelled
   status: boolean;
 
-  @Column()
+  @Column({ nullable: true })
   reason: string;
 
-  @Column({ name: 'cancellation_date' })
+  @Column({ name: 'cancellation_date', nullable: true })
   cancellationDate: string;
 
   @Column({ name: 'staff_work_schedule_identifier' })

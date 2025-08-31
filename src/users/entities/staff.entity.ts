@@ -21,13 +21,13 @@ export class Staff {
   @Column()
   address: string;
 
-  @Column()
+  @Column({ type: 'boolean', default: true }) // false ~ quit
   active: boolean;
 
-  @Column({ name: 'start_date' })
+  @Column({ name: 'start_date', type: 'date' })
   startDate: string;
 
-  @Column({ name: 'end_date' })
+  @Column({ name: 'end_date', type: 'date' })
   endDate: string;
 
   @OneToMany(

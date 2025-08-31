@@ -16,7 +16,6 @@ import { ServiceReport } from 'src/reports/entities/service-report.entity';
 
 @Entity('physicians')
 export class Physician {
-  [x: string]: any;
   @PrimaryColumn()
   identifier: number;
 

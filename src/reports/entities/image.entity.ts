@@ -19,9 +19,9 @@ export class Image {
   comment: string;
 
   @Column()
-  modality: boolean;
+  modality: string;
 
-  @Column({ name: 'received_time' })
+  @Column({ name: 'received_time', type: 'datetime' })
   receivedTime: string;
 
   @Column({ name: 'imaging_report_identifier' })

@@ -24,10 +24,10 @@ export class Qualification {
   @Column()
   type: string;
 
-  @Column({ name: 'effective_date' })
+  @Column({ name: 'effective_date', type: 'date' })
   effectiveDate: string;
 
-  @Column({ name: 'expired_date' })
+  @Column({ name: 'expired_date', type: 'date' })
   expiredDate: string;
 
   @Column({ name: 'physician_identifier' })

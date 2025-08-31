@@ -16,7 +16,7 @@ export class Prescription {
   @PrimaryGeneratedColumn()
   identifier: number;
 
-  @Column({ name: 'create_time' })
+  @Column({ name: 'create_time', type: 'datetime' })
   createdTime: string;
 
   @OneToMany(

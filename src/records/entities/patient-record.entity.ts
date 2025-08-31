@@ -16,10 +16,10 @@ export class PatientRecord {
   @PrimaryGeneratedColumn()
   identifier: number;
 
-  @Column()
+  @Column({ type: 'boolean', default: false }) // true ~ completed
   status: boolean;
 
-  @Column({ name: 'created_time' })
+  @Column({ name: 'created_time', type: 'datetime' })
   createdTime: string;
 
   @Column({ name: 'prescription_identifier' })

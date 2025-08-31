@@ -10,6 +10,6 @@ export class AssessmentQuestion {
   @JoinColumn({ name: 'identifier' })
   assessmentItem: AssessmentItem;
 
-  @Column({ name: 'detail_description' })
+  @Column({ name: 'detail_description', nullable: true })
   detailDescription: string;
 }
