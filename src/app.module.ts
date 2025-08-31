@@ -13,6 +13,7 @@ import { RecordsModule } from './records/records.module';
 import { BillingModule } from './billing/billing.module';
 import { AssessmentsModule } from './assessments/assessments.module';
 import { ReportsModule } from './reports/reports.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { ReportsModule } from './reports/reports.module';
     BillingModule,
     AssessmentsModule,
     ReportsModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
