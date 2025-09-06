@@ -3,17 +3,17 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { UsersModule } from './users/users.module';
-import { SpecializationsModule } from './specializations/specializations.module';
-import { InsurancesModule } from './insurances/insurances.module';
-import { SchedulesModule } from './schedules/schedules.module';
-import { AppointmentsModule } from './appointments/appointments.module';
-import { MedicinesModule } from './medicines/medicines.module';
-import { RecordsModule } from './records/records.module';
-import { BillingModule } from './billing/billing.module';
-import { AssessmentsModule } from './assessments/assessments.module';
-import { ReportsModule } from './reports/reports.module';
-import { AuthModule } from './auth/auth.module';
+import { UsersModule } from './modules/users/users.module';
+import { SpecializationsModule } from './modules/specializations/specializations.module';
+import { InsurancesModule } from './modules/insurances/insurances.module';
+import { SchedulesModule } from './modules/schedules/schedules.module';
+import { AppointmentsModule } from './modules/appointments/appointments.module';
+import { MedicinesModule } from './modules/medicines/medicines.module';
+import { RecordsModule } from './modules/records/records.module';
+import { BillingModule } from './modules/billing/billing.module';
+import { AssessmentsModule } from './modules/assessments/assessments.module';
+import { ReportsModule } from './modules/reports/reports.module';
+import { AuthModule } from './modules/auth/auth.module';
 
 @Module({
   imports: [
