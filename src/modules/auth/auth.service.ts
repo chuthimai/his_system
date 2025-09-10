@@ -5,6 +5,7 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { ERROR_MESSAGES } from 'src/constants/error-messages';
 import { ROLES } from 'src/constants/roles';
+import { Roles } from 'src/decorators/roles.decorator';
 
 @Injectable()
 export class AuthService {
@@ -13,10 +14,13 @@ export class AuthService {
     private readonly userService: UsersService,
   ) {}
 
-  async login(loginDto: LoginDto, isPhysician: boolean = true) {
-    const user = await this.userService.findOne(loginDto.identifier);
+  async login(loginDto: LoginDto, role: string = ROLES.PATIENT) {
+    const user =
+      role === ROLES.PATIENT
+        ? await this.userService.findOne(loginDto.identifier)
+        : await this.userService.findOnePhysician(loginDto.identifier);
 
-    if (!user || (isPhysician && user?.role !== ROLES.PHYSICIAN)) {
+    if (!user || role !== user?.role || !user.role.endsWith(role)) {
       throw new HttpException(
         ERROR_MESSAGES.USER_NOT_FOUND,
         HttpStatus.BAD_REQUEST,
@@ -25,7 +29,7 @@ export class AuthService {
 
     const isValidPassword = await bcrypt.compare(
       loginDto.password,
-      user.password,
+      user.password as string,
     );
 
     if (!isValidPassword) {
