@@ -21,7 +21,20 @@ export class Physician {
 
   @OneToOne(() => Staff, { cascade: true })
   @JoinColumn({ name: 'identifier' })
-  staff: Staff;
+  staff?: Staff;
+
+  name?: string;
+  telecom?: string;
+  email?: string;
+  gender?: string;
+  birthDate?: string;
+  photo?: string;
+  password?: string;
+  role: string;
+  address?: string;
+  active?: boolean;
+  startDate?: string;
+  endDate?: string;
 
   @OneToMany(() => Qualification, (qualification) => qualification.physician)
   qualifications: Qualification[];

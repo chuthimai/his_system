@@ -10,13 +10,16 @@ import { ROLES } from 'src/constants/roles';
 export class AuthService {
   constructor(
     private jwtService: JwtService,
-    private readonly userService: UsersService,
+    private readonly usersService: UsersService,
   ) {}
 
-  async login(loginDto: LoginDto, isPhysician: boolean = true) {
-    const user = await this.userService.findOne(loginDto.identifier);
+  async login(loginDto: LoginDto, role: string = ROLES.PATIENT) {
+    const user =
+      role === ROLES.PATIENT
+        ? await this.usersService.findOne(loginDto.identifier)
+        : await this.usersService.findOnePhysician(loginDto.identifier);
 
-    if (!user || (isPhysician && user?.role !== ROLES.PHYSICIAN)) {
+    if (!user || role !== user?.role || !user.role.endsWith(role)) {
       throw new HttpException(
         ERROR_MESSAGES.USER_NOT_FOUND,
         HttpStatus.BAD_REQUEST,
@@ -25,7 +28,7 @@ export class AuthService {
 
     const isValidPassword = await bcrypt.compare(
       loginDto.password,
-      user.password,
+      user.password as string,
     );
 
     if (!isValidPassword) {

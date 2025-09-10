@@ -15,4 +15,19 @@ export class UsersController {
   test() {
     return 'OKE';
   }
+
+  @Get('/user-test')
+  async userTest() {
+    return await this.usersService.findOne(130386943);
+  }
+
+  @Get('/staff-test')
+  async staffTest() {
+    return await this.usersService.findOneStaff(1303869943);
+  }
+
+  @Get('/physician-test')
+  async physicianTest() {
+    return await this.usersService.findOnePhysician(130369943);
+  }
 }
