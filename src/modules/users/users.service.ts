@@ -1,10 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { Staff } from './entities/staff.entity';
 import { Physician } from './entities/physician.entity';
-import { promises } from 'dns';
+import { CreateUserDto } from './dto/create-user.dto';
+import { ERROR_MESSAGES } from 'src/constants/error-messages';
 
 @Injectable()
 export class UsersService {
@@ -35,7 +36,10 @@ export class UsersService {
 
   async findOnePhysician(identifier: number): Promise<Physician | null> {
     const physician = await this.physicianRepository.findOne({
-      where: { identifier },
+      where: {
+        identifier,
+        staff: { active: true },
+      },
       relations: ['staff', 'staff.user'],
     });
 
@@ -44,5 +48,45 @@ export class UsersService {
     const { staff, ...physicianWithoutStaff } = physician;
     const { user, ...staffWithoutUser } = staff as Staff;
     return { ...physicianWithoutStaff, ...staffWithoutUser, ...user };
+  }
+
+  async create(
+    createUserDto: CreateUserDto,
+    reuseOnDuplicate: boolean = false,
+  ): Promise<User> {
+    const existedUser = await this.userRepository.findOneBy({
+      telecom: createUserDto.telecom,
+    });
+
+    if (existedUser) {
+      if (reuseOnDuplicate) return existedUser;
+      else
+        throw new HttpException(
+          ERROR_MESSAGES.USER_ALREADY_EXISTS,
+          HttpStatus.BAD_REQUEST,
+        );
+    }
+
+    const newUser = this.userRepository.create({
+      ...createUserDto,
+      role: 'USER',
+    });
+
+    return this.userRepository.save(newUser);
+  }
+
+  async search(name: string): Promise<User[]> {
+    return await this.userRepository
+      .createQueryBuilder('user')
+      .select([
+        'user.identifier',
+        'user.name',
+        'user.email',
+        'user.telecom',
+        'user.birthDate',
+        'user.gender',
+      ])
+      .where('LOWER(user.name) LIKE LOWER(:name)', { name: `%${name}%` })
+      .getMany();
   }
 }

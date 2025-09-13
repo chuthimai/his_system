@@ -14,6 +14,7 @@ export class AuthService {
   ) {}
 
   async login(loginDto: LoginDto, role: string = ROLES.PATIENT) {
+    role = role.toUpperCase();
     const user =
       role === ROLES.PATIENT
         ? await this.usersService.findOne(loginDto.identifier)

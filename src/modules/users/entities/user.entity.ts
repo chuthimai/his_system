@@ -10,16 +10,16 @@ export class User {
   name: string;
 
   @Column({ nullable: true })
-  telecom: string;
-
-  @Column({ nullable: true })
   email: string;
 
-  @Column()
-  gender: string;
+  @Column({ nullable: true })
+  telecom: string;
 
   @Column({ name: 'birth_date', type: 'date' })
   birthDate: string;
+
+  @Column()
+  gender: string;
 
   @Column({ nullable: true })
   photo: string;
