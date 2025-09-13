@@ -19,10 +19,14 @@ export class PatientRecord {
   @Column({ type: 'boolean', default: false }) // true ~ completed
   status: boolean;
 
-  @Column({ name: 'created_time', type: 'datetime' })
-  createdTime: string;
+  @Column({
+    name: 'created_time',
+    type: 'datetime',
+    default: () => 'CURRENT_TIMESTAMP',
+  })
+  createdTime: Date;
 
-  @Column({ name: 'prescription_identifier' })
+  @Column({ name: 'prescription_identifier', nullable: true })
   prescriptionIdentifier: number;
 
   @OneToOne(() => Prescription, (prescription) => prescription.patientRecord)
