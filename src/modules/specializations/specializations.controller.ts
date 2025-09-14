@@ -1,15 +1,9 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-} from '@nestjs/common';
+import { Controller, Get, UseGuards } from '@nestjs/common';
 import { SpecializationsService } from './specializations.service';
-import { CreateSpecializationDto } from './dto/create-specialization.dto';
-import { UpdateSpecializationDto } from './dto/update-specialization.dto';
+import { Roles } from 'src/decorators/roles.decorator';
+import { ROLES } from 'src/constants/roles';
+import { RolesGuard } from 'src/guards/roles.guard';
+import { JwtAuthGuard } from '@modules/auth/guards/jwt.guard';
 
 @Controller('specializations')
 export class SpecializationsController {
@@ -17,31 +11,10 @@ export class SpecializationsController {
     private readonly specializationsService: SpecializationsService,
   ) {}
 
-  @Post()
-  create(@Body() createSpecializationDto: CreateSpecializationDto) {
-    return this.specializationsService.create(createSpecializationDto);
-  }
-
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(ROLES.PHYSICIAN)
   @Get()
   findAll() {
     return this.specializationsService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.specializationsService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateSpecializationDto: UpdateSpecializationDto,
-  ) {
-    return this.specializationsService.update(+id, updateSpecializationDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.specializationsService.remove(+id);
   }
 }

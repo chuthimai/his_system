@@ -31,7 +31,7 @@ export class UsersService {
     if (!staff) return null;
 
     const { user, ...staffWithoutUser } = staff;
-    return { ...staffWithoutUser, ...user };
+    return { ...staffWithoutUser, ...user } as unknown as Staff;
   }
 
   async findOnePhysician(identifier: number): Promise<Physician | null> {
@@ -40,14 +40,59 @@ export class UsersService {
         identifier,
         staff: { active: true },
       },
-      relations: ['staff', 'staff.user'],
+      relations: ['staff', 'staff.user', 'specialty', 'qualifications'],
     });
 
     if (!physician) return null;
 
-    const { staff, ...physicianWithoutStaff } = physician;
-    const { user, ...staffWithoutUser } = staff as Staff;
-    return { ...physicianWithoutStaff, ...staffWithoutUser, ...user };
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { specialtyIdentifier, staff, ...physicianWithoutStaff } = physician;
+    const { user, ...staffWithoutUser } = staff;
+    return {
+      ...physicianWithoutStaff,
+      ...staffWithoutUser,
+      ...user,
+      specialty: physician.specialty,
+      qualifications: physician.qualifications,
+    } as unknown as Physician;
+  }
+
+  async findAllPhysicianBySpecialty(
+    specialtyIdentifier: number,
+  ): Promise<Physician[]> {
+    const physicians = await this.physicianRepository.find({
+      where: {
+        specialtyIdentifier,
+        staff: { active: true },
+      },
+      relations: ['staff', 'staff.user', 'specialty'],
+    });
+
+    return physicians.map((physician) => {
+      return {
+        identifier: physician.identifier,
+        name: physician?.staff?.user?.name,
+        specialty: {
+          identifier: physician?.specialty?.identifier,
+          name: physician?.specialty?.name,
+        },
+      } as Physician;
+    });
+  }
+
+  async searchByName(name: string): Promise<User[]> {
+    return await this.userRepository
+      .createQueryBuilder('user')
+      .select([
+        'user.identifier',
+        'user.name',
+        'user.email',
+        'user.telecom',
+        'user.birthDate',
+        'user.gender',
+      ])
+      .where('LOWER(user.name) LIKE LOWER(:name)', { name: `%${name}%` })
+      .getMany();
   }
 
   async create(
@@ -73,20 +118,5 @@ export class UsersService {
     });
 
     return this.userRepository.save(newUser);
-  }
-
-  async search(name: string): Promise<User[]> {
-    return await this.userRepository
-      .createQueryBuilder('user')
-      .select([
-        'user.identifier',
-        'user.name',
-        'user.email',
-        'user.telecom',
-        'user.birthDate',
-        'user.gender',
-      ])
-      .where('LOWER(user.name) LIKE LOWER(:name)', { name: `%${name}%` })
-      .getMany();
   }
 }
