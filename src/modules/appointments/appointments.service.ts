@@ -1,26 +1,67 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
-import { UpdateAppointmentDto } from './dto/update-appointment.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Appointment } from './entities/appointment.entity';
+import { Repository } from 'typeorm';
+import { UsersService } from '@modules/users/users.service';
+import { Physician } from '@modules/users/entities/physician.entity';
+import { ERROR_MESSAGES } from 'src/constants/error-messages';
+import { SchedulesService } from '@modules/schedules/schedules.service';
 
 @Injectable()
 export class AppointmentsService {
-  create(createAppointmentDto: CreateAppointmentDto) {
-    return 'This action adds a new appointment';
-  }
+  constructor(
+    @InjectRepository(Appointment)
+    private readonly appointmentRepository: Repository<Appointment>,
+    private readonly usersService: UsersService,
+    private readonly schedulesService: SchedulesService,
+  ) {}
 
-  findAll() {
-    return `This action returns all appointments`;
-  }
+  async create(createAppointmentDto: CreateAppointmentDto) {
+    const existedUser = await this.usersService.findOne(
+      createAppointmentDto.userIdentifier,
+    );
 
-  findOne(id: number) {
-    return `This action returns a #${id} appointment`;
-  }
+    const existedPhysician = await this.usersService.findOnePhysician(
+      createAppointmentDto.physicianIdentifier,
+    );
 
-  update(id: number, updateAppointmentDto: UpdateAppointmentDto) {
-    return `This action updates a #${id} appointment`;
-  }
+    const existedWorkSchedule = await this.schedulesService.findOneWorkSchedule(
+      createAppointmentDto.workScheduleIdentifier,
+    );
 
-  remove(id: number) {
-    return `This action removes a #${id} appointment`;
+    if (!existedUser || !existedPhysician || !existedWorkSchedule) {
+      throw !existedUser
+        ? new HttpException(
+            ERROR_MESSAGES.USER_NOT_FOUND,
+            HttpStatus.BAD_REQUEST,
+          )
+        : !existedPhysician
+          ? new HttpException(
+              ERROR_MESSAGES.PHYSICIAN_NOT_FOUND,
+              HttpStatus.BAD_REQUEST,
+            )
+          : new HttpException(
+              ERROR_MESSAGES.WORK_SCHEDULE_NOT_FOUND,
+              HttpStatus.BAD_REQUEST,
+            );
+    }
+
+    const newAppointment =
+      this.appointmentRepository.create(createAppointmentDto);
+
+    const savedAppointment =
+      await this.appointmentRepository.save(newAppointment);
+
+    const targetAppointment = (await this.appointmentRepository.findOne({
+      where: { identifier: savedAppointment.identifier },
+      relations: ['user', 'workSchedule', 'workSchedule.shift'],
+    })) as Appointment;
+
+    targetAppointment.physician = (await this.usersService.findOnePhysician(
+      targetAppointment.physicianIdentifier,
+    )) as Physician;
+
+    return targetAppointment;
   }
 }

@@ -1,3 +1,4 @@
+import { Appointment } from '@modules/appointments/entities/appointment.entity';
 import { PatientRecord } from 'src/modules/records/entities/patient-record.entity';
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
@@ -39,6 +40,9 @@ export class User {
   //   referencedColumnName: 'identifier',
   // })
   // healthInsurance: HealthInsurance;
+
+  @OneToMany(() => Appointment, (appointment) => appointment.user)
+  appointments: Appointment[];
 
   @OneToMany(() => PatientRecord, (patientRecord) => patientRecord.patient)
   patientRecords: PatientRecord[];

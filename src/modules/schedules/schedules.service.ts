@@ -19,6 +19,12 @@ export class SchedulesService {
     private readonly usersService: UsersService,
   ) {}
 
+  async findOneWorkSchedule(identifier: number) {
+    return await this.workScheduleRepository.findOne({
+      where: { identifier },
+    });
+  }
+
   async findAllWorkSchedulesByCondition(
     workScheduleConditionDto: WorkScheduleConditionDto,
   ) {

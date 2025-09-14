@@ -9,6 +9,7 @@ import {
 import { Shift } from './shift.entity';
 import { StaffWorkSchedule } from './staff-work-schedule.entity';
 import { Location } from './location.entity';
+import { Appointment } from '@modules/appointments/entities/appointment.entity';
 
 @Entity('work_schedules')
 export class WorkSchedule {
@@ -40,4 +41,7 @@ export class WorkSchedule {
     (staffWorkSchedule) => staffWorkSchedule.workSchedule,
   )
   staffWorkSchedules: StaffWorkSchedule[];
+
+  @OneToMany(() => Appointment, (appointment) => appointment.workSchedule)
+  appointments: Appointment[];
 }

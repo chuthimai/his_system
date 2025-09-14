@@ -17,9 +17,10 @@ import { AuthModule } from '@modules/auth/auth.module';
     forwardRef(() => AppointmentsModule),
     forwardRef(() => BillingModule),
     forwardRef(() => AuthModule),
+    forwardRef(() => AppointmentsModule),
   ],
   controllers: [SchedulesController],
   providers: [SchedulesService],
-  exports: [TypeOrmModule],
+  exports: [TypeOrmModule, SchedulesService],
 })
 export class SchedulesModule {}

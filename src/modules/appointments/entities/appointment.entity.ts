@@ -1,4 +1,5 @@
-import { StaffWorkSchedule } from 'src/modules/schedules/entities/staff-work-schedule.entity';
+import { WorkSchedule } from '@modules/schedules/entities/work-schedule.entity';
+import { User } from '@modules/users/entities/user.entity';
 import { Physician } from 'src/modules/users/entities/physician.entity';
 import {
   Column,
@@ -22,18 +23,28 @@ export class Appointment {
   @Column({ name: 'cancellation_date', nullable: true })
   cancellationDate: string;
 
-  @Column({ name: 'staff_work_schedule_identifier' })
-  staffWorkScheduleIdentifier: number;
+  // @Column({ name: 'staff_work_schedule_identifier' })
+  // staffWorkScheduleIdentifier: number;
 
-  @ManyToOne(
-    () => StaffWorkSchedule,
-    (staffWorkSchedule) => staffWorkSchedule.appointments,
-  )
+  // @ManyToOne(
+  //   () => StaffWorkSchedule,
+  //   (staffWorkSchedule) => staffWorkSchedule.appointments,
+  // )
+  // @JoinColumn({
+  //   name: 'staff_work_schedule_identifier',
+  //   referencedColumnName: 'identifier',
+  // })
+  // staffWorkSchedule: StaffWorkSchedule;
+
+  @Column({ name: 'work_schedule_identifier' })
+  workScheduleIdentifier: number;
+
+  @ManyToOne(() => WorkSchedule, (workSchedule) => workSchedule.appointments)
   @JoinColumn({
-    name: 'staff_work_schedule_identifier',
+    name: 'work_schedule_identifier',
     referencedColumnName: 'identifier',
   })
-  staffWorkSchedule: StaffWorkSchedule;
+  workSchedule: WorkSchedule;
 
   @Column({ name: 'physician_identifier' })
   physicianIdentifier: number;
@@ -44,4 +55,14 @@ export class Appointment {
     referencedColumnName: 'identifier',
   })
   physician: Physician;
+
+  @Column({ name: 'user_identifier' })
+  userIdentifier: number;
+
+  @ManyToOne(() => User, (user) => user.appointments)
+  @JoinColumn({
+    name: 'user_identifier',
+    referencedColumnName: 'identifier',
+  })
+  user: User;
 }
