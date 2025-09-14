@@ -4,7 +4,7 @@ import { UsersService } from 'src/modules/users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { ERROR_MESSAGES } from 'src/constants/error-messages';
-import { ROLES } from 'src/constants/roles';
+import { ROLES } from 'src/constants/others';
 
 @Injectable()
 export class AuthService {
