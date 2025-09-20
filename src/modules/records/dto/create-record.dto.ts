@@ -24,12 +24,6 @@ export class CreateRecordDto {
   @ApiProperty()
   @IsOptional()
   @IsString()
-  @IsEmail()
-  email?: string;
-
-  @ApiProperty()
-  @IsOptional()
-  @IsString()
   @IsPhoneNumber('VN')
   telecom?: string;
 
@@ -41,6 +35,11 @@ export class CreateRecordDto {
   @ApiProperty()
   @IsOptional()
   gender?: string;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsString()
+  address?: string;
 
   @ApiProperty()
   @IsOptional()

@@ -18,8 +18,6 @@ import { ROLES } from 'src/constants/others';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(ROLES.PHYSICIAN)
   @Get('/test')
   test() {
     return 'OKE';

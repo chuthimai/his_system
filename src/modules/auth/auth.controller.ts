@@ -7,7 +7,7 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('/login')
-  patientLogin(@Query('role') role: string, @Body() loginDto: LoginDto) {
+  login(@Query('role') role: string, @Body() loginDto: LoginDto) {
     return this.authService.login(loginDto, role);
   }
 }

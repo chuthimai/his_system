@@ -53,13 +53,26 @@ export class AppointmentsService {
     const savedAppointment =
       await this.appointmentRepository.save(newAppointment);
 
-    const targetAppointment = (await this.appointmentRepository.findOne({
-      where: { identifier: savedAppointment.identifier },
-      relations: ['user', 'workSchedule', 'workSchedule.shift'],
-    })) as Appointment;
+    const targetAppointment = (await this.appointmentRepository
+      .createQueryBuilder('appointment')
+      .leftJoin('appointment.user', 'user')
+      .leftJoinAndSelect('appointment.workSchedule', 'workSchedule')
+      .leftJoinAndSelect('workSchedule.shift', 'shift')
+      .addSelect([
+        'user.name',
+        'user.telecom',
+        'user.birth_date',
+        'user.gender',
+        'user.address',
+      ])
+      .where('appointment.identifier = :id', {
+        id: savedAppointment.identifier,
+      })
+      .getOne()) as Appointment;
 
     targetAppointment.physician = (await this.usersService.findOnePhysician(
       targetAppointment.physicianIdentifier,
+      false,
     )) as Physician;
 
     return targetAppointment;

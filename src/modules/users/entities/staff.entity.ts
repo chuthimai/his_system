@@ -26,8 +26,6 @@ export class Staff {
   photo?: string;
   password?: string;
   role: string;
-
-  @Column()
   address: string;
 
   @Column({ type: 'boolean', default: true }) // false ~ quit
