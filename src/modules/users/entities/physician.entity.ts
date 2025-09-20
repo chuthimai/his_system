@@ -21,7 +21,7 @@ export class Physician {
 
   @OneToOne(() => Staff, { cascade: true })
   @JoinColumn({ name: 'identifier' })
-  staff?: Staff;
+  staff: Staff;
 
   name?: string;
   telecom?: string;
@@ -30,7 +30,7 @@ export class Physician {
   birthDate?: string;
   photo?: string;
   password?: string;
-  role: string;
+  role?: string;
   address?: string;
   active?: boolean;
   startDate?: string;

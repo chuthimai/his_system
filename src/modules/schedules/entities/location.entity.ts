@@ -21,7 +21,7 @@ export class Location {
   @Column()
   type: string;
 
-  @Column({ name: 'parent_identifier' })
+  @Column({ name: 'parent_identifier', nullable: true })
   parentIdentifier: number;
 
   @ManyToOne(() => Location, (location) => location.children)

@@ -3,12 +3,10 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
-  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { WorkSchedule } from './work-schedule.entity';
 import { Staff } from 'src/modules/users/entities/staff.entity';
-import { Appointment } from 'src/modules/appointments/entities/appointment.entity';
 
 @Entity('staff_work_schedules')
 export class StaffWorkSchedule {
@@ -41,6 +39,6 @@ export class StaffWorkSchedule {
   @JoinColumn({ name: 'staff_identifier', referencedColumnName: 'identifier' })
   staff: Staff;
 
-  @OneToMany(() => Appointment, (appointment) => appointment.staffWorkSchedule)
-  appointments: Appointment[];
+  // @OneToMany(() => Appointment, (appointment) => appointment.staffWorkSchedule)
+  // appointments: Appointment[];
 }

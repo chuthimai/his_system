@@ -49,10 +49,10 @@ export class RecordsService {
       .select('record')
       .addSelect([
         'patient.name',
-        'patient.email',
         'patient.telecom',
         'patient.birthDate',
         'patient.gender',
+        'patient.address',
       ])
       .leftJoin('record.patient', 'patient')
       .where('record.identifier = :id', { id: savedPatientRecord.identifier })

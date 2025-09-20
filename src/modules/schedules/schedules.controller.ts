@@ -1,45 +1,31 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-} from '@nestjs/common';
+import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
 import { SchedulesService } from './schedules.service';
-import { CreateScheduleDto } from './dto/create-schedule.dto';
-import { UpdateScheduleDto } from './dto/update-schedule.dto';
+import { ShiftConditionDto } from './dto/get-shifts-by-condition.dto';
+import { JwtAuthGuard } from '@modules/auth/guards/jwt.guard';
+import { RolesGuard } from 'src/guards/roles.guard';
+import { Roles } from 'src/decorators/roles.decorator';
+import { ROLES } from 'src/constants/others';
+import { WorkScheduleConditionDto } from './dto/get-work-schedules-by-condition.dto';
 
 @Controller('schedules')
 export class SchedulesController {
   constructor(private readonly schedulesService: SchedulesService) {}
 
-  @Post()
-  create(@Body() createScheduleDto: CreateScheduleDto) {
-    return this.schedulesService.create(createScheduleDto);
-  }
-
-  @Get()
-  findAll() {
-    return this.schedulesService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.schedulesService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateScheduleDto: UpdateScheduleDto,
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(ROLES.PATIENT)
+  @Get('/work-schedules-by-condition')
+  getAllWorkSchedulesByCondition(
+    @Body() workScheduleConditionDto: WorkScheduleConditionDto,
   ) {
-    return this.schedulesService.update(+id, updateScheduleDto);
+    return this.schedulesService.findAllWorkSchedulesByCondition(
+      workScheduleConditionDto,
+    );
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.schedulesService.remove(+id);
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(ROLES.PATIENT)
+  @Post('/shifts-by-condition')
+  getAllShiftsByCondition(@Body() shiftConditionDto: ShiftConditionDto) {
+    return this.schedulesService.findAllShiftsByCondition(shiftConditionDto);
   }
 }

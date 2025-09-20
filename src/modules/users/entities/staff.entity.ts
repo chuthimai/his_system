@@ -8,7 +8,6 @@ import {
 } from 'typeorm';
 import { User } from './user.entity';
 import { StaffWorkSchedule } from 'src/modules/schedules/entities/staff-work-schedule.entity';
-import { Expose } from 'class-transformer';
 
 @Entity('staffs')
 export class Staff {
@@ -17,7 +16,7 @@ export class Staff {
 
   @OneToOne(() => User, { cascade: true })
   @JoinColumn({ name: 'identifier' })
-  user?: User;
+  user: User;
 
   name?: string;
   telecom?: string;
@@ -27,8 +26,6 @@ export class Staff {
   photo?: string;
   password?: string;
   role: string;
-
-  @Column()
   address: string;
 
   @Column({ type: 'boolean', default: true }) // false ~ quit

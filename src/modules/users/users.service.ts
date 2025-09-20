@@ -6,6 +6,8 @@ import { Staff } from './entities/staff.entity';
 import { Physician } from './entities/physician.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { ERROR_MESSAGES } from 'src/constants/error-messages';
+import * as bcrypt from 'bcrypt';
+import { ROLES } from 'src/constants/others';
 
 @Injectable()
 export class UsersService {
@@ -31,23 +33,71 @@ export class UsersService {
     if (!staff) return null;
 
     const { user, ...staffWithoutUser } = staff;
-    return { ...staffWithoutUser, ...user };
+    return { ...staffWithoutUser, ...user } as unknown as Staff;
   }
 
-  async findOnePhysician(identifier: number): Promise<Physician | null> {
+  async findOnePhysician(
+    identifier: number,
+    isFull: boolean = true,
+  ): Promise<Physician | null> {
     const physician = await this.physicianRepository.findOne({
       where: {
         identifier,
         staff: { active: true },
       },
-      relations: ['staff', 'staff.user'],
+      relations: ['staff', 'staff.user', 'specialty', 'qualifications'],
     });
 
     if (!physician) return null;
 
-    const { staff, ...physicianWithoutStaff } = physician;
-    const { user, ...staffWithoutUser } = staff as Staff;
-    return { ...physicianWithoutStaff, ...staffWithoutUser, ...user };
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { specialtyIdentifier, staff, ...physicianWithoutStaff } = physician;
+    const { user, ...staffWithoutUser } = staff;
+    return isFull
+      ? ({
+          ...physicianWithoutStaff,
+          ...staffWithoutUser,
+          ...user,
+          specialty: physician.specialty,
+          qualifications: physician.qualifications,
+        } as unknown as Physician)
+      : ({
+          identifier: physician.identifier,
+          name: physician?.staff?.user?.name,
+        } as Physician);
+  }
+
+  async findAllPhysicianBySpecialty(
+    specialtyIdentifier: number,
+  ): Promise<Physician[]> {
+    const physicians = await this.physicianRepository.find({
+      where: {
+        specialtyIdentifier,
+        staff: { active: true },
+      },
+      relations: ['staff', 'staff.user'],
+    });
+
+    return physicians.map((physician) => {
+      return {
+        identifier: physician.identifier,
+        name: physician?.staff?.user?.name,
+      } as Physician;
+    });
+  }
+
+  async searchByName(name: string): Promise<User[]> {
+    return await this.userRepository
+      .createQueryBuilder('user')
+      .select([
+        'user.name',
+        'user.telecom',
+        'user.birthDate',
+        'user.gender',
+        'user.address',
+      ])
+      .where('LOWER(user.name) LIKE LOWER(:name)', { name: `%${name}%` })
+      .getMany();
   }
 
   async create(
@@ -67,26 +117,13 @@ export class UsersService {
         );
     }
 
+    createUserDto.password = bcrypt.hashSync(createUserDto.password, 10);
+
     const newUser = this.userRepository.create({
       ...createUserDto,
-      role: 'USER',
+      role: ROLES.PATIENT,
     });
 
-    return this.userRepository.save(newUser);
-  }
-
-  async search(name: string): Promise<User[]> {
-    return await this.userRepository
-      .createQueryBuilder('user')
-      .select([
-        'user.identifier',
-        'user.name',
-        'user.email',
-        'user.telecom',
-        'user.birthDate',
-        'user.gender',
-      ])
-      .where('LOWER(user.name) LIKE LOWER(:name)', { name: `%${name}%` })
-      .getMany();
+    return await this.userRepository.save(newUser);
   }
 }

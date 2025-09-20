@@ -5,11 +5,13 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Qualification } from './entities/qualification.entity';
 import { Specialty } from './entities/specialty.entity';
 import { UsersModule } from 'src/modules/users/users.module';
+import { AuthModule } from '@modules/auth/auth.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Qualification, Specialty]),
     forwardRef(() => UsersModule),
+    forwardRef(() => AuthModule),
   ],
   controllers: [SpecializationsController],
   providers: [SpecializationsService],

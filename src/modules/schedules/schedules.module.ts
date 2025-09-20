@@ -8,6 +8,7 @@ import { UsersModule } from 'src/modules/users/users.module';
 import { AppointmentsModule } from 'src/modules/appointments/appointments.module';
 import { Location } from './entities/location.entity';
 import { BillingModule } from 'src/modules/billing/billing.module';
+import { AuthModule } from '@modules/auth/auth.module';
 
 @Module({
   imports: [
@@ -15,9 +16,11 @@ import { BillingModule } from 'src/modules/billing/billing.module';
     forwardRef(() => UsersModule),
     forwardRef(() => AppointmentsModule),
     forwardRef(() => BillingModule),
+    forwardRef(() => AuthModule),
+    forwardRef(() => AppointmentsModule),
   ],
   controllers: [SchedulesController],
   providers: [SchedulesService],
-  exports: [TypeOrmModule],
+  exports: [TypeOrmModule, SchedulesService],
 })
 export class SchedulesModule {}
