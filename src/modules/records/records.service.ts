@@ -1,4 +1,10 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  forwardRef,
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+} from '@nestjs/common';
 import { CreateRecordDto } from './dto/create-record.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PatientRecord } from './entities/patient-record.entity';
