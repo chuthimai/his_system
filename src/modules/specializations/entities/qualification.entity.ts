@@ -27,7 +27,7 @@ export class Qualification {
   @Column({ name: 'effective_date', type: 'date' })
   effectiveDate: string;
 
-  @Column({ name: 'expired_date', type: 'date' })
+  @Column({ name: 'expired_date', type: 'date', nullable: true })
   expiredDate: string;
 
   @Column({ name: 'physician_identifier' })
