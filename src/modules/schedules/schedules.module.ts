@@ -9,10 +9,16 @@ import { AppointmentsModule } from 'src/modules/appointments/appointments.module
 import { Location } from './entities/location.entity';
 import { BillingModule } from 'src/modules/billing/billing.module';
 import { AuthModule } from '@modules/auth/auth.module';
+import { StaffWorkSchedule } from './entities/staff-work-schedule.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Location, Shift, WorkSchedule]),
+    TypeOrmModule.forFeature([
+      Location,
+      Shift,
+      WorkSchedule,
+      StaffWorkSchedule,
+    ]),
     forwardRef(() => UsersModule),
     forwardRef(() => AppointmentsModule),
     forwardRef(() => BillingModule),

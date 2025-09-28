@@ -1,10 +1,4 @@
-import {
-  forwardRef,
-  HttpException,
-  HttpStatus,
-  Inject,
-  Injectable,
-} from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateRecordDto } from './dto/create-record.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PatientRecord } from './entities/patient-record.entity';
@@ -54,6 +48,7 @@ export class RecordsService {
       .createQueryBuilder('record')
       .select('record')
       .addSelect([
+        'patient.identifier',
         'patient.name',
         'patient.telecom',
         'patient.birthDate',

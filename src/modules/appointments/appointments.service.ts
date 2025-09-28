@@ -39,6 +39,16 @@ export class AppointmentsService {
     }
 
     if (createAppointmentDto.physicianIdentifier) {
+      if (
+        createAppointmentDto.physicianIdentifier ==
+        createAppointmentDto.userIdentifier
+      ) {
+        throw new HttpException(
+          ERROR_MESSAGES.APPOINTMENT_USER_CANNOT_BE_PHYSICIAN,
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
       const existedPhysician = await this.usersService.findOnePhysician(
         createAppointmentDto.physicianIdentifier,
       );

@@ -6,6 +6,7 @@ import { PatientRecord } from './entities/patient-record.entity';
 import { MedicinesModule } from 'src/modules/medicines/medicines.module';
 import { UsersModule } from 'src/modules/users/users.module';
 import { BillingModule } from 'src/modules/billing/billing.module';
+import { AuthModule } from '@modules/auth/auth.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { BillingModule } from 'src/modules/billing/billing.module';
     forwardRef(() => MedicinesModule),
     forwardRef(() => UsersModule),
     forwardRef(() => BillingModule),
+    forwardRef(() => AuthModule),
   ],
   controllers: [RecordsController],
   providers: [RecordsService],
