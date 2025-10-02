@@ -34,10 +34,10 @@ export class SchedulesController {
     );
   }
 
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(ROLES.PATIENT)
-  @Post('/shifts-by-condition')
-  getAllShiftsByCondition(@Body() shiftConditionDto: ShiftConditionDto) {
-    return this.schedulesService.findAllShiftsByCondition(shiftConditionDto);
-  }
+  // @UseGuards(JwtAuthGuard, RolesGuard)
+  // @Roles(ROLES.PATIENT)
+  // @Post('/shifts-by-condition')
+  // getAllShiftsByCondition(@Body() shiftConditionDto: ShiftConditionDto) {
+  //   return this.schedulesService.findAllShiftsByCondition(shiftConditionDto);
+  // }
 }

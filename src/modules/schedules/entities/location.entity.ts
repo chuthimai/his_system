@@ -9,6 +9,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { JoinColumn } from 'typeorm';
+import { StaffWorkSchedule } from './staff-work-schedule.entity';
 
 @Entity('locations')
 export class Location {
@@ -34,8 +35,14 @@ export class Location {
   @OneToMany(() => Location, (location) => location.parent)
   children: Location[];
 
-  @OneToMany(() => WorkSchedule, (workSchedule) => workSchedule.location)
-  workSchedules: WorkSchedule[];
+  // @OneToMany(() => WorkSchedule, (workSchedule) => workSchedule.location)
+  // workSchedules: WorkSchedule[];
+
+  @OneToMany(
+    () => StaffWorkSchedule,
+    (staffWorkSchedule) => staffWorkSchedule.location,
+  )
+  staffWorkSchedules: StaffWorkSchedule[];
 
   @OneToOne(() => Service, (service) => service.location)
   service: Service;

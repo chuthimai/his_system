@@ -6,4 +6,9 @@ export class StaffWorkScheduleConditionDto {
   @IsOptional()
   @IsNumber()
   physicianIdentifier?: number;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsNumber()
+  specialtyIdentifier?: number;
 }
