@@ -34,7 +34,7 @@ export class Staff {
   @Column({ name: 'start_date', type: 'date' })
   startDate: string;
 
-  @Column({ name: 'end_date', type: 'date' })
+  @Column({ name: 'end_date', type: 'date', nullable: true })
   endDate: string;
 
   @OneToMany(

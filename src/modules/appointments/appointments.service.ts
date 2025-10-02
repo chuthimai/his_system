@@ -22,29 +22,43 @@ export class AppointmentsService {
       createAppointmentDto.userIdentifier,
     );
 
-    const existedPhysician = await this.usersService.findOnePhysician(
-      createAppointmentDto.physicianIdentifier,
-    );
-
     const existedWorkSchedule = await this.schedulesService.findOneWorkSchedule(
       createAppointmentDto.workScheduleIdentifier,
     );
 
-    if (!existedUser || !existedPhysician || !existedWorkSchedule) {
+    if (!existedUser || !existedWorkSchedule) {
       throw !existedUser
         ? new HttpException(
             ERROR_MESSAGES.USER_NOT_FOUND,
             HttpStatus.BAD_REQUEST,
           )
-        : !existedPhysician
-          ? new HttpException(
-              ERROR_MESSAGES.PHYSICIAN_NOT_FOUND,
-              HttpStatus.BAD_REQUEST,
-            )
-          : new HttpException(
-              ERROR_MESSAGES.WORK_SCHEDULE_NOT_FOUND,
-              HttpStatus.BAD_REQUEST,
-            );
+        : new HttpException(
+            ERROR_MESSAGES.WORK_SCHEDULE_NOT_FOUND,
+            HttpStatus.BAD_REQUEST,
+          );
+    }
+
+    if (createAppointmentDto.physicianIdentifier) {
+      if (
+        createAppointmentDto.physicianIdentifier ==
+        createAppointmentDto.userIdentifier
+      ) {
+        throw new HttpException(
+          ERROR_MESSAGES.APPOINTMENT_USER_CANNOT_BE_PHYSICIAN,
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
+      const existedPhysician = await this.usersService.findOnePhysician(
+        createAppointmentDto.physicianIdentifier,
+      );
+
+      if (!existedPhysician) {
+        throw new HttpException(
+          ERROR_MESSAGES.PHYSICIAN_NOT_FOUND,
+          HttpStatus.BAD_REQUEST,
+        );
+      }
     }
 
     const newAppointment =
@@ -59,6 +73,7 @@ export class AppointmentsService {
       .leftJoinAndSelect('appointment.workSchedule', 'workSchedule')
       .leftJoinAndSelect('workSchedule.shift', 'shift')
       .addSelect([
+        'user.identifier',
         'user.name',
         'user.telecom',
         'user.birth_date',

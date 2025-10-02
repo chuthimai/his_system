@@ -48,6 +48,7 @@ export class RecordsService {
       .createQueryBuilder('record')
       .select('record')
       .addSelect([
+        'patient.identifier',
         'patient.name',
         'patient.telecom',
         'patient.birthDate',

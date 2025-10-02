@@ -8,14 +8,21 @@ import { DUTIES } from 'src/constants/others';
 import { WorkScheduleConditionDto } from './dto/get-work-schedules-by-condition.dto';
 import { UsersService } from '@modules/users/users.service';
 import { ERROR_MESSAGES } from 'src/constants/error-messages';
+import { StaffWorkSchedule } from './entities/staff-work-schedule.entity';
+import { StaffWorkScheduleConditionDto } from './dto/get-staff-work-schedules-by-condition.dto';
+import { Location } from './entities/location.entity';
 
 @Injectable()
 export class SchedulesService {
   constructor(
     @InjectRepository(WorkSchedule)
     private readonly workScheduleRepository: Repository<WorkSchedule>,
+    @InjectRepository(StaffWorkSchedule)
+    private readonly staffWorkScheduleRepository: Repository<StaffWorkSchedule>,
     @InjectRepository(Shift)
     private readonly shiftRepository: Repository<Shift>,
+    @InjectRepository(Location)
+    private readonly locationRepository: Repository<Location>,
     private readonly usersService: UsersService,
   ) {}
 
@@ -75,6 +82,48 @@ export class SchedulesService {
     return workSchedules;
   }
 
+  async findAllStaffWorkSchedulesByCondition(
+    staffWorkScheduleConditionDto: StaffWorkScheduleConditionDto,
+  ) {
+    if (staffWorkScheduleConditionDto.physicianIdentifier) {
+      const existedPhysician = await this.usersService.findOnePhysician(
+        staffWorkScheduleConditionDto?.physicianIdentifier,
+      );
+
+      if (!existedPhysician)
+        throw new HttpException(
+          ERROR_MESSAGES.PHYSICIAN_NOT_FOUND,
+          HttpStatus.BAD_REQUEST,
+        );
+    }
+
+    const staffWorkSchedules = await this.staffWorkScheduleRepository.find({
+      where: {
+        staffIdentifier: staffWorkScheduleConditionDto.physicianIdentifier,
+        active: true,
+      },
+      relations: [
+        'workSchedule',
+        'workSchedule.location',
+        'workSchedule.shift',
+        'staff',
+      ],
+    });
+
+    const updatedStaffWorkSchedules = await Promise.all(
+      staffWorkSchedules.map(async (staffWorkSchedule) => {
+        const location = await this.findOneLocation(
+          staffWorkSchedule.workSchedule.location.identifier,
+        );
+
+        staffWorkSchedule.workSchedule.location = location as Location;
+        return staffWorkSchedule;
+      }),
+    );
+
+    return updatedStaffWorkSchedules;
+  }
+
   async findAllShiftsByCondition(shiftConditionDto: ShiftConditionDto) {
     if (shiftConditionDto.physicianIdentifier) {
       const existedPhysician = await this.usersService.findOnePhysician(
@@ -114,5 +163,26 @@ export class SchedulesService {
         },
       )
       .getMany();
+  }
+
+  async findOneLocation(identifier: number) {
+    const childLocation = (await this.locationRepository.findOneBy({
+      identifier,
+    })) as Location;
+
+    if (!childLocation) return null;
+
+    let fullName = childLocation.name;
+    let nextLocation: Location | null = { ...childLocation };
+    while (nextLocation.parentIdentifier) {
+      nextLocation = await this.locationRepository.findOneBy({
+        identifier: nextLocation.parentIdentifier,
+      });
+
+      if (!nextLocation) break;
+      fullName = `${fullName}, ${nextLocation.name}`;
+    }
+
+    return { ...childLocation, name: fullName };
   }
 }

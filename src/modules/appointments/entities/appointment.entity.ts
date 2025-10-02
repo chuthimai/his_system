@@ -46,7 +46,7 @@ export class Appointment {
   })
   workSchedule: WorkSchedule;
 
-  @Column({ name: 'physician_identifier' })
+  @Column({ name: 'physician_identifier', nullable: true })
   physicianIdentifier: number;
 
   @ManyToOne(() => Physician, (physician) => physician.appointments)

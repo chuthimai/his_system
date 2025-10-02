@@ -5,6 +5,7 @@ export const ERROR_MESSAGES = {
   WORK_SCHEDULE_NOT_FOUND: 'Work schedule not found',
   USER_ALREADY_EXISTS: 'User already exists',
   INVALID_PASSWORD: 'Invalid password',
+  APPOINTMENT_USER_CANNOT_BE_PHYSICIAN: 'Appointment user cannot be physician',
   UNAUTHORIZED: 'Unauthorized',
   FORBIDDEN: 'Forbidden',
 };

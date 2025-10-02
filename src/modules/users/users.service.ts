@@ -90,6 +90,7 @@ export class UsersService {
     return await this.userRepository
       .createQueryBuilder('user')
       .select([
+        'user.identifier',
         'user.name',
         'user.telecom',
         'user.birthDate',
