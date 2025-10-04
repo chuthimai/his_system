@@ -18,12 +18,6 @@ export class CreateUserDto {
   @ApiProperty()
   @IsNotEmpty()
   @IsString()
-  @IsEmail()
-  email: string;
-
-  @ApiProperty()
-  @IsNotEmpty()
-  @IsString()
   @IsPhoneNumber('VN')
   telecom: string;
 
@@ -35,6 +29,11 @@ export class CreateUserDto {
   @ApiProperty()
   @IsNotEmpty()
   gender: string;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsString()
+  address: string;
 
   @ApiProperty()
   @IsNotEmpty()

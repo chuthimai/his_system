@@ -20,22 +20,17 @@ export class UsersService {
     private readonly physicianRepository: Repository<Physician>,
   ) {}
 
+  // For check existence, get full information in auth/login (all info)
+  // For check existence in records/create (just check existence)
+  // For check existence in appointments/create (just check existence)
   async findOne(identifier: number): Promise<User | null> {
     return await this.userRepository.findOneBy({ identifier });
   }
 
-  async findOneStaff(identifier: number): Promise<Staff | null> {
-    const staff = await this.staffRepository.findOne({
-      where: { identifier },
-      relations: ['user'],
-    });
-
-    if (!staff) return null;
-
-    const { user, ...staffWithoutUser } = staff;
-    return { ...staffWithoutUser, ...user } as unknown as Staff;
-  }
-
+  // For check existence, get full information in auth/login (all info)
+  // For check existence in schedules/work-schedules-by-condition (just check existence)
+  // For check existence, get base information in appointments/create (base info)
+  // For check existence in schedules/staff-work-schedule-by-condition (just check existence)
   async findOnePhysician(
     identifier: number,
     isFull: boolean = true,
@@ -89,6 +84,7 @@ export class UsersService {
   async searchByName(name: string): Promise<User[]> {
     return await this.userRepository
       .createQueryBuilder('user')
+      .where('LOWER(user.name) LIKE LOWER(:name)', { name: `%${name}%` })
       .select([
         'user.identifier',
         'user.name',
@@ -97,10 +93,10 @@ export class UsersService {
         'user.gender',
         'user.address',
       ])
-      .where('LOWER(user.name) LIKE LOWER(:name)', { name: `%${name}%` })
       .getMany();
   }
 
+  // For create patient in records/create (all info)
   async create(
     createUserDto: CreateUserDto,
     reuseOnDuplicate: boolean = false,
@@ -121,6 +117,7 @@ export class UsersService {
     createUserDto.password = bcrypt.hashSync(createUserDto.password, 10);
 
     const newUser = this.userRepository.create({
+      identifier: Number('111' + (Date.now() % 1e7)),
       ...createUserDto,
       role: ROLES.PATIENT,
     });

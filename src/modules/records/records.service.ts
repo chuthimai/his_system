@@ -6,6 +6,7 @@ import { Repository } from 'typeorm';
 import { UsersService } from '@modules/users/users.service';
 import { ERROR_MESSAGES } from 'src/constants/error-messages';
 import { CreateUserDto } from '@modules/users/dto/create-user.dto';
+import { User } from '@modules/users/entities/user.entity';
 
 @Injectable()
 export class RecordsService {
@@ -15,8 +16,11 @@ export class RecordsService {
     private readonly usersService: UsersService,
   ) {}
 
-  async create(createRecordDto: CreateRecordDto) {
-    let patient;
+  // Must have information: base, patient
+  async create(
+    createRecordDto: CreateRecordDto,
+  ): Promise<PatientRecord | null> {
+    let patient: User | null;
 
     if (!createRecordDto.patientIdentifier) {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -24,8 +28,7 @@ export class RecordsService {
       patient = await this.usersService.create(userData as CreateUserDto, true);
     } else {
       patient = await this.usersService.findOne(
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        createRecordDto.patientIdentifier ?? patient.identifier,
+        createRecordDto.patientIdentifier,
       );
     }
 
@@ -37,8 +40,7 @@ export class RecordsService {
     }
 
     const newPatientRecord = this.patientRecordRepository.create({
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      patientIdentifier: patient.identifier as number,
+      patientIdentifier: patient.identifier,
     });
 
     const savedPatientRecord =
@@ -46,7 +48,8 @@ export class RecordsService {
 
     return await this.patientRecordRepository
       .createQueryBuilder('record')
-      .select('record')
+      .where('record.identifier = :id', { id: savedPatientRecord.identifier })
+      .leftJoin('record.patient', 'patient')
       .addSelect([
         'patient.identifier',
         'patient.name',
@@ -55,8 +58,6 @@ export class RecordsService {
         'patient.gender',
         'patient.address',
       ])
-      .leftJoin('record.patient', 'patient')
-      .where('record.identifier = :id', { id: savedPatientRecord.identifier })
       .getOne();
   }
 }

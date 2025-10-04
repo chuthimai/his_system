@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber, IsOptional } from 'class-validator';
+import { IsNumber, IsOptional, ValidateIf } from 'class-validator';
 
 export class StaffWorkScheduleConditionDto {
   @ApiProperty()
@@ -8,7 +8,8 @@ export class StaffWorkScheduleConditionDto {
   physicianIdentifier?: number;
 
   @ApiProperty()
-  @IsOptional()
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+  @ValidateIf((obj) => obj.physicianIdentifier == undefined)
   @IsNumber()
   specialtyIdentifier?: number;
 }
