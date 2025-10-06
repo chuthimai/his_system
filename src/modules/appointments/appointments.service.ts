@@ -17,7 +17,10 @@ export class AppointmentsService {
     private readonly schedulesService: SchedulesService,
   ) {}
 
-  async create(createAppointmentDto: CreateAppointmentDto) {
+  // Must have information: base, workSchedule, physician, user
+  async create(
+    createAppointmentDto: CreateAppointmentDto,
+  ): Promise<Appointment> {
     const existedUser = await this.usersService.findOne(
       createAppointmentDto.userIdentifier,
     );
@@ -69,20 +72,20 @@ export class AppointmentsService {
 
     const targetAppointment = (await this.appointmentRepository
       .createQueryBuilder('appointment')
-      .leftJoin('appointment.user', 'user')
+      .where('appointment.identifier = :identifier', {
+        identifier: savedAppointment.identifier,
+      })
       .leftJoinAndSelect('appointment.workSchedule', 'workSchedule')
       .leftJoinAndSelect('workSchedule.shift', 'shift')
+      .leftJoin('appointment.user', 'user')
       .addSelect([
         'user.identifier',
         'user.name',
         'user.telecom',
-        'user.birth_date',
+        'user.birthDate',
         'user.gender',
         'user.address',
       ])
-      .where('appointment.identifier = :id', {
-        id: savedAppointment.identifier,
-      })
       .getOne()) as Appointment;
 
     targetAppointment.physician = (await this.usersService.findOnePhysician(

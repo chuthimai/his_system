@@ -10,6 +10,7 @@ import { Location } from './entities/location.entity';
 import { BillingModule } from 'src/modules/billing/billing.module';
 import { AuthModule } from '@modules/auth/auth.module';
 import { StaffWorkSchedule } from './entities/staff-work-schedule.entity';
+import { SpecializationsModule } from '@modules/specializations/specializations.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { StaffWorkSchedule } from './entities/staff-work-schedule.entity';
     forwardRef(() => BillingModule),
     forwardRef(() => AuthModule),
     forwardRef(() => AppointmentsModule),
+    forwardRef(() => SpecializationsModule),
   ],
   controllers: [SchedulesController],
   providers: [SchedulesService],

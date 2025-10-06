@@ -19,15 +19,15 @@ export class WorkSchedule {
   @Column({ type: 'date' })
   date: string;
 
-  @Column({ name: 'location_identifier' })
-  locationIdentifier: number;
+  // @Column({ name: 'location_identifier' })
+  // locationIdentifier: number;
 
-  @ManyToOne(() => Location, (location) => location.workSchedules)
-  @JoinColumn({
-    name: 'location_identifier',
-    referencedColumnName: 'identifier',
-  })
-  location: Location;
+  // @ManyToOne(() => Location, (location) => location.workSchedules)
+  // @JoinColumn({
+  //   name: 'location_identifier',
+  //   referencedColumnName: 'identifier',
+  // })
+  // location: Location;
 
   @Column({ name: 'shift_identifier' })
   shiftIdentifier: number;

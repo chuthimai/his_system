@@ -15,6 +15,6 @@ import { AuthModule } from '@modules/auth/auth.module';
   ],
   controllers: [SpecializationsController],
   providers: [SpecializationsService],
-  exports: [TypeOrmModule],
+  exports: [TypeOrmModule, SpecializationsService],
 })
 export class SpecializationsModule {}

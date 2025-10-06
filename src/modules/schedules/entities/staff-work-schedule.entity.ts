@@ -7,6 +7,7 @@ import {
 } from 'typeorm';
 import { WorkSchedule } from './work-schedule.entity';
 import { Staff } from 'src/modules/users/entities/staff.entity';
+import { Location } from './location.entity';
 
 @Entity('staff_work_schedules')
 export class StaffWorkSchedule {
@@ -31,6 +32,16 @@ export class StaffWorkSchedule {
     referencedColumnName: 'identifier',
   })
   workSchedule: WorkSchedule;
+
+  @Column({ name: 'location_identifier' })
+  locationIdentifier: number;
+
+  @ManyToOne(() => Location, (location) => location.staffWorkSchedules)
+  @JoinColumn({
+    name: 'location_identifier',
+    referencedColumnName: 'identifier',
+  })
+  location: Location;
 
   @Column({ name: 'staff_identifier' })
   staffIdentifier: number;

@@ -8,6 +8,7 @@ import {
 } from 'typeorm';
 import { User } from './user.entity';
 import { StaffWorkSchedule } from 'src/modules/schedules/entities/staff-work-schedule.entity';
+import { Physician } from './physician.entity';
 
 @Entity('staffs')
 export class Staff {
@@ -17,6 +18,9 @@ export class Staff {
   @OneToOne(() => User, { cascade: true })
   @JoinColumn({ name: 'identifier' })
   user: User;
+
+  @OneToOne(() => Physician, (physician) => physician.staff)
+  physician: Physician;
 
   name?: string;
   telecom?: string;
