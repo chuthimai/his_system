@@ -10,12 +10,9 @@ export class DiagnosisReport {
   @JoinColumn({ name: 'identifier' })
   serviceReport: ServiceReport;
 
-  @Column()
-  type: string;
-
-  @Column()
+  @Column({ default: '' })
   severity: string;
 
-  @Column()
+  @Column({ default: '' })
   conclusion: string;
 }

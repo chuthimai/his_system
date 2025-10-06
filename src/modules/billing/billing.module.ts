@@ -8,10 +8,11 @@ import { SchedulesModule } from 'src/modules/schedules/schedules.module';
 import { AssessmentsModule } from 'src/modules/assessments/assessments.module';
 import { RecordsModule } from 'src/modules/records/records.module';
 import { ReportsModule } from 'src/modules/reports/reports.module';
+import { InvoiceService } from './entities/invoice-service.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Service, Invoice]),
+    TypeOrmModule.forFeature([Service, Invoice, InvoiceService]),
     forwardRef(() => SchedulesModule),
     forwardRef(() => AssessmentsModule),
     forwardRef(() => RecordsModule),
@@ -19,6 +20,6 @@ import { ReportsModule } from 'src/modules/reports/reports.module';
   ],
   controllers: [BillingController],
   providers: [BillingService],
-  exports: [TypeOrmModule],
+  exports: [TypeOrmModule, BillingService],
 })
 export class BillingModule {}

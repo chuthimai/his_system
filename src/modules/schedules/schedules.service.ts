@@ -1,7 +1,7 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { WorkSchedule } from './entities/work-schedule.entity';
-import { Repository } from 'typeorm';
+import { LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
 import { DUTIES } from 'src/constants/others';
 import { WorkScheduleConditionDto } from './dto/work-schedules-by-condition.dto';
 import { UsersService } from '@modules/users/users.service';
@@ -12,7 +12,6 @@ import { Location } from './entities/location.entity';
 import { Staff } from '@modules/users/entities/staff.entity';
 import { SpecializationsService } from '@modules/specializations/specializations.service';
 
-@Injectable()
 export class SchedulesService {
   constructor(
     @InjectRepository(WorkSchedule)
@@ -30,6 +29,46 @@ export class SchedulesService {
     return await this.workScheduleRepository.findOne({
       where: { identifier },
     });
+  }
+
+  // For check existence in records/update (just check existence)
+  async findOneStaffWorkSchedule(
+    identifier: number,
+  ): Promise<StaffWorkSchedule | null> {
+    return await this.staffWorkScheduleRepository.findOne({
+      where: { identifier, active: true },
+    });
+  }
+
+  // For check existence, fetch base info in records/update (base info)
+  async findOneStaffWorkScheduleByCondition(
+    workScheduleIdentifier: number,
+    staffIdentifier: number,
+  ): Promise<StaffWorkSchedule | null> {
+    return await this.staffWorkScheduleRepository.findOne({
+      where: { workScheduleIdentifier, staffIdentifier, active: true },
+    });
+  }
+
+  async findOneLocation(identifier: number) {
+    const childLocation = (await this.locationRepository.findOneBy({
+      identifier,
+    })) as Location;
+
+    if (!childLocation) return null;
+
+    let fullName = childLocation.name;
+    let nextLocation: Location | null = { ...childLocation };
+    while (nextLocation.parentIdentifier) {
+      nextLocation = await this.locationRepository.findOneBy({
+        identifier: nextLocation.parentIdentifier,
+      });
+
+      if (!nextLocation) break;
+      fullName = `${fullName}, ${nextLocation.name}`;
+    }
+
+    return { ...childLocation, name: fullName };
   }
 
   // Must have information: base, shifts
@@ -241,24 +280,25 @@ export class SchedulesService {
     return updatedStaffWorkSchedules;
   }
 
-  async findOneLocation(identifier: number) {
-    const childLocation = (await this.locationRepository.findOneBy({
-      identifier,
-    })) as Location;
+  async findCurrentStaffWorkSchedule(currentUserIdentifier: number) {
+    const now = new Date();
+    const currentDate = now.toISOString().split('T')[0];
+    const currentTime = now.toTimeString().slice(0, 8);
 
-    if (!childLocation) return null;
+    // const currentTime = '11:20:20';
 
-    let fullName = childLocation.name;
-    let nextLocation: Location | null = { ...childLocation };
-    while (nextLocation.parentIdentifier) {
-      nextLocation = await this.locationRepository.findOneBy({
-        identifier: nextLocation.parentIdentifier,
-      });
-
-      if (!nextLocation) break;
-      fullName = `${fullName}, ${nextLocation.name}`;
-    }
-
-    return { ...childLocation, name: fullName };
+    return await this.staffWorkScheduleRepository.findOne({
+      where: {
+        staffIdentifier: currentUserIdentifier,
+        workSchedule: {
+          date: currentDate,
+          shift: {
+            startTime: LessThanOrEqual(currentTime),
+            endTime: MoreThanOrEqual(currentTime),
+          },
+        },
+      },
+      relations: ['workSchedule'],
+    });
   }
 }

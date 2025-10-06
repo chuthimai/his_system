@@ -1,8 +1,8 @@
 import { Column, Entity, JoinColumn, OneToOne, PrimaryColumn } from 'typeorm';
 import { AssessmentItem } from './assessment-item.entity';
 
-@Entity('measurement_indicator')
-export class MeasurementIndicator {
+@Entity('measurement_items')
+export class MeasurementItems {
   @PrimaryColumn()
   identifier: number;
 

@@ -104,7 +104,6 @@ export class UsersService {
     const existedUser = await this.userRepository.findOneBy({
       telecom: createUserDto.telecom,
     });
-
     if (existedUser) {
       if (reuseOnDuplicate) return existedUser;
       else
@@ -115,7 +114,6 @@ export class UsersService {
     }
 
     createUserDto.password = bcrypt.hashSync(createUserDto.password, 10);
-
     const newUser = this.userRepository.create({
       identifier: Number('111' + (Date.now() % 1e7)),
       ...createUserDto,
