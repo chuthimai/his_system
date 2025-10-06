@@ -1,3 +1,4 @@
+import { ServiceReport } from '@modules/reports/entities/service-report.entity';
 import { Invoice } from 'src/modules/billing/entities/invoice.entity';
 import { Prescription } from 'src/modules/medicines/entities/prescription.entity';
 import { User } from 'src/modules/users/entities/user.entity';
@@ -45,6 +46,12 @@ export class PatientRecord {
     referencedColumnName: 'identifier',
   })
   patient: User;
+
+  @OneToMany(
+    () => ServiceReport,
+    (serviceReport) => serviceReport.patientRecord,
+  )
+  serviceReports: ServiceReport[];
 
   @OneToMany(() => Invoice, (invoice) => invoice.patientRecord)
   invoices: Invoice[];

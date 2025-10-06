@@ -7,7 +7,6 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { AssessmentCategory } from './assessment-category.entity';
 import { AssessmentResult } from './assessment-result.entity';
 
 @Entity('assessment_items')
@@ -18,7 +17,7 @@ export class AssessmentItem {
   @Column()
   name: string;
 
-  @Column({ name: 'service_identifier' })
+  @Column({ name: 'service_identifier', nullable: true })
   serviceIdentifier: number;
 
   @ManyToOne(() => Service, (service) => service.assessmentItems)
@@ -28,18 +27,18 @@ export class AssessmentItem {
   })
   service: Service;
 
-  @Column({ name: 'assessment_category_identifier' })
-  assessmentCategoryIdentifier: number;
+  @Column({ name: 'parent_identifier', nullable: true })
+  parentIdentifier: number;
 
-  @ManyToOne(
-    () => AssessmentCategory,
-    (assessmentCategory) => assessmentCategory.assessmentItems,
-  )
+  @ManyToOne(() => AssessmentItem, (assessmentItem) => assessmentItem.children)
   @JoinColumn({
-    name: 'assessment_category_identifier',
+    name: 'parent_identifier',
     referencedColumnName: 'identifier',
   })
-  assessmentCategory: AssessmentCategory;
+  parent: AssessmentItem;
+
+  @OneToMany(() => AssessmentItem, (assessmentItem) => assessmentItem.parent)
+  children: AssessmentItem[];
 
   @OneToMany(
     () => AssessmentResult,

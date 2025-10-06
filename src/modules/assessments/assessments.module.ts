@@ -3,23 +3,23 @@ import { AssessmentsService } from './assessments.service';
 import { AssessmentsController } from './assessments.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AssessmentItem } from './entities/assessment-item.entity';
-import { AssessmentQuestion } from './entities/assessment-question.entity';
-import { MeasurementIndicator } from './entities/measurement-indicator.entity';
+import { MeasurementItems } from './entities/measurement-item.entity';
 import { BillingModule } from 'src/modules/billing/billing.module';
-import { AssessmentCategory } from './entities/assessment-category.entity';
+import { ReportsModule } from '@modules/reports/reports.module';
+import { AssessmentResult } from './entities/assessment-result.entity';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([
       AssessmentItem,
-      AssessmentQuestion,
-      MeasurementIndicator,
-      AssessmentCategory,
+      MeasurementItems,
+      AssessmentResult,
     ]),
     forwardRef(() => BillingModule),
+    forwardRef(() => ReportsModule),
   ],
   controllers: [AssessmentsController],
   providers: [AssessmentsService],
-  exports: [TypeOrmModule],
+  exports: [TypeOrmModule, AssessmentsService],
 })
 export class AssessmentsModule {}
