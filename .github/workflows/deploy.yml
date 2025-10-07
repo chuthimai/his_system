@@ -1,0 +1,66 @@
+# Tên workflow
+name: CI/CD Backend HIS to AWS EC2
+
+on:
+  push:
+    branches: [ deploy ]  # Chạy mỗi khi push lên nhánh deploy
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Lấy source code
+      - name: Checkout source code
+        uses: actions/checkout@v3
+
+      # 2. Chuẩn bị Docker Buildx (tối ưu build image)
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # 3. Login Docker Hub bằng secrets
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      # 4. Build và push image lên Docker Hub
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/nestjs-his:latest
+
+      # 5. SSH vào EC2 để deploy
+      - name: Deploy to AWS EC2 via SSH
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ec2-user
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            # Pull image mới nhất
+            docker pull ${{ secrets.DOCKER_USERNAME }}/nestjs-his:latest
+
+            # Xóa mọi container đang dùng port 3000
+            docker ps -q --filter "publish=3000" | xargs -r docker stop
+            docker ps -aq --filter "publish=3000" | xargs -r docker rm
+            
+            # Xóa container cũ (dù đã stop)
+            docker rm -f nestjs-his
+
+            # Chạy container mới
+            docker run -d -p 3000:3000 \
+              --name nestjs-his \
+              -e DB_HOST=${{ secrets.DB_HOST }}\
+              -e DB_PORT=3306\
+              -e DB_USERNAME=${{ secrets.DB_USERNAME }} \
+              -e DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
+              -e DB_DATABASE=${{ secrets.DB_DATABASE }} \
+              -e JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }} \
+              -e JWT_EXPIRATION_TIME=1h \
+              -e SOURCE_URL=http://${{ secrets.EC2_HOST }}:3000 \
+              -e ORIGIN_URL=${{ secrets.FONTEND_URL }} \
+              -e AVAILABLE_METHODS=GET,HEAD,PUT,PATCH,POST,DELETE \
+              ${{ secrets.DOCKER_USERNAME }}/nestjs-his:latest
