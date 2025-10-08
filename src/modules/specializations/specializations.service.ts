@@ -10,6 +10,10 @@ export class SpecializationsService {
     private readonly specialtyRepository: Repository<Specialty>,
   ) {}
 
+  async findOne(identifier: number): Promise<Specialty | null> {
+    return await this.specialtyRepository.findOneBy({ identifier });
+  }
+
   async findAll(): Promise<Specialty[]> {
     return await this.specialtyRepository.find();
   }

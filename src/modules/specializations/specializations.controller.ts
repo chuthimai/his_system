@@ -12,7 +12,7 @@ export class SpecializationsController {
   ) {}
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(ROLES.PATIENT)
+  @Roles(ROLES.PATIENT, ROLES.PHYSICIAN)
   @Get()
   findAll() {
     return this.specializationsService.findAll();

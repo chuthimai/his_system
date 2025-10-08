@@ -1,34 +1,13 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Param,
-  Post,
-  Query,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { JwtAuthGuard } from 'src/modules/auth/guards/jwt.guard';
 import { Roles } from 'src/decorators/roles.decorator';
 import { RolesGuard } from 'src/guards/roles.guard';
-import { CreateUserDto } from './dto/create-user.dto';
 import { ROLES } from 'src/constants/others';
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
-
-  @Get('/test')
-  test() {
-    return 'OKE';
-  }
-
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(ROLES.PHYSICIAN)
-  @Post('/')
-  async create(@Body() createUserDto: CreateUserDto) {
-    return await this.usersService.create(createUserDto);
-  }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(ROLES.PHYSICIAN)

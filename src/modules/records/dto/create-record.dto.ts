@@ -1,12 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
   IsDateString,
-  IsEmail,
   IsNumber,
   IsOptional,
   IsPhoneNumber,
   IsString,
   MinLength,
+  ValidateIf,
 } from 'class-validator';
 
 export class CreateRecordDto {
@@ -16,33 +16,39 @@ export class CreateRecordDto {
   patientIdentifier?: number;
 
   @ApiProperty()
-  @IsOptional()
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+  @ValidateIf((obj) => obj.patientIdentifier == undefined)
   @IsString()
   @MinLength(3)
   name?: string;
 
   @ApiProperty()
-  @IsOptional()
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+  @ValidateIf((obj) => obj.patientIdentifier == undefined)
   @IsString()
   @IsPhoneNumber('VN')
   telecom?: string;
 
   @ApiProperty()
-  @IsOptional()
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+  @ValidateIf((obj) => obj.patientIdentifier == undefined)
   @IsDateString()
   birthDate?: string;
 
   @ApiProperty()
-  @IsOptional()
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+  @ValidateIf((obj) => obj.patientIdentifier == undefined)
   gender?: string;
 
   @ApiProperty()
-  @IsOptional()
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+  @ValidateIf((obj) => obj.patientIdentifier == undefined)
   @IsString()
   address?: string;
 
   @ApiProperty()
-  @IsOptional()
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+  @ValidateIf((obj) => obj.patientIdentifier == undefined)
   @IsString()
   @MinLength(8)
   password?: string;
