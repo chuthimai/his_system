@@ -51,7 +51,7 @@ jobs:
             docker rm -f nestjs-his
 
             # Chạy container mới
-            docker run -d -p 3000:3000 \
+            docker run -p 3000:3000 \
               --name nestjs-his \
               -e DB_HOST=${{ secrets.DB_HOST }}\
               -e DB_PORT=3306\
