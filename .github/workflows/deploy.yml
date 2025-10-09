@@ -53,16 +53,16 @@ jobs:
             # Chạy container mới
             docker run -d -p 3000:3000 \
               --name nestjs-his \
-              --env DB_HOST=${{ secrets.DB_HOST }} \
-              --env DB_PORT=3306 \
-              --env DB_USERNAME=${{ secrets.DB_USERNAME }} \
-              --env DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
-              --env DB_DATABASE=${{ secrets.DB_DATABASE }} \
-              --env JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }} \
-              --env JWT_EXPIRATION_TIME=1h \
-              --env SOURCE_URL=http://${{ secrets.EC2_HOST }}:3000 \
-              --env ORIGIN_URL=${{ secrets.FONTEND_URL }} \
-              --env AVAILABLE_METHODS=GET,HEAD,PUT,PATCH,POST,DELETE \
+              --env=DB_HOST=${{ secrets.DB_HOST }} \
+              --env=DB_PORT=3306 \
+              --env=DB_USERNAME=${{ secrets.DB_USERNAME }} \
+              --env=DB_PASSWORD='${{ secrets.DB_PASSWORD }}' \
+              --env=DB_DATABASE=${{ secrets.DB_DATABASE }} \
+              --env=JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }} \
+              --env=JWT_EXPIRATION_TIME=1h \
+              --env=SOURCE_URL=http://${{ secrets.EC2_HOST }}:3000 \
+              --env=ORIGIN_URL=${{ secrets.FONTEND_URL }} \
+              --env=AVAILABLE_METHODS=GET,HEAD,PUT,PATCH,POST,DELETE \
               --network=bridge \
               --restart=no \
               ${{ secrets.DOCKER_USERNAME }}/nestjs-his:latest
