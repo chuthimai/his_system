@@ -21,15 +21,11 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build Docker image
+      - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
-          push: false
+          push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/nestjs-his:latest
-
-      - name: Push Docker image
-        run: |
-          docker push ${{ secrets.DOCKER_USERNAME }}/nestjs-his:latest
 
   # 2. Job: Deploy lên EC2
   deploy_ec2:
@@ -43,17 +39,18 @@ jobs:
           username: ec2-user
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            echo "Pull latest image"
+            # Pull image mới nhất
             docker pull ${{ secrets.DOCKER_USERNAME }}/nestjs-his:latest
 
-            echo "Stop old containers"
+            # Xóa mọi container đang dùng port 3000
             docker ps -q --filter "publish=3000" | xargs -r docker stop
             docker ps -aq --filter "publish=3000" | xargs -r docker rm
-
-            echo "Remove old container if exists"
+            
+            # Xóa container cũ (dù đã stop)
             docker rm -f nestjs-his || true
 
-            echo "Run new container"
+
+            # Chạy container mới
             docker run -d -p 3000:3000 \
               --name nestjs-his \
               --env DB_HOST=${{ secrets.DB_HOST }} \
@@ -70,5 +67,5 @@ jobs:
               --restart=no \
               ${{ secrets.DOCKER_USERNAME }}/nestjs-his:latest
 
-            echo "Clean unused images"
+            # Xoá tất cả images ko có container đi kèm
             docker image prune -a -f
