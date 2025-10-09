@@ -1,73 +1,85 @@
-# Tên workflow
 name: CI/CD Backend HIS to AWS EC2
 
 on:
   push:
-    branches: [ deploy ]  # Chạy mỗi khi push lên nhánh deploy
+    branches: [ deploy ]
 
 jobs:
-  build_and_deploy:
+  # 1. Job: Checkout và Build Docker image
+  build_image:
     runs-on: ubuntu-latest
-
     steps:
-      # 1. Lấy source code
       - name: Checkout source code
         uses: actions/checkout@v3
 
-      # 2. Chuẩn bị Docker Buildx (tối ưu build image)
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      # 3. Login Docker Hub bằng secrets
       - name: Login to DockerHub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      # 4. Build và push image lên Docker Hub
-      - name: Build and push Docker image
+      - name: Build Docker image
         uses: docker/build-push-action@v5
         with:
-          push: true
+          push: false
           tags: ${{ secrets.DOCKER_USERNAME }}/nestjs-his:latest
 
-      # 5. SSH vào EC2 để deploy
-      - name: Deploy to AWS EC2 via SSH
+  # 2. Job: Push image lên Docker Hub
+  push_image:
+    runs-on: ubuntu-latest
+    needs: build_image
+    steps:
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Push Docker image
+        run: |
+          docker push ${{ secrets.DOCKER_USERNAME }}/nestjs-his:latest
+
+  # 3. Job: Deploy lên EC2
+  deploy_ec2:
+    runs-on: ubuntu-latest
+    needs: push_image
+    steps:
+      - name: SSH to EC2 and deploy
         uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ec2-user
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            # Pull image mới nhất
+            echo "Pull latest image"
             docker pull ${{ secrets.DOCKER_USERNAME }}/nestjs-his:latest
 
-            # Xóa mọi container đang dùng port 3000
+            echo "Stop old containers"
             docker ps -q --filter "publish=3000" | xargs -r docker stop
             docker ps -aq --filter "publish=3000" | xargs -r docker rm
-            
-            # Xóa container cũ (dù đã stop)
-            docker rm -f nestjs-his
 
-            # Chạy container mới
-            docker run -p 3000:3000 \
+            echo "Remove old container if exists"
+            docker rm -f nestjs-his || true
+
+            echo "Run new container"
+            docker run -d -p 3000:3000 \
               --name nestjs-his \
-              --env=DB_HOST=${{ secrets.DB_HOST }} \
-              --env=DB_PORT=3306 \
-              --env=DB_USERNAME=${{ secrets.DB_USERNAME }} \
-              --env=DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
-              --env=DB_DATABASE${{ secrets.DB_DATABASE }} \
-              --env=JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }} \
-              --env=JWT_EXPIRATION_TIME=1h \
-              --env=SOURCE_URL=http://${{ secrets.EC2_HOST }}:3000 \
-              --env=ORIGIN_URL=${{ secrets.FONTEND_URL }} \
-              --env=AVAILABLE_METHODS=GET,HEAD,PUT,PATCH,POST,DELETE \
-              --env=NODE_VERSION=20.19.5 \
-              --env=YARN_VERSION=1.22.22 \
+              --env DB_HOST=${{ secrets.DB_HOST }} \
+              --env DB_PORT=3306 \
+              --env DB_USERNAME=${{ secrets.DB_USERNAME }} \
+              --env DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
+              --env DB_DATABASE=${{ secrets.DB_DATABASE }} \
+              --env JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }} \
+              --env JWT_EXPIRATION_TIME=1h \
+              --env SOURCE_URL=http://${{ secrets.EC2_HOST }}:3000 \
+              --env ORIGIN_URL=${{ secrets.FONTEND_URL }} \
+              --env AVAILABLE_METHODS=GET,HEAD,PUT,PATCH,POST,DELETE \
               --network=bridge \
               --restart=no \
               ${{ secrets.DOCKER_USERNAME }}/nestjs-his:latest
-            
-            # Xoá tất cả images ko có container đi kèm
+
+            echo "Clean unused images"
             docker image prune -a -f
