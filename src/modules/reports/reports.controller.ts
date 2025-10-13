@@ -62,7 +62,7 @@ export class ReportsController {
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(ROLES.PHYSICIAN)
-  @Get('/close/:serviceReportIdentifier')
+  @Get('/close-service-report/:serviceReportIdentifier')
   closeServiceReport(
     @Param('serviceReportIdentifier') serviceReportIdentifier: number,
     @CurrentUser() currentUser: User,

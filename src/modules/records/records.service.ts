@@ -11,7 +11,7 @@ import { UsersService } from '@modules/users/users.service';
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ERROR_MESSAGES } from 'src/constants/error-messages';
-import { SERVICE_NAMES, SERVICE_TYPES } from 'src/constants/others';
+import { SERVICE_TYPES } from 'src/constants/others';
 import { HttpExceptionWrapper } from 'src/helpers/http-exception-wrapper';
 import { Repository } from 'typeorm';
 import { CreateRecordDto } from './dto/create-record.dto';
@@ -176,20 +176,27 @@ export class RecordsService {
       throw new HttpExceptionWrapper(ERROR_MESSAGES.PATIENT_RECORD_NOT_FOUND);
     }
 
-    updateLaboratoryAndImagingDto.serviceNames.forEach((serviceName) => {
-      if (!Object.values(SERVICE_NAMES).includes(serviceName)) {
-        throw new HttpExceptionWrapper(ERROR_MESSAGES.SERVICE_NAME_NOT_FOUND);
-      }
-    });
+    const services = await Promise.all(
+      updateLaboratoryAndImagingDto.serviceIdentifiers.map(
+        async (serviceIdentifier) => {
+          const service =
+            await this.billingService.findOneService(serviceIdentifier);
+          if (!service) {
+            throw new HttpExceptionWrapper(ERROR_MESSAGES.SERVICE_NOT_FOUND);
+          }
+          return service;
+        },
+      ),
+    );
 
     await Promise.all(
-      updateLaboratoryAndImagingDto.serviceNames.map(async (serviceName) => {
+      services.map(async (service) => {
         if (
           !(await this.createServiceForPatientRecord(
             currentUser.identifier,
             null,
             updateLaboratoryAndImagingDto.patientRecordIdentifier,
-            { name: serviceName },
+            { identifier: service.identifier },
           ))
         ) {
           throw new HttpExceptionWrapper(ERROR_MESSAGES.UNEXPECTABLE_FAULT);

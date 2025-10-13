@@ -50,6 +50,12 @@ export class BillingService {
     });
   }
 
+  async findAllServicesByTypes(type: string | null = null) {
+    return this.serviceRepository.find({
+      ...(type ? { where: { type } } : {}),
+    });
+  }
+
   async createInvoice(createInvoiceDto: CreateInvoiceDto) {
     const existedPatientRecord = await this.recordService.findOnePatientRecord(
       createInvoiceDto.patientRecordIdentifier,

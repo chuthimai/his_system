@@ -1,5 +1,6 @@
 import { SchedulesService } from '@modules/schedules/schedules.service';
 import { Physician } from '@modules/users/entities/physician.entity';
+import { User } from '@modules/users/entities/user.entity';
 import { UsersService } from '@modules/users/users.service';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -17,6 +18,28 @@ export class AppointmentsService {
     private readonly usersService: UsersService,
     private readonly schedulesService: SchedulesService,
   ) {}
+
+  async findAllByUserIdentifier(userIdentifier: number) {
+    const appointments = await this.appointmentRepository.find({
+      where: { ...(userIdentifier ? { userIdentifier } : {}), status: true },
+      relations: ['workSchedule', 'workSchedule.shift'],
+    });
+
+    await Promise.all(
+      appointments.map(async (appointment) => {
+        appointment.physician = (await this.usersService.findOnePhysician(
+          appointment.physicianIdentifier,
+          false,
+        )) as unknown as Physician;
+        appointment.user = (await this.usersService.findOne(
+          appointment.userIdentifier,
+          false,
+        )) as User;
+      }),
+    );
+
+    return appointments;
+  }
 
   // Must have information: base, workSchedule, physician, user
   async create(

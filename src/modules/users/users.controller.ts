@@ -11,7 +11,7 @@ export class UsersController {
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(ROLES.PHYSICIAN)
-  @Get('/search/by-name')
+  @Get('/by-name')
   searchByName(@Query('name') name: string) {
     return this.usersService.searchByName(name);
   }

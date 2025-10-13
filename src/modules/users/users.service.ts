@@ -21,8 +21,23 @@ export class UsersService {
   // For check existence, get full information in auth/login (all info)
   // For check existence in records/create (just check existence)
   // For check existence in appointments/create (just check existence)
-  async findOne(identifier: number): Promise<User | null> {
-    return await this.userRepository.findOneBy({ identifier });
+  async findOne(
+    identifier: number,
+    isFull: boolean = true,
+  ): Promise<User | null> {
+    return isFull
+      ? await this.userRepository.findOneBy({ identifier })
+      : await this.userRepository.findOne({
+          where: { identifier },
+          select: [
+            'identifier',
+            'name',
+            'telecom',
+            'birthDate',
+            'gender',
+            'address',
+          ],
+        });
   }
 
   // For check existence, get full information in auth/login (all info)
@@ -57,6 +72,7 @@ export class UsersService {
       : ({
           identifier: physician.identifier,
           name: physician?.staff?.user?.name,
+          specialty: physician.specialty,
         } as Physician);
   }
 

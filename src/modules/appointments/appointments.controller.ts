@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Get, Query } from '@nestjs/common';
 import { AppointmentsService } from './appointments.service';
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
 import { Roles } from 'src/decorators/roles.decorator';
@@ -9,6 +9,11 @@ import { RolesGuard } from 'src/guards/roles.guard';
 @Controller('appointments')
 export class AppointmentsController {
   constructor(private readonly appointmentsService: AppointmentsService) {}
+
+  @Get('/by-user')
+  getAllByUserIdentifier(@Query('userIdentifier') userIdentifier: number) {
+    return this.appointmentsService.findAllByUserIdentifier(userIdentifier);
+  }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(ROLES.PHYSICIAN, ROLES.PATIENT)
