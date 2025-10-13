@@ -7,7 +7,7 @@ export class BillingController {
   constructor(private readonly billingService: BillingService) {}
 
   @Post('/invoice-services')
-  async createInvoiceService(
+  createInvoiceService(
     @Body() createServiceInvoiceDto: CreateInvoiceServiceDto,
   ) {
     return this.billingService.createInvoiceService(createServiceInvoiceDto);

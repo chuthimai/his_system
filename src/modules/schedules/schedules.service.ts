@@ -1,16 +1,16 @@
-import { HttpException, HttpStatus } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { WorkSchedule } from './entities/work-schedule.entity';
-import { LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
-import { DUTIES } from 'src/constants/others';
-import { WorkScheduleConditionDto } from './dto/work-schedules-by-condition.dto';
-import { UsersService } from '@modules/users/users.service';
-import { ERROR_MESSAGES } from 'src/constants/error-messages';
-import { StaffWorkSchedule } from './entities/staff-work-schedule.entity';
-import { StaffWorkScheduleConditionDto } from './dto/staff-work-schedules-by-condition.dto';
-import { Location } from './entities/location.entity';
-import { Staff } from '@modules/users/entities/staff.entity';
 import { SpecializationsService } from '@modules/specializations/specializations.service';
+import { Staff } from '@modules/users/entities/staff.entity';
+import { UsersService } from '@modules/users/users.service';
+import { InjectRepository } from '@nestjs/typeorm';
+import { ERROR_MESSAGES } from 'src/constants/error-messages';
+import { DUTIES } from 'src/constants/others';
+import { HttpExceptionWrapper } from 'src/helpers/http-exception-wrapper';
+import { LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
+import { StaffWorkScheduleConditionDto } from './dto/staff-work-schedules-by-condition.dto';
+import { WorkScheduleConditionDto } from './dto/work-schedules-by-condition.dto';
+import { Location } from './entities/location.entity';
+import { StaffWorkSchedule } from './entities/staff-work-schedule.entity';
+import { WorkSchedule } from './entities/work-schedule.entity';
 
 export class SchedulesService {
   constructor(
@@ -20,8 +20,8 @@ export class SchedulesService {
     private readonly staffWorkScheduleRepository: Repository<StaffWorkSchedule>,
     @InjectRepository(Location)
     private readonly locationRepository: Repository<Location>,
-    private readonly usersService: UsersService,
     private readonly specializationsService: SpecializationsService,
+    private readonly usersService: UsersService,
   ) {}
 
   // For check existence in appointments/create (just check existence)
@@ -80,11 +80,9 @@ export class SchedulesService {
         workScheduleConditionDto?.physicianIdentifier,
       );
 
-      if (!existedPhysician)
-        throw new HttpException(
-          ERROR_MESSAGES.PHYSICIAN_NOT_FOUND,
-          HttpStatus.BAD_REQUEST,
-        );
+      if (!existedPhysician) {
+        throw new HttpExceptionWrapper(ERROR_MESSAGES.PHYSICIAN_NOT_FOUND);
+      }
     }
 
     // Get work schedules from today to the end of next month
@@ -147,10 +145,7 @@ export class SchedulesService {
       await this.usersService.findOnePhysician(physicianIdentifier);
 
     if (!existedPhysician) {
-      throw new HttpException(
-        ERROR_MESSAGES.PHYSICIAN_NOT_FOUND,
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new HttpExceptionWrapper(ERROR_MESSAGES.PHYSICIAN_NOT_FOUND);
     }
 
     const now = new Date();
@@ -215,10 +210,7 @@ export class SchedulesService {
       await this.specializationsService.findOne(specialtyIdentifier);
 
     if (!existedSpecialty)
-      throw new HttpException(
-        ERROR_MESSAGES.SPECIALTY_NOT_FOUND,
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new HttpExceptionWrapper(ERROR_MESSAGES.SPECIALTY_NOT_FOUND);
 
     const now = new Date();
     const nowPlus30Minutes = new Date(now.getTime() + 30 * 60000);

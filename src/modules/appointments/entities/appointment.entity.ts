@@ -23,19 +23,6 @@ export class Appointment {
   @Column({ name: 'cancellation_date', nullable: true })
   cancellationDate: string;
 
-  // @Column({ name: 'staff_work_schedule_identifier' })
-  // staffWorkScheduleIdentifier: number;
-
-  // @ManyToOne(
-  //   () => StaffWorkSchedule,
-  //   (staffWorkSchedule) => staffWorkSchedule.appointments,
-  // )
-  // @JoinColumn({
-  //   name: 'staff_work_schedule_identifier',
-  //   referencedColumnName: 'identifier',
-  // })
-  // staffWorkSchedule: StaffWorkSchedule;
-
   @Column({ name: 'work_schedule_identifier' })
   workScheduleIdentifier: number;
 

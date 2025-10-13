@@ -1,14 +1,14 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
-import { ReportsService } from './reports.service';
-import { CurrentUser } from 'src/decorators/current-user.decorator.dto';
-import { User } from '@modules/users/entities/user.entity';
 import { JwtAuthGuard } from '@modules/auth/guards/jwt.guard';
-import { RolesGuard } from 'src/guards/roles.guard';
-import { Roles } from 'src/decorators/roles.decorator';
+import { User } from '@modules/users/entities/user.entity';
+import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { ROLES } from 'src/constants/others';
+import { CurrentUser } from 'src/decorators/current-user.decorator.dto';
+import { Roles } from 'src/decorators/roles.decorator';
+import { RolesGuard } from 'src/guards/roles.guard';
 import { UpdateDiagnosisReportResultDto } from './dto/update-diagnosis-report-result.dto';
 import { UpdateLaboratoryReportResultDto } from './dto/update-imaging-report-result.dto';
 import { UpdateImagingReportResultDto } from './dto/update-laboratoty-report-result.dto';
+import { ReportsService } from './reports.service';
 
 @Controller('reports')
 export class ReportsController {
@@ -17,11 +17,11 @@ export class ReportsController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(ROLES.PHYSICIAN)
   @Get('/:patientRecordIdentifier')
-  async getCurrentOneByPatientRecordIdentifier(
+  getCurrentOneByPatientRecordIdentifier(
     @Param('patientRecordIdentifier') patientRecordIdentifier: number,
     @CurrentUser() currentUser: User,
   ) {
-    return await this.reportService.findOneByPatientRecordIdentifier(
+    return this.reportService.findOneByPatientRecordIdentifier(
       patientRecordIdentifier,
       currentUser.identifier,
     );
@@ -30,7 +30,7 @@ export class ReportsController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(ROLES.PHYSICIAN)
   @Post('/update-diagnosis-report-result')
-  async updateDiagnosisReportResult(
+  updateDiagnosisReportResult(
     @Body() updateDiagnosisReportResultDto: UpdateDiagnosisReportResultDto,
     @CurrentUser() currentUser: User,
   ) {
@@ -43,7 +43,7 @@ export class ReportsController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(ROLES.PHYSICIAN)
   @Post('/update-laboratory-report-result')
-  async updateLaboratoryReportResult(
+  updateLaboratoryReportResult(
     @Body() updateLaboratoryReportResultDto: UpdateLaboratoryReportResultDto,
     @CurrentUser() currentUser: User,
   ) {
@@ -53,7 +53,7 @@ export class ReportsController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(ROLES.PHYSICIAN)
   @Post('/update-imaging-report-result')
-  async updateImagingReportResult(
+  updateImagingReportResult(
     @Body() updateImagingReportResultDto: UpdateImagingReportResultDto,
     @CurrentUser() currentUser: User,
   ) {
@@ -62,8 +62,8 @@ export class ReportsController {
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(ROLES.PHYSICIAN)
-  @Get('/close-service-report/:serviceReportIdentifier')
-  async closeServiceReport(
+  @Get('/close/:serviceReportIdentifier')
+  closeServiceReport(
     @Param('serviceReportIdentifier') serviceReportIdentifier: number,
     @CurrentUser() currentUser: User,
   ) {
@@ -77,9 +77,7 @@ export class ReportsController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(ROLES.PHYSICIAN)
   @Get('/test/:serviceReportIdentifier')
-  async getOne(
-    @Param('serviceReportIdentifier') serviceReportIdentifier: number,
-  ) {
-    return await this.reportService.findOne(serviceReportIdentifier);
+  getOne(@Param('serviceReportIdentifier') serviceReportIdentifier: number) {
+    return this.reportService.findOne(serviceReportIdentifier);
   }
 }
