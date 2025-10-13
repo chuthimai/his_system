@@ -1,13 +1,14 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Service } from './entities/service.entity';
-import { Repository } from 'typeorm';
-import { CreateInvoiceDto } from './dto/create-invoice.dto';
-import { Invoice } from './entities/invoice.entity';
-import { CreateInvoiceServiceDto } from './dto/create-invoice-service.dto';
-import { InvoiceService } from './entities/invoice-service.entity';
 import { RecordsService } from '@modules/records/records.service';
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 import { ERROR_MESSAGES } from 'src/constants/error-messages';
+import { HttpExceptionWrapper } from 'src/helpers/http-exception-wrapper';
+import { Repository } from 'typeorm';
+import { CreateInvoiceServiceDto } from './dto/create-invoice-service.dto';
+import { CreateInvoiceDto } from './dto/create-invoice.dto';
+import { InvoiceService } from './entities/invoice-service.entity';
+import { Invoice } from './entities/invoice.entity';
+import { Service } from './entities/service.entity';
 
 @Injectable()
 export class BillingService {
@@ -53,12 +54,8 @@ export class BillingService {
     const existedPatientRecord = await this.recordService.findOnePatientRecord(
       createInvoiceDto.patientRecordIdentifier,
     );
-
     if (!existedPatientRecord) {
-      throw new HttpException(
-        ERROR_MESSAGES.PATIENT_RECORD_NOT_FOUND,
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new HttpExceptionWrapper(ERROR_MESSAGES.PATIENT_RECORD_NOT_FOUND);
     }
 
     const newInvoice = this.invoiceRepository.create(createInvoiceDto);
@@ -69,29 +66,22 @@ export class BillingService {
     const existedInvoice = await this.findOneInvoice(
       createInvoiceServiceDto.invoiceIdentifier,
     );
-
     if (!existedInvoice) {
-      throw new HttpException(
-        ERROR_MESSAGES.INVOICE_NOT_FOUND,
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new HttpExceptionWrapper(ERROR_MESSAGES.INVOICE_NOT_FOUND);
     }
 
     const existedService = await this.findOneService(
       createInvoiceServiceDto.serviceIdentifier,
     );
     if (!existedService) {
-      throw new HttpException(
-        ERROR_MESSAGES.SERVICE_NOT_FOUND,
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new HttpExceptionWrapper(ERROR_MESSAGES.SERVICE_NOT_FOUND);
     }
 
     const newInvoiceService = this.invoiceServiceRepository.create(
       createInvoiceServiceDto,
     );
-    return (await this.invoiceServiceRepository.save(newInvoiceService))
-      ? true
-      : false;
+    const savedInvoiceService =
+      await this.invoiceServiceRepository.save(newInvoiceService);
+    return savedInvoiceService ? true : false;
   }
 }

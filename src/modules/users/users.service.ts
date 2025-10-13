@@ -1,21 +1,19 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { User } from './entities/user.entity';
-import { Staff } from './entities/staff.entity';
-import { Physician } from './entities/physician.entity';
-import { CreateUserDto } from './dto/create-user.dto';
-import { ERROR_MESSAGES } from 'src/constants/error-messages';
 import * as bcrypt from 'bcrypt';
+import { ERROR_MESSAGES } from 'src/constants/error-messages';
 import { ROLES } from 'src/constants/others';
+import { HttpExceptionWrapper } from 'src/helpers/http-exception-wrapper';
+import { Repository } from 'typeorm';
+import { CreateUserDto } from './dto/create-user.dto';
+import { Physician } from './entities/physician.entity';
+import { User } from './entities/user.entity';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    @InjectRepository(Staff)
-    private readonly staffRepository: Repository<Staff>,
     @InjectRepository(Physician)
     private readonly physicianRepository: Repository<Physician>,
   ) {}
@@ -106,11 +104,7 @@ export class UsersService {
     });
     if (existedUser) {
       if (reuseOnDuplicate) return existedUser;
-      else
-        throw new HttpException(
-          ERROR_MESSAGES.USER_ALREADY_EXISTS,
-          HttpStatus.BAD_REQUEST,
-        );
+      else throw new HttpExceptionWrapper(ERROR_MESSAGES.USER_ALREADY_EXISTS);
     }
 
     createUserDto.password = bcrypt.hashSync(createUserDto.password, 10);

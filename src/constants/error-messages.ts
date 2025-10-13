@@ -17,6 +17,7 @@ export const ERROR_MESSAGES = {
   SERVICE_TYPE_NOT_FOUND: 'Invalid service type',
   SERVICE_NAME_NOT_FOUND: 'Invalid service name',
   SERVICE_REPORT_NOT_FOUND: 'Service report not found',
+  DETAIL_SERVICE_REPORT_NOT_FOUND: 'Detail service report not found',
 
   CREATE_INVOICE_FAIL: 'Create invoice fail',
   CREATE_INVOICE_SERVICE_FAIL: 'Create invoice service fail',

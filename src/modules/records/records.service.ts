@@ -1,28 +1,23 @@
-import {
-  forwardRef,
-  HttpException,
-  HttpStatus,
-  Inject,
-  Injectable,
-} from '@nestjs/common';
-import { CreateRecordDto } from './dto/create-record.dto';
-import { InjectRepository } from '@nestjs/typeorm';
-import { PatientRecord } from './entities/patient-record.entity';
-import { Repository } from 'typeorm';
-import { UsersService } from '@modules/users/users.service';
-import { ERROR_MESSAGES } from 'src/constants/error-messages';
+import { BillingService } from '@modules/billing/billing.service';
+import { Service } from '@modules/billing/entities/service.entity';
+import { DiagnosisReport } from '@modules/reports/entities/diagnosis-report.entity';
+import { ImagingReport } from '@modules/reports/entities/imaging-report.entity';
+import { LaboratoryReport } from '@modules/reports/entities/laboratory-report.entity';
+import { ReportsService, T } from '@modules/reports/reports.service';
+import { SchedulesService } from '@modules/schedules/schedules.service';
 import { CreateUserDto } from '@modules/users/dto/create-user.dto';
 import { User } from '@modules/users/entities/user.entity';
-import { BillingService } from '@modules/billing/billing.service';
+import { UsersService } from '@modules/users/users.service';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { ERROR_MESSAGES } from 'src/constants/error-messages';
 import { SERVICE_NAMES, SERVICE_TYPES } from 'src/constants/others';
-import { Service } from '@modules/billing/entities/service.entity';
-import { SchedulesService } from '@modules/schedules/schedules.service';
-import { ReportsService, T } from '@modules/reports/reports.service';
-import { DiagnosisReport } from '@modules/reports/entities/diagnosis-report.entity';
-import { LaboratoryReport } from '@modules/reports/entities/laboratory-report.entity';
-import { ImagingReport } from '@modules/reports/entities/imaging-report.entity';
-import { UpdateSpecialtyConsultationDto } from './dto/update-specialty-consultation.dto';
+import { HttpExceptionWrapper } from 'src/helpers/http-exception-wrapper';
+import { Repository } from 'typeorm';
+import { CreateRecordDto } from './dto/create-record.dto';
 import { UpdateLaboratoryAndImagingDto } from './dto/update-laboratory-and-imaging.dto';
+import { UpdateSpecialtyConsultationDto } from './dto/update-specialty-consultation.dto';
+import { PatientRecord } from './entities/patient-record.entity';
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
 export const mapServiceTypeToEntity = new Map<string, Function>([
@@ -36,11 +31,11 @@ export class RecordsService {
   constructor(
     @InjectRepository(PatientRecord)
     private readonly patientRecordRepository: Repository<PatientRecord>,
-    private readonly usersService: UsersService,
     @Inject(forwardRef(() => BillingService))
     private readonly billingService: BillingService,
-    private readonly schedulesService: SchedulesService,
     private readonly reportsService: ReportsService,
+    private readonly schedulesService: SchedulesService,
+    private readonly usersService: UsersService,
   ) {}
 
   // For check existence in createInvoice in billing service
@@ -92,11 +87,9 @@ export class RecordsService {
       const { patientIdentifier, ...userData } = createRecordDto;
       patient = await this.usersService.create(userData as CreateUserDto, true);
     }
+
     if (!patient) {
-      throw new HttpException(
-        ERROR_MESSAGES.PATIENT_NOT_FOUND,
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new HttpExceptionWrapper(ERROR_MESSAGES.PATIENT_NOT_FOUND);
     }
 
     const newPatientRecord = this.patientRecordRepository.create({
@@ -113,10 +106,7 @@ export class RecordsService {
         { type: SERVICE_TYPES.GENERAL_CONSULTATION },
       ))
     ) {
-      throw new HttpException(
-        ERROR_MESSAGES.UNEXPECTABLE_FAULT,
-        HttpStatus.EXPECTATION_FAILED,
-      );
+      throw new HttpExceptionWrapper(ERROR_MESSAGES.UNEXPECTABLE_FAULT);
     }
 
     return await this.findOnePatientRecord(savedPatientRecord.identifier, true);
@@ -132,14 +122,10 @@ export class RecordsService {
       true,
     );
     if (!existedRecord) {
-      throw new HttpException(
-        ERROR_MESSAGES.PATIENT_RECORD_NOT_FOUND,
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new HttpExceptionWrapper(ERROR_MESSAGES.PATIENT_RECORD_NOT_FOUND);
     } else if (existedRecord.serviceReports.length >= 2) {
-      throw new HttpException(
+      throw new HttpExceptionWrapper(
         ERROR_MESSAGES.SPECIALTY_CONSULTATION_SPECIFIED,
-        HttpStatus.BAD_REQUEST,
       );
     }
 
@@ -149,9 +135,8 @@ export class RecordsService {
         updateSpecialtyConsultationDto.physicianIdentifier,
       );
     if (!existedStaffWorkSchedule) {
-      throw new HttpException(
+      throw new HttpExceptionWrapper(
         ERROR_MESSAGES.STAFF_WORK_SCHEDULE_NOT_FOUND,
-        HttpStatus.BAD_REQUEST,
       );
     }
 
@@ -170,10 +155,7 @@ export class RecordsService {
         serviceInfo,
       ))
     ) {
-      throw new HttpException(
-        ERROR_MESSAGES.UNEXPECTABLE_FAULT,
-        HttpStatus.EXPECTATION_FAILED,
-      );
+      throw new HttpExceptionWrapper(ERROR_MESSAGES.UNEXPECTABLE_FAULT);
     }
 
     return await this.findOnePatientRecord(
@@ -191,18 +173,12 @@ export class RecordsService {
       updateLaboratoryAndImagingDto.patientRecordIdentifier,
     );
     if (!existedRecord) {
-      throw new HttpException(
-        ERROR_MESSAGES.PATIENT_RECORD_NOT_FOUND,
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new HttpExceptionWrapper(ERROR_MESSAGES.PATIENT_RECORD_NOT_FOUND);
     }
 
     updateLaboratoryAndImagingDto.serviceNames.forEach((serviceName) => {
       if (!Object.values(SERVICE_NAMES).includes(serviceName)) {
-        throw new HttpException(
-          ERROR_MESSAGES.SERVICE_NAME_NOT_FOUND,
-          HttpStatus.BAD_REQUEST,
-        );
+        throw new HttpExceptionWrapper(ERROR_MESSAGES.SERVICE_NAME_NOT_FOUND);
       }
     });
 
@@ -216,10 +192,7 @@ export class RecordsService {
             { name: serviceName },
           ))
         ) {
-          throw new HttpException(
-            ERROR_MESSAGES.UNEXPECTABLE_FAULT,
-            HttpStatus.EXPECTATION_FAILED,
-          );
+          throw new HttpExceptionWrapper(ERROR_MESSAGES.UNEXPECTABLE_FAULT);
         }
       }),
     );
@@ -246,10 +219,7 @@ export class RecordsService {
       });
 
       if (!invoice) {
-        throw new HttpException(
-          ERROR_MESSAGES.CREATE_INVOICE_FAIL,
-          HttpStatus.BAD_REQUEST,
-        );
+        throw new HttpExceptionWrapper(ERROR_MESSAGES.CREATE_INVOICE_FAIL);
       }
     }
 
@@ -258,10 +228,7 @@ export class RecordsService {
     )) as Service;
     if (!service) {
       console.log('Service not found with info: ', serviceInfo);
-      throw new HttpException(
-        ERROR_MESSAGES.SERVICE_NOT_FOUND,
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new HttpExceptionWrapper(ERROR_MESSAGES.SERVICE_NOT_FOUND);
     }
 
     const serviceInvoiceCreated =
@@ -270,9 +237,8 @@ export class RecordsService {
         serviceIdentifier: service.identifier,
       });
     if (!serviceInvoiceCreated) {
-      throw new HttpException(
+      throw new HttpExceptionWrapper(
         ERROR_MESSAGES.CREATE_INVOICE_SERVICE_FAIL,
-        HttpStatus.BAD_REQUEST,
       );
     }
 
@@ -295,10 +261,7 @@ export class RecordsService {
   ): Promise<boolean> {
     const serviceReportEntity = mapServiceTypeToEntity.get(serviceType);
     if (!serviceReportEntity) {
-      throw new HttpException(
-        ERROR_MESSAGES.ENTITY_NOT_FOUND,
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new HttpExceptionWrapper(ERROR_MESSAGES.ENTITY_NOT_FOUND);
     }
 
     const createServiceReportInfo = {

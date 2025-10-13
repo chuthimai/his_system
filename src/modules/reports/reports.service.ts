@@ -1,30 +1,25 @@
-import {
-  forwardRef,
-  HttpException,
-  HttpStatus,
-  Inject,
-  Injectable,
-} from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { ServiceReport } from './entities/service-report.entity';
-import { Repository } from 'typeorm';
-import { CreateServiceReportDto } from './dto/create-service-report.dto';
+import { AssessmentsService } from '@modules/assessments/assessments.service';
 import { BillingService } from '@modules/billing/billing.service';
-import { ERROR_MESSAGES } from 'src/constants/error-messages';
-import { UsersService } from '@modules/users/users.service';
-import { Physician } from '@modules/users/entities/physician.entity';
 import {
   mapServiceTypeToEntity,
   RecordsService,
 } from '@modules/records/records.service';
-import { DiagnosisReport } from './entities/diagnosis-report.entity';
-import { LaboratoryReport } from './entities/laboratory-report.entity';
-import { ImagingReport } from './entities/imaging-report.entity';
-import { SERVICE_TYPES } from 'src/constants/others';
-import { SchedulesService } from '@modules/schedules/schedules.service';
 import { UpdateDiagnosisReportResultDto } from '@modules/reports/dto/update-diagnosis-report-result.dto';
-import { AssessmentsService } from '@modules/assessments/assessments.service';
+import { SchedulesService } from '@modules/schedules/schedules.service';
+import { Physician } from '@modules/users/entities/physician.entity';
 import { User } from '@modules/users/entities/user.entity';
+import { UsersService } from '@modules/users/users.service';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { ERROR_MESSAGES } from 'src/constants/error-messages';
+import { SERVICE_TYPES } from 'src/constants/others';
+import { HttpExceptionWrapper } from 'src/helpers/http-exception-wrapper';
+import { Repository } from 'typeorm';
+import { CreateServiceReportDto } from './dto/create-service-report.dto';
+import { DiagnosisReport } from './entities/diagnosis-report.entity';
+import { ImagingReport } from './entities/imaging-report.entity';
+import { LaboratoryReport } from './entities/laboratory-report.entity';
+import { ServiceReport } from './entities/service-report.entity';
 
 export type T = DiagnosisReport | LaboratoryReport | ImagingReport;
 
@@ -44,11 +39,11 @@ export class ReportsService {
     private readonly imagingReportRepository: Repository<ImagingReport>,
     @Inject(forwardRef(() => BillingService))
     private readonly billingService: BillingService,
-    private readonly usersService: UsersService,
     @Inject(forwardRef(() => RecordsService))
     private readonly patientRecordService: RecordsService,
-    private readonly schedulesService: SchedulesService,
     private readonly assessmentsService: AssessmentsService,
+    private readonly schedulesService: SchedulesService,
+    private readonly usersService: UsersService,
   ) {
     this.mapEntityToRepository.set(
       DiagnosisReport,
@@ -88,7 +83,11 @@ export class ReportsService {
       where: { identifier, serviceReport: { status: false } },
       relations: ['serviceReport', 'serviceReport.service'],
     });
-    if (!detailServiceReport) return null;
+    if (!detailServiceReport) {
+      throw new HttpExceptionWrapper(
+        ERROR_MESSAGES.DETAIL_SERVICE_REPORT_NOT_FOUND,
+      );
+    }
 
     detailServiceReport.serviceReport.service.assessmentItems =
       await this.assessmentsService.findAllAssessmentItems(
@@ -120,9 +119,8 @@ export class ReportsService {
         currentUserIdentifier,
       );
     if (!staffWorkSchedule) {
-      throw new HttpException(
+      throw new HttpExceptionWrapper(
         ERROR_MESSAGES.STAFF_WORK_SCHEDULE_NOT_FOUND,
-        HttpStatus.BAD_REQUEST,
       );
     }
 
@@ -131,10 +129,7 @@ export class ReportsService {
         patientRecordIdentifier,
       );
     if (!existedPatientRecord) {
-      throw new HttpException(
-        ERROR_MESSAGES.USER_NOT_FOUND,
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new HttpExceptionWrapper(ERROR_MESSAGES.PATIENT_RECORD_NOT_FOUND);
     }
 
     const serviceReport = await this.serviceReportRepository.findOne({
@@ -148,10 +143,7 @@ export class ReportsService {
       relations: ['service'],
     });
     if (!serviceReport) {
-      throw new HttpException(
-        ERROR_MESSAGES.SERVICE_REPORT_NOT_FOUND,
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new HttpExceptionWrapper(ERROR_MESSAGES.SERVICE_REPORT_NOT_FOUND);
     }
 
     const entity = mapServiceTypeToEntity.get(serviceReport.service.type);
@@ -172,10 +164,7 @@ export class ReportsService {
       createServiceReportDto.serviceIdentifier,
     );
     if (!existedService) {
-      throw new HttpException(
-        ERROR_MESSAGES.SERVICE_NOT_FOUND,
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new HttpExceptionWrapper(ERROR_MESSAGES.SERVICE_NOT_FOUND);
     }
 
     const existedPatientRecord =
@@ -183,10 +172,7 @@ export class ReportsService {
         createServiceReportDto.patientRecordIdentifier,
       );
     if (!existedPatientRecord) {
-      throw new HttpException(
-        ERROR_MESSAGES.PATIENT_RECORD_NOT_FOUND,
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new HttpExceptionWrapper(ERROR_MESSAGES.PATIENT_RECORD_NOT_FOUND);
     }
 
     let existedPerformer: Physician | null = null;
@@ -195,10 +181,7 @@ export class ReportsService {
         createServiceReportDto.performerIdentifier,
       );
       if (!existedPerformer) {
-        throw new HttpException(
-          ERROR_MESSAGES.PHYSICIAN_NOT_FOUND,
-          HttpStatus.BAD_GATEWAY,
-        );
+        throw new HttpExceptionWrapper(ERROR_MESSAGES.PHYSICIAN_NOT_FOUND);
       }
     }
 
@@ -208,10 +191,7 @@ export class ReportsService {
         createServiceReportDto.requesterIdentifier,
       );
       if (!existedRequester) {
-        throw new HttpException(
-          ERROR_MESSAGES.PHYSICIAN_NOT_FOUND,
-          HttpStatus.BAD_REQUEST,
-        );
+        throw new HttpExceptionWrapper(ERROR_MESSAGES.PHYSICIAN_NOT_FOUND);
       }
     }
 
@@ -228,26 +208,19 @@ export class ReportsService {
   ): Promise<T | null> {
     const detailReportRepository = this.mapEntityToRepository.get(entity);
     if (!detailReportRepository) {
-      throw new HttpException(
-        ERROR_MESSAGES.ENTITY_NOT_FOUND,
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new HttpExceptionWrapper(ERROR_MESSAGES.ENTITY_NOT_FOUND);
     }
 
     const existedService = await this.billingService.findOneService(
       createServiceReportDto.serviceIdentifier,
     );
     if (!existedService) {
-      throw new HttpException(
-        ERROR_MESSAGES.SERVICE_NOT_FOUND,
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new HttpExceptionWrapper(ERROR_MESSAGES.SERVICE_NOT_FOUND);
     }
 
     if (!createServiceReportDto.requesterIdentifier) {
-      throw new HttpException(
+      throw new HttpExceptionWrapper(
         ERROR_MESSAGES.REQUESTER_PHYSICIAN_MUST_BE_SPECIFY,
-        HttpStatus.BAD_REQUEST,
       );
     }
     if (
@@ -257,9 +230,8 @@ export class ReportsService {
       ].includes(existedService.type) &&
       !createServiceReportDto.performerIdentifier
     ) {
-      throw new HttpException(
+      throw new HttpExceptionWrapper(
         ERROR_MESSAGES.PERFORMER_PHYSICIAN_MUST_BE_SPECIFY,
-        HttpStatus.BAD_REQUEST,
       );
     }
 
@@ -267,19 +239,15 @@ export class ReportsService {
       ...createServiceReportDto,
     });
     if (!newServiceReport) {
-      throw new HttpException(
-        ERROR_MESSAGES.CREATE_SERVICE_REPORT_FAIL,
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new HttpExceptionWrapper(ERROR_MESSAGES.CREATE_SERVICE_REPORT_FAIL);
     }
 
     const newDetailReport = detailReportRepository.create({
       identifier: newServiceReport.identifier,
     });
     if (!newDetailReport) {
-      throw new HttpException(
+      throw new HttpExceptionWrapper(
         ERROR_MESSAGES.CREATE_DETAIL_SERVICE_REPORT_FAIL,
-        HttpStatus.BAD_REQUEST,
       );
     }
     const savedDetailReport =
@@ -300,19 +268,13 @@ export class ReportsService {
       updateDiagnosisReportResultDto.serviceReportIdentifier,
     )) as DiagnosisReport;
     if (!diagnosisReport) {
-      throw new HttpException(
-        ERROR_MESSAGES.SERVICE_REPORT_NOT_FOUND,
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new HttpExceptionWrapper(ERROR_MESSAGES.SERVICE_REPORT_NOT_FOUND);
     }
     if (
       currentUser.identifier !==
       diagnosisReport.serviceReport.performerIdentifier
     ) {
-      throw new HttpException(
-        ERROR_MESSAGES.PERMISSION_DENIED,
-        HttpStatus.FORBIDDEN,
-      );
+      throw new HttpExceptionWrapper(ERROR_MESSAGES.PERMISSION_DENIED);
     }
 
     // Chưa check đẩy đủ assessment results
@@ -323,7 +285,9 @@ export class ReportsService {
         assessmentResults: updateDiagnosisReportResultDto.assessmentResults,
       });
     if (!assessmentResultsCreated) {
-      throw new Error(ERROR_MESSAGES.CREATE_ASSESSMENT_RESULT_FAIL);
+      throw new HttpExceptionWrapper(
+        ERROR_MESSAGES.CREATE_ASSESSMENT_RESULT_FAIL,
+      );
     }
 
     const date = new Date(0);
@@ -355,19 +319,13 @@ export class ReportsService {
       serviceReportIdentifier,
     )) as T;
     if (!detailServiceReport) {
-      throw new HttpException(
-        ERROR_MESSAGES.SERVICE_REPORT_NOT_FOUND,
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new HttpExceptionWrapper(ERROR_MESSAGES.SERVICE_REPORT_NOT_FOUND);
     }
     if (
       currentUser.identifier !==
       detailServiceReport.serviceReport.performerIdentifier
     ) {
-      throw new HttpException(
-        ERROR_MESSAGES.PERMISSION_DENIED,
-        HttpStatus.FORBIDDEN,
-      );
+      throw new HttpExceptionWrapper(ERROR_MESSAGES.PERMISSION_DENIED);
     }
 
     detailServiceReport.serviceReport.status = true;

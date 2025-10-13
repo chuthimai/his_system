@@ -1,9 +1,9 @@
 import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
-import { UsersService } from './users.service';
-import { JwtAuthGuard } from 'src/modules/auth/guards/jwt.guard';
+import { ROLES } from 'src/constants/others';
 import { Roles } from 'src/decorators/roles.decorator';
 import { RolesGuard } from 'src/guards/roles.guard';
-import { ROLES } from 'src/constants/others';
+import { JwtAuthGuard } from 'src/modules/auth/guards/jwt.guard';
+import { UsersService } from './users.service';
 
 @Controller('users')
 export class UsersController {
@@ -12,18 +12,16 @@ export class UsersController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(ROLES.PHYSICIAN)
   @Get('/search/by-name')
-  async searchByName(@Query('name') name: string) {
-    return await this.usersService.searchByName(name);
+  searchByName(@Query('name') name: string) {
+    return this.usersService.searchByName(name);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(ROLES.PATIENT)
   @Get('/physicians-by-specialty/:specialtyIdentifier')
-  async getPhysicianBySpecialty(
+  getPhysicianBySpecialty(
     @Param('specialtyIdentifier') specialtyIdentifier: number,
   ) {
-    return await this.usersService.findAllPhysicianBySpecialty(
-      specialtyIdentifier,
-    );
+    return this.usersService.findAllPhysicianBySpecialty(specialtyIdentifier);
   }
 }
