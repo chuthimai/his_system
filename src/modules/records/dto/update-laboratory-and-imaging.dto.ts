@@ -7,9 +7,9 @@ export class UpdateLaboratoryAndImagingDto {
   @IsNumber()
   patientRecordIdentifier: number;
 
-  @ApiProperty({ type: [String] })
+  @ApiProperty({ type: [Number] })
   @IsNotEmpty()
   @IsArray()
-  @IsString({ each: true })
-  serviceNames: string[];
+  @IsNumber({}, { each: true })
+  serviceIdentifiers: number[];
 }
