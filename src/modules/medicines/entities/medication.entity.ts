@@ -1,4 +1,5 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+
 import { PrescribedMedication } from './prescribed-medication.entity';
 
 @Entity('medications')

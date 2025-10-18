@@ -5,6 +5,7 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+
 import { Medication } from './medication.entity';
 import { Prescription } from './prescription.entity';
 

@@ -1,4 +1,5 @@
 import { Column, Entity, JoinColumn, OneToOne, PrimaryColumn } from 'typeorm';
+
 import { AssessmentItem } from './assessment-item.entity';
 
 @Entity('measurement_items')

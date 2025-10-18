@@ -1,14 +1,15 @@
+import { AuthModule } from '@modules/auth/auth.module';
+import { ReportsModule } from '@modules/reports/reports.module';
+import { SchedulesModule } from '@modules/schedules/schedules.module';
 import { forwardRef, Module } from '@nestjs/common';
-import { RecordsService } from './records.service';
-import { RecordsController } from './records.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { PatientRecord } from './entities/patient-record.entity';
+import { BillingModule } from 'src/modules/billing/billing.module';
 import { MedicinesModule } from 'src/modules/medicines/medicines.module';
 import { UsersModule } from 'src/modules/users/users.module';
-import { BillingModule } from 'src/modules/billing/billing.module';
-import { AuthModule } from '@modules/auth/auth.module';
-import { SchedulesModule } from '@modules/schedules/schedules.module';
-import { ReportsModule } from '@modules/reports/reports.module';
+
+import { PatientRecord } from './entities/patient-record.entity';
+import { RecordsController } from './records.controller';
+import { RecordsService } from './records.service';
 
 @Module({
   imports: [

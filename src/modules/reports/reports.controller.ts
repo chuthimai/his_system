@@ -5,6 +5,7 @@ import { ROLES } from 'src/constants/others';
 import { CurrentUser } from 'src/decorators/current-user.decorator.dto';
 import { Roles } from 'src/decorators/roles.decorator';
 import { RolesGuard } from 'src/guards/roles.guard';
+
 import { UpdateDiagnosisReportResultDto } from './dto/update-diagnosis-report-result.dto';
 import { UpdateLaboratoryReportResultDto } from './dto/update-imaging-report-result.dto';
 import { UpdateImagingReportResultDto } from './dto/update-laboratoty-report-result.dto';

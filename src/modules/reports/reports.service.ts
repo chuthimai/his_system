@@ -15,6 +15,7 @@ import { ERROR_MESSAGES } from 'src/constants/error-messages';
 import { SERVICE_TYPES } from 'src/constants/others';
 import { HttpExceptionWrapper } from 'src/helpers/http-exception-wrapper';
 import { Repository } from 'typeorm';
+
 import { CreateServiceReportDto } from './dto/create-service-report.dto';
 import { DiagnosisReport } from './entities/diagnosis-report.entity';
 import { ImagingReport } from './entities/imaging-report.entity';
@@ -41,6 +42,7 @@ export class ReportsService {
     private readonly billingService: BillingService,
     @Inject(forwardRef(() => RecordsService))
     private readonly patientRecordService: RecordsService,
+    @Inject(forwardRef(() => AssessmentsService))
     private readonly assessmentsService: AssessmentsService,
     private readonly schedulesService: SchedulesService,
     private readonly usersService: UsersService,
