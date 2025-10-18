@@ -1,21 +1,19 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { User } from './entities/user.entity';
-import { Staff } from './entities/staff.entity';
-import { Physician } from './entities/physician.entity';
-import { CreateUserDto } from './dto/create-user.dto';
-import { ERROR_MESSAGES } from 'src/constants/error-messages';
 import * as bcrypt from 'bcrypt';
+import { ERROR_MESSAGES } from 'src/constants/error-messages';
 import { ROLES } from 'src/constants/others';
+import { HttpExceptionWrapper } from 'src/helpers/http-exception-wrapper';
+import { Repository } from 'typeorm';
+import { CreateUserDto } from './dto/create-user.dto';
+import { Physician } from './entities/physician.entity';
+import { User } from './entities/user.entity';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    @InjectRepository(Staff)
-    private readonly staffRepository: Repository<Staff>,
     @InjectRepository(Physician)
     private readonly physicianRepository: Repository<Physician>,
   ) {}
@@ -23,8 +21,23 @@ export class UsersService {
   // For check existence, get full information in auth/login (all info)
   // For check existence in records/create (just check existence)
   // For check existence in appointments/create (just check existence)
-  async findOne(identifier: number): Promise<User | null> {
-    return await this.userRepository.findOneBy({ identifier });
+  async findOne(
+    identifier: number,
+    isFull: boolean = true,
+  ): Promise<User | null> {
+    return isFull
+      ? await this.userRepository.findOneBy({ identifier })
+      : await this.userRepository.findOne({
+          where: { identifier },
+          select: [
+            'identifier',
+            'name',
+            'telecom',
+            'birthDate',
+            'gender',
+            'address',
+          ],
+        });
   }
 
   // For check existence, get full information in auth/login (all info)
@@ -59,6 +72,7 @@ export class UsersService {
       : ({
           identifier: physician.identifier,
           name: physician?.staff?.user?.name,
+          specialty: physician.specialty,
         } as Physician);
   }
 
@@ -104,18 +118,12 @@ export class UsersService {
     const existedUser = await this.userRepository.findOneBy({
       telecom: createUserDto.telecom,
     });
-
     if (existedUser) {
       if (reuseOnDuplicate) return existedUser;
-      else
-        throw new HttpException(
-          ERROR_MESSAGES.USER_ALREADY_EXISTS,
-          HttpStatus.BAD_REQUEST,
-        );
+      else throw new HttpExceptionWrapper(ERROR_MESSAGES.USER_ALREADY_EXISTS);
     }
 
     createUserDto.password = bcrypt.hashSync(createUserDto.password, 10);
-
     const newUser = this.userRepository.create({
       identifier: Number('111' + (Date.now() % 1e7)),
       ...createUserDto,

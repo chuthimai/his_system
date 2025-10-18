@@ -34,16 +34,6 @@ export class User {
   @Column()
   role: string;
 
-  // @Column({ name: 'health_insurance_identity' })
-  // healthInsuranceIdentifier: number;
-
-  // @OneToOne(() => HealthInsurance, (healthInsurance) => healthInsurance.user)
-  // @JoinColumn({
-  //   name: 'health_insurance_identity',
-  //   referencedColumnName: 'identifier',
-  // })
-  // healthInsurance: HealthInsurance;
-
   @OneToMany(() => Appointment, (appointment) => appointment.user)
   appointments: Appointment[];
 

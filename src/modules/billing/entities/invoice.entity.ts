@@ -14,19 +14,20 @@ export class Invoice {
   @PrimaryGeneratedColumn()
   identifier: number;
 
-  @Column()
+  @Column({ default: 'VND' })
   currency: string;
 
-  @Column({ name: 'copayment_waiver', default: 0 })
-  copaymentWaiver: number;
-
-  @Column({ name: 'total_gross' })
-  totalGross: number;
+  @Column({ default: 0 })
+  total: number;
 
   @Column({ type: 'boolean', default: false }) // true ~ completed
   status: boolean;
 
-  @Column({ name: 'created_time', type: 'datetime' })
+  @Column({
+    name: 'created_time',
+    type: 'datetime',
+    default: () => 'CURRENT_TIMESTAMP',
+  })
   createdTime: boolean;
 
   @OneToMany(() => InvoiceService, (invoiceService) => invoiceService.invoice)

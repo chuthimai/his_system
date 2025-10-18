@@ -1,42 +1,83 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-} from '@nestjs/common';
+import { JwtAuthGuard } from '@modules/auth/guards/jwt.guard';
+import { User } from '@modules/users/entities/user.entity';
+import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { ROLES } from 'src/constants/others';
+import { CurrentUser } from 'src/decorators/current-user.decorator.dto';
+import { Roles } from 'src/decorators/roles.decorator';
+import { RolesGuard } from 'src/guards/roles.guard';
+import { UpdateDiagnosisReportResultDto } from './dto/update-diagnosis-report-result.dto';
+import { UpdateLaboratoryReportResultDto } from './dto/update-imaging-report-result.dto';
+import { UpdateImagingReportResultDto } from './dto/update-laboratoty-report-result.dto';
 import { ReportsService } from './reports.service';
-import { CreateReportDto } from './dto/create-report.dto';
-import { UpdateReportDto } from './dto/update-report.dto';
 
 @Controller('reports')
 export class ReportsController {
-  constructor(private readonly reportsService: ReportsService) {}
+  constructor(private readonly reportService: ReportsService) {}
 
-  @Post()
-  create(@Body() createReportDto: CreateReportDto) {
-    return this.reportsService.create(createReportDto);
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(ROLES.PHYSICIAN)
+  @Get('/:patientRecordIdentifier')
+  getCurrentOneByPatientRecordIdentifier(
+    @Param('patientRecordIdentifier') patientRecordIdentifier: number,
+    @CurrentUser() currentUser: User,
+  ) {
+    return this.reportService.findOneByPatientRecordIdentifier(
+      patientRecordIdentifier,
+      currentUser.identifier,
+    );
   }
 
-  @Get()
-  findAll() {
-    return this.reportsService.findAll();
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(ROLES.PHYSICIAN)
+  @Post('/update-diagnosis-report-result')
+  updateDiagnosisReportResult(
+    @Body() updateDiagnosisReportResultDto: UpdateDiagnosisReportResultDto,
+    @CurrentUser() currentUser: User,
+  ) {
+    return this.reportService.updateDiagnosisReportResult(
+      updateDiagnosisReportResultDto,
+      currentUser,
+    );
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.reportsService.findOne(+id);
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(ROLES.PHYSICIAN)
+  @Post('/update-laboratory-report-result')
+  updateLaboratoryReportResult(
+    @Body() updateLaboratoryReportResultDto: UpdateLaboratoryReportResultDto,
+    @CurrentUser() currentUser: User,
+  ) {
+    // TODO
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateReportDto: UpdateReportDto) {
-    return this.reportsService.update(+id, updateReportDto);
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(ROLES.PHYSICIAN)
+  @Post('/update-imaging-report-result')
+  updateImagingReportResult(
+    @Body() updateImagingReportResultDto: UpdateImagingReportResultDto,
+    @CurrentUser() currentUser: User,
+  ) {
+    // TODO
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.reportsService.remove(+id);
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(ROLES.PHYSICIAN)
+  @Get('/close-service-report/:serviceReportIdentifier')
+  closeServiceReport(
+    @Param('serviceReportIdentifier') serviceReportIdentifier: number,
+    @CurrentUser() currentUser: User,
+  ) {
+    return this.reportService.closeServiceReport(
+      serviceReportIdentifier,
+      currentUser,
+    );
+  }
+
+  // !!! FOR TESTING PURPOSE ONLY !!!
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(ROLES.PHYSICIAN)
+  @Get('/test/:serviceReportIdentifier')
+  getOne(@Param('serviceReportIdentifier') serviceReportIdentifier: number) {
+    return this.reportService.findOne(serviceReportIdentifier);
   }
 }

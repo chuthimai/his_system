@@ -18,10 +18,10 @@ export class ImagingReport {
   @JoinColumn({ name: 'identifier' })
   serviceReport: ServiceReport;
 
-  @Column()
+  @Column({ default: '' })
   focus: string;
 
-  @Column()
+  @Column({ default: '' })
   interpretation: string;
 
   @OneToMany(() => Image, (image) => image.imagingReport)

@@ -6,7 +6,6 @@ import { User } from './entities/user.entity';
 import { Staff } from './entities/staff.entity';
 import { Physician } from './entities/physician.entity';
 import { SpecializationsModule } from 'src/modules/specializations/specializations.module';
-import { InsurancesModule } from 'src/modules/insurances/insurances.module';
 import { SchedulesModule } from 'src/modules/schedules/schedules.module';
 import { AppointmentsModule } from 'src/modules/appointments/appointments.module';
 import { MedicinesModule } from 'src/modules/medicines/medicines.module';
@@ -18,7 +17,6 @@ import { AuthModule } from 'src/modules/auth/auth.module';
   imports: [
     TypeOrmModule.forFeature([User, Staff, Physician]),
     forwardRef(() => SpecializationsModule),
-    forwardRef(() => InsurancesModule),
     forwardRef(() => SchedulesModule),
     forwardRef(() => AppointmentsModule),
     forwardRef(() => MedicinesModule),

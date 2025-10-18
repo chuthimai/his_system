@@ -1,3 +1,4 @@
+import { PatientRecord } from '@modules/records/entities/patient-record.entity';
 import { Service } from 'src/modules/billing/entities/service.entity';
 import { Physician } from 'src/modules/users/entities/physician.entity';
 import {
@@ -5,28 +6,55 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { DiagnosisReport } from './diagnosis-report.entity';
+import { ImagingReport } from './imaging-report.entity';
+import { LaboratoryReport } from './laboratory-report.entity';
+import { AssessmentResult } from '@modules/assessments/entities/assessment-result.entity';
 
 @Entity('service_reports')
 export class ServiceReport {
   @PrimaryGeneratedColumn()
   identifier: number;
 
-  @Column()
+  @Column({ default: '' })
   category: string;
 
-  @Column()
+  @Column({ default: '' })
   method: string;
 
   @Column({ type: 'boolean', default: false }) // true ~ completed
   status: boolean;
 
-  @Column({ name: 'effective_time', type: 'date' })
+  @Column({
+    name: 'effective_time',
+    type: 'date',
+    default: () => "'1000-01-01'",
+  })
   effectiveTime: string;
 
-  @Column({ name: 'record_time', type: 'datetime' })
+  @Column({
+    name: 'record_time',
+    type: 'datetime',
+    default: () => "'1000-01-01 00:00:00'",
+  })
   recordedTime: string;
+
+  @Column({ name: 'patient_record_identifier' })
+  patientRecordIdentifier: number;
+
+  @ManyToOne(
+    () => PatientRecord,
+    (patientRecord) => patientRecord.serviceReports,
+  )
+  @JoinColumn({
+    name: 'patient_record_identifier',
+    referencedColumnName: 'identifier',
+  })
+  patientRecord: PatientRecord;
 
   @Column({ name: 'service_identifier' })
   serviceIdentifier: number;
@@ -38,7 +66,13 @@ export class ServiceReport {
   })
   service: Service;
 
-  @Column({ name: 'performer_identifier' })
+  @OneToMany(
+    () => AssessmentResult,
+    (assessmentResult) => assessmentResult.serviceReport,
+  )
+  assessmentResults: AssessmentResult[];
+
+  @Column({ name: 'performer_identifier', nullable: true })
   performerIdentifier: number;
 
   @ManyToOne(
@@ -51,7 +85,7 @@ export class ServiceReport {
   })
   performer: Physician;
 
-  @Column({ name: 'requester_identifier' })
+  @Column({ name: 'requester_identifier', nullable: true })
   requesterIdentifier: number;
 
   @ManyToOne(() => Physician, (requester) => requester.serviceRequestReports)
@@ -60,4 +94,19 @@ export class ServiceReport {
     referencedColumnName: 'identifier',
   })
   requester: Physician;
+
+  @OneToOne(
+    () => DiagnosisReport,
+    (diagnosisReport) => diagnosisReport.serviceReport,
+  )
+  diagnosisReport: DiagnosisReport;
+
+  @OneToOne(
+    () => LaboratoryReport,
+    (laboratoryReport) => laboratoryReport.serviceReport,
+  )
+  laboratoryReport: LaboratoryReport;
+
+  @OneToOne(() => ImagingReport, (imagingReport) => imagingReport.serviceReport)
+  imagingReport: ImagingReport;
 }

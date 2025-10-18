@@ -14,7 +14,7 @@ export class InvoiceService {
   identifier: number;
 
   @Column({ name: 'invoice_identifier' })
-  invoiceIdentifier: string;
+  invoiceIdentifier: number;
 
   @ManyToOne(() => Invoice, (invoice) => invoice.invoiceServices)
   @JoinColumn({

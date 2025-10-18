@@ -1,18 +1,17 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { WorkSchedule } from './entities/work-schedule.entity';
-import { Repository } from 'typeorm';
-import { DUTIES } from 'src/constants/others';
-import { WorkScheduleConditionDto } from './dto/work-schedules-by-condition.dto';
-import { UsersService } from '@modules/users/users.service';
-import { ERROR_MESSAGES } from 'src/constants/error-messages';
-import { StaffWorkSchedule } from './entities/staff-work-schedule.entity';
-import { StaffWorkScheduleConditionDto } from './dto/staff-work-schedules-by-condition.dto';
-import { Location } from './entities/location.entity';
-import { Staff } from '@modules/users/entities/staff.entity';
 import { SpecializationsService } from '@modules/specializations/specializations.service';
+import { Staff } from '@modules/users/entities/staff.entity';
+import { UsersService } from '@modules/users/users.service';
+import { InjectRepository } from '@nestjs/typeorm';
+import { ERROR_MESSAGES } from 'src/constants/error-messages';
+import { DUTIES } from 'src/constants/others';
+import { HttpExceptionWrapper } from 'src/helpers/http-exception-wrapper';
+import { LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
+import { StaffWorkScheduleConditionDto } from './dto/staff-work-schedules-by-condition.dto';
+import { WorkScheduleConditionDto } from './dto/work-schedules-by-condition.dto';
+import { Location } from './entities/location.entity';
+import { StaffWorkSchedule } from './entities/staff-work-schedule.entity';
+import { WorkSchedule } from './entities/work-schedule.entity';
 
-@Injectable()
 export class SchedulesService {
   constructor(
     @InjectRepository(WorkSchedule)
@@ -21,8 +20,8 @@ export class SchedulesService {
     private readonly staffWorkScheduleRepository: Repository<StaffWorkSchedule>,
     @InjectRepository(Location)
     private readonly locationRepository: Repository<Location>,
-    private readonly usersService: UsersService,
     private readonly specializationsService: SpecializationsService,
+    private readonly usersService: UsersService,
   ) {}
 
   // For check existence in appointments/create (just check existence)
@@ -30,6 +29,46 @@ export class SchedulesService {
     return await this.workScheduleRepository.findOne({
       where: { identifier },
     });
+  }
+
+  // For check existence in records/update (just check existence)
+  async findOneStaffWorkSchedule(
+    identifier: number,
+  ): Promise<StaffWorkSchedule | null> {
+    return await this.staffWorkScheduleRepository.findOne({
+      where: { identifier, active: true },
+    });
+  }
+
+  // For check existence, fetch base info in records/update (base info)
+  async findOneStaffWorkScheduleByCondition(
+    workScheduleIdentifier: number,
+    staffIdentifier: number,
+  ): Promise<StaffWorkSchedule | null> {
+    return await this.staffWorkScheduleRepository.findOne({
+      where: { workScheduleIdentifier, staffIdentifier, active: true },
+    });
+  }
+
+  async findOneLocation(identifier: number) {
+    const childLocation = (await this.locationRepository.findOneBy({
+      identifier,
+    })) as Location;
+
+    if (!childLocation) return null;
+
+    let fullName = childLocation.name;
+    let nextLocation: Location | null = { ...childLocation };
+    while (nextLocation.parentIdentifier) {
+      nextLocation = await this.locationRepository.findOneBy({
+        identifier: nextLocation.parentIdentifier,
+      });
+
+      if (!nextLocation) break;
+      fullName = `${fullName}, ${nextLocation.name}`;
+    }
+
+    return { ...childLocation, name: fullName };
   }
 
   // Must have information: base, shifts
@@ -41,11 +80,9 @@ export class SchedulesService {
         workScheduleConditionDto?.physicianIdentifier,
       );
 
-      if (!existedPhysician)
-        throw new HttpException(
-          ERROR_MESSAGES.PHYSICIAN_NOT_FOUND,
-          HttpStatus.BAD_REQUEST,
-        );
+      if (!existedPhysician) {
+        throw new HttpExceptionWrapper(ERROR_MESSAGES.PHYSICIAN_NOT_FOUND);
+      }
     }
 
     // Get work schedules from today to the end of next month
@@ -108,10 +145,7 @@ export class SchedulesService {
       await this.usersService.findOnePhysician(physicianIdentifier);
 
     if (!existedPhysician) {
-      throw new HttpException(
-        ERROR_MESSAGES.PHYSICIAN_NOT_FOUND,
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new HttpExceptionWrapper(ERROR_MESSAGES.PHYSICIAN_NOT_FOUND);
     }
 
     const now = new Date();
@@ -176,10 +210,7 @@ export class SchedulesService {
       await this.specializationsService.findOne(specialtyIdentifier);
 
     if (!existedSpecialty)
-      throw new HttpException(
-        ERROR_MESSAGES.SPECIALTY_NOT_FOUND,
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new HttpExceptionWrapper(ERROR_MESSAGES.SPECIALTY_NOT_FOUND);
 
     const now = new Date();
     const nowPlus30Minutes = new Date(now.getTime() + 30 * 60000);
@@ -241,24 +272,25 @@ export class SchedulesService {
     return updatedStaffWorkSchedules;
   }
 
-  async findOneLocation(identifier: number) {
-    const childLocation = (await this.locationRepository.findOneBy({
-      identifier,
-    })) as Location;
+  async findCurrentStaffWorkSchedule(currentUserIdentifier: number) {
+    const now = new Date();
+    const currentDate = now.toISOString().split('T')[0];
+    const currentTime = now.toTimeString().slice(0, 8);
 
-    if (!childLocation) return null;
+    // const currentTime = '11:20:20';
 
-    let fullName = childLocation.name;
-    let nextLocation: Location | null = { ...childLocation };
-    while (nextLocation.parentIdentifier) {
-      nextLocation = await this.locationRepository.findOneBy({
-        identifier: nextLocation.parentIdentifier,
-      });
-
-      if (!nextLocation) break;
-      fullName = `${fullName}, ${nextLocation.name}`;
-    }
-
-    return { ...childLocation, name: fullName };
+    return await this.staffWorkScheduleRepository.findOne({
+      where: {
+        staffIdentifier: currentUserIdentifier,
+        workSchedule: {
+          date: currentDate,
+          shift: {
+            startTime: LessThanOrEqual(currentTime),
+            endTime: MoreThanOrEqual(currentTime),
+          },
+        },
+      },
+      relations: ['workSchedule'],
+    });
   }
 }

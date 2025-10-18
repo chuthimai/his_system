@@ -7,6 +7,8 @@ import { MedicinesModule } from 'src/modules/medicines/medicines.module';
 import { UsersModule } from 'src/modules/users/users.module';
 import { BillingModule } from 'src/modules/billing/billing.module';
 import { AuthModule } from '@modules/auth/auth.module';
+import { SchedulesModule } from '@modules/schedules/schedules.module';
+import { ReportsModule } from '@modules/reports/reports.module';
 
 @Module({
   imports: [
@@ -15,9 +17,11 @@ import { AuthModule } from '@modules/auth/auth.module';
     forwardRef(() => UsersModule),
     forwardRef(() => BillingModule),
     forwardRef(() => AuthModule),
+    forwardRef(() => SchedulesModule),
+    forwardRef(() => ReportsModule),
   ],
   controllers: [RecordsController],
   providers: [RecordsService],
-  exports: [TypeOrmModule],
+  exports: [TypeOrmModule, RecordsService],
 })
 export class RecordsModule {}

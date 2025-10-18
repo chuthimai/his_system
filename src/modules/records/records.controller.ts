@@ -1,19 +1,52 @@
-import { Controller, Post, Body, UseGuards } from '@nestjs/common';
-import { RecordsService } from './records.service';
-import { CreateRecordDto } from './dto/create-record.dto';
 import { JwtAuthGuard } from '@modules/auth/guards/jwt.guard';
-import { RolesGuard } from 'src/guards/roles.guard';
-import { Roles } from 'src/decorators/roles.decorator';
+import { User } from '@modules/users/entities/user.entity';
+import { Body, Controller, Post, UseGuards } from '@nestjs/common';
 import { ROLES } from 'src/constants/others';
+import { CurrentUser } from 'src/decorators/current-user.decorator.dto';
+import { Roles } from 'src/decorators/roles.decorator';
+import { RolesGuard } from 'src/guards/roles.guard';
+import { CreateRecordDto } from './dto/create-record.dto';
+import { UpdateLaboratoryAndImagingDto } from './dto/update-laboratory-and-imaging.dto';
+import { UpdateSpecialtyConsultationDto } from './dto/update-specialty-consultation.dto';
+import { RecordsService } from './records.service';
 
 @Controller('records')
 export class RecordsController {
-  constructor(private readonly RecordsService: RecordsService) {}
+  constructor(private readonly recordsService: RecordsService) {}
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(ROLES.PHYSICIAN)
   @Post()
-  create(@Body() createRecordDto: CreateRecordDto) {
-    return this.RecordsService.create(createRecordDto);
+  create(
+    @Body() createRecordDto: CreateRecordDto,
+    @CurrentUser() currentUser: User,
+  ) {
+    return this.recordsService.create(createRecordDto, currentUser);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(ROLES.PHYSICIAN)
+  @Post('/update-specialty-consultation')
+  updateSpecialtyConsultation(
+    @Body() updateRecordDto: UpdateSpecialtyConsultationDto,
+    @CurrentUser() currentUser: User,
+  ) {
+    return this.recordsService.updateSpecialtyConsultation(
+      updateRecordDto,
+      currentUser,
+    );
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(ROLES.PHYSICIAN)
+  @Post('/update-test-and-scan')
+  updateLaboratoryAndImaging(
+    @Body() updateRecord2Dto: UpdateLaboratoryAndImagingDto,
+    @CurrentUser() currentUser: User,
+  ) {
+    return this.recordsService.updateLaboratoryAndImaging(
+      updateRecord2Dto,
+      currentUser,
+    );
   }
 }

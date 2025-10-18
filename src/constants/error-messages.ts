@@ -1,12 +1,37 @@
 export const ERROR_MESSAGES = {
+  ENTITY_NOT_FOUND: 'Invalid entity type',
   USER_NOT_FOUND: 'User not found',
   PATIENT_NOT_FOUND: 'Patient not found',
   PHYSICIAN_NOT_FOUND: 'Physician not found',
-  WORK_SCHEDULE_NOT_FOUND: 'Work schedule not found',
+
   SPECIALTY_NOT_FOUND: 'Specialty not found',
-  USER_ALREADY_EXISTS: 'User already exists',
+  SPECIALIZATION_NOT_FOUND: 'Specialization not found',
+  PATIENT_RECORD_NOT_FOUND: 'Patient record not found',
+
+  WORK_SCHEDULE_NOT_FOUND: 'Work schedule not found',
+  STAFF_WORK_SCHEDULE_NOT_FOUND: 'Staff work schedule not found',
+  LOCATION_NOT_FOUND: 'Location not found',
+
+  INVOICE_NOT_FOUND: 'Invoice not found',
+  SERVICE_NOT_FOUND: 'Service not found',
+  SERVICE_TYPE_NOT_FOUND: 'Invalid service type',
+  SERVICE_NAME_NOT_FOUND: 'Invalid service name',
+  SERVICE_REPORT_NOT_FOUND: 'Service report not found',
+  DETAIL_SERVICE_REPORT_NOT_FOUND: 'Detail service report not found',
+
+  CREATE_INVOICE_FAIL: 'Create invoice fail',
+  CREATE_INVOICE_SERVICE_FAIL: 'Create invoice service fail',
+  CREATE_SERVICE_REPORT_FAIL: 'Create service report fail',
+  CREATE_DETAIL_SERVICE_REPORT_FAIL: 'Create service report fail',
+  CREATE_ASSESSMENT_RESULT_FAIL: 'Update assessment result fail',
+
   INVALID_PASSWORD: 'Invalid password',
+  USER_ALREADY_EXISTS: 'User already exists',
   APPOINTMENT_USER_CANNOT_BE_PHYSICIAN: 'Appointment user cannot be physician',
-  UNAUTHORIZED: 'Unauthorized',
-  FORBIDDEN: 'Forbidden',
+  PERFORMER_PHYSICIAN_MUST_BE_SPECIFY: 'Performer physician must be specify',
+  REQUESTER_PHYSICIAN_MUST_BE_SPECIFY: 'Requester physician must be specify',
+  SPECIALTY_CONSULTATION_SPECIFIED: 'Specialty consultation specified',
+
+  UNEXPECTABLE_FAULT: 'Unexpectable fail',
+  PERMISSION_DENIED: 'Permission denied',
 };

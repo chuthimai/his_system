@@ -2,10 +2,12 @@ import {
   Column,
   Entity,
   JoinColumn,
+  ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { AssessmentItem } from './assessment-item.entity';
+import { ServiceReport } from '@modules/reports/entities/service-report.entity';
 
 @Entity('assessment_results')
 export class AssessmentResult {
@@ -13,7 +15,7 @@ export class AssessmentResult {
   identifier: number;
 
   @Column()
-  name: string;
+  value: string;
 
   @Column({ name: 'assessment_item_identifier' })
   assessmentItemIdentifier: number;
@@ -27,4 +29,17 @@ export class AssessmentResult {
     referencedColumnName: 'identifier',
   })
   assessmentItem: AssessmentItem;
+
+  @Column({ name: 'service_report_identifier' })
+  serviceReportIdentifier: number;
+
+  @ManyToOne(
+    () => ServiceReport,
+    (serviceReport) => serviceReport.assessmentResults,
+  )
+  @JoinColumn({
+    name: 'service_report_identifier',
+    referencedColumnName: 'identifier',
+  })
+  serviceReport: ServiceReport;
 }
