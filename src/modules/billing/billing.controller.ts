@@ -1,9 +1,10 @@
-import { Controller, Get, Query, UseGuards } from '@nestjs/common';
-import { BillingService } from './billing.service';
 import { JwtAuthGuard } from '@modules/auth/guards/jwt.guard';
-import { RolesGuard } from 'src/guards/roles.guard';
-import { Roles } from 'src/decorators/roles.decorator';
+import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { ROLES } from 'src/constants/others';
+import { Roles } from 'src/decorators/roles.decorator';
+import { RolesGuard } from 'src/guards/roles.guard';
+
+import { BillingService } from './billing.service';
 
 @Controller('billing')
 export class BillingController {

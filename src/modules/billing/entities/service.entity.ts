@@ -1,3 +1,6 @@
+import { AssessmentItem } from 'src/modules/assessments/entities/assessment-item.entity';
+import { ServiceReport } from 'src/modules/reports/entities/service-report.entity';
+import { Location } from 'src/modules/schedules/entities/location.entity';
 import {
   Column,
   Entity,
@@ -6,10 +9,8 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+
 import { InvoiceService } from './invoice-service.entity';
-import { Location } from 'src/modules/schedules/entities/location.entity';
-import { AssessmentItem } from 'src/modules/assessments/entities/assessment-item.entity';
-import { ServiceReport } from 'src/modules/reports/entities/service-report.entity';
 
 @Entity('services')
 export class Service {

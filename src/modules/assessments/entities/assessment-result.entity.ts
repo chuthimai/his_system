@@ -1,3 +1,4 @@
+import { ServiceReport } from '@modules/reports/entities/service-report.entity';
 import {
   Column,
   Entity,
@@ -6,8 +7,8 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+
 import { AssessmentItem } from './assessment-item.entity';
-import { ServiceReport } from '@modules/reports/entities/service-report.entity';
 
 @Entity('assessment_results')
 export class AssessmentResult {

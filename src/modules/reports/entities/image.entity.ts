@@ -5,6 +5,7 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+
 import { ImagingReport } from './imaging-report.entity';
 
 @Entity('images')

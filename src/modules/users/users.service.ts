@@ -1,10 +1,12 @@
-import { Injectable } from '@nestjs/common';
+import { RecordsService } from '@modules/records/records.service';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import { ERROR_MESSAGES } from 'src/constants/error-messages';
 import { ROLES } from 'src/constants/others';
 import { HttpExceptionWrapper } from 'src/helpers/http-exception-wrapper';
 import { Repository } from 'typeorm';
+
 import { CreateUserDto } from './dto/create-user.dto';
 import { Physician } from './entities/physician.entity';
 import { User } from './entities/user.entity';
@@ -16,6 +18,8 @@ export class UsersService {
     private readonly userRepository: Repository<User>,
     @InjectRepository(Physician)
     private readonly physicianRepository: Repository<Physician>,
+    @Inject(forwardRef(() => RecordsService))
+    private readonly recordsService: RecordsService,
   ) {}
 
   // For check existence, get full information in auth/login (all info)

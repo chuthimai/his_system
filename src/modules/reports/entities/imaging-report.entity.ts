@@ -6,8 +6,9 @@ import {
   OneToOne,
   PrimaryColumn,
 } from 'typeorm';
-import { ServiceReport } from './service-report.entity';
+
 import { Image } from './image.entity';
+import { ServiceReport } from './service-report.entity';
 
 @Entity('imaging_reports')
 export class ImagingReport {
