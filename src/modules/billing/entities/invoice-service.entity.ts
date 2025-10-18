@@ -5,6 +5,7 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+
 import { Invoice } from './invoice.entity';
 import { Service } from './service.entity';
 

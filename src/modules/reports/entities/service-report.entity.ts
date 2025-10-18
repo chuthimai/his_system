@@ -1,3 +1,4 @@
+import { AssessmentResult } from '@modules/assessments/entities/assessment-result.entity';
 import { PatientRecord } from '@modules/records/entities/patient-record.entity';
 import { Service } from 'src/modules/billing/entities/service.entity';
 import { Physician } from 'src/modules/users/entities/physician.entity';
@@ -10,10 +11,10 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+
 import { DiagnosisReport } from './diagnosis-report.entity';
 import { ImagingReport } from './imaging-report.entity';
 import { LaboratoryReport } from './laboratory-report.entity';
-import { AssessmentResult } from '@modules/assessments/entities/assessment-result.entity';
 
 @Entity('service_reports')
 export class ServiceReport {

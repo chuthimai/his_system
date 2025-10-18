@@ -6,6 +6,7 @@ import {
   OneToOne,
   PrimaryColumn,
 } from 'typeorm';
+
 import { ServiceReport } from './service-report.entity';
 import { Specimen } from './specimen.entity';
 

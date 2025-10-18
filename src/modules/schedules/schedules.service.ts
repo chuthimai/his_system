@@ -1,11 +1,13 @@
 import { SpecializationsService } from '@modules/specializations/specializations.service';
 import { Staff } from '@modules/users/entities/staff.entity';
 import { UsersService } from '@modules/users/users.service';
+import { forwardRef, Inject } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ERROR_MESSAGES } from 'src/constants/error-messages';
 import { DUTIES } from 'src/constants/others';
 import { HttpExceptionWrapper } from 'src/helpers/http-exception-wrapper';
 import { LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
+
 import { StaffWorkScheduleConditionDto } from './dto/staff-work-schedules-by-condition.dto';
 import { WorkScheduleConditionDto } from './dto/work-schedules-by-condition.dto';
 import { Location } from './entities/location.entity';
@@ -21,6 +23,7 @@ export class SchedulesService {
     @InjectRepository(Location)
     private readonly locationRepository: Repository<Location>,
     private readonly specializationsService: SpecializationsService,
+    @Inject(forwardRef(() => UsersService))
     private readonly usersService: UsersService,
   ) {}
 

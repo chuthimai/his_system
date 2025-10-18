@@ -5,6 +5,7 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+
 import { LaboratoryReport } from './laboratory-report.entity';
 
 @Entity('specimens')

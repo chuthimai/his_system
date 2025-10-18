@@ -1,3 +1,4 @@
+import { StaffWorkSchedule } from 'src/modules/schedules/entities/staff-work-schedule.entity';
 import {
   Column,
   Entity,
@@ -6,9 +7,9 @@ import {
   OneToOne,
   PrimaryColumn,
 } from 'typeorm';
-import { User } from './user.entity';
-import { StaffWorkSchedule } from 'src/modules/schedules/entities/staff-work-schedule.entity';
+
 import { Physician } from './physician.entity';
+import { User } from './user.entity';
 
 @Entity('staffs')
 export class Staff {

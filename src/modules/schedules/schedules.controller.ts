@@ -1,11 +1,12 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
-import { SchedulesService } from './schedules.service';
 import { JwtAuthGuard } from '@modules/auth/guards/jwt.guard';
-import { RolesGuard } from 'src/guards/roles.guard';
-import { Roles } from 'src/decorators/roles.decorator';
+import { Body, Controller, Post, UseGuards } from '@nestjs/common';
 import { ROLES } from 'src/constants/others';
-import { WorkScheduleConditionDto } from './dto/work-schedules-by-condition.dto';
+import { Roles } from 'src/decorators/roles.decorator';
+import { RolesGuard } from 'src/guards/roles.guard';
+
 import { StaffWorkScheduleConditionDto } from './dto/staff-work-schedules-by-condition.dto';
+import { WorkScheduleConditionDto } from './dto/work-schedules-by-condition.dto';
+import { SchedulesService } from './schedules.service';
 
 @Controller('schedules')
 export class SchedulesController {

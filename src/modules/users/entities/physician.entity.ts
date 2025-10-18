@@ -1,3 +1,8 @@
+import { Appointment } from 'src/modules/appointments/entities/appointment.entity';
+import { Prescription } from 'src/modules/medicines/entities/prescription.entity';
+import { ServiceReport } from 'src/modules/reports/entities/service-report.entity';
+import { Qualification } from 'src/modules/specializations/entities/qualification.entity';
+import { Specialty } from 'src/modules/specializations/entities/specialty.entity';
 import {
   Column,
   Entity,
@@ -7,12 +12,8 @@ import {
   OneToOne,
   PrimaryColumn,
 } from 'typeorm';
+
 import { Staff } from './staff.entity';
-import { Qualification } from 'src/modules/specializations/entities/qualification.entity';
-import { Specialty } from 'src/modules/specializations/entities/specialty.entity';
-import { Appointment } from 'src/modules/appointments/entities/appointment.entity';
-import { Prescription } from 'src/modules/medicines/entities/prescription.entity';
-import { ServiceReport } from 'src/modules/reports/entities/service-report.entity';
 
 @Entity('physicians')
 export class Physician {

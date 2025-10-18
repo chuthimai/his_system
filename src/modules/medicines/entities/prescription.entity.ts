@@ -1,3 +1,5 @@
+import { PatientRecord } from 'src/modules/records/entities/patient-record.entity';
+import { Physician } from 'src/modules/users/entities/physician.entity';
 import {
   Column,
   Entity,
@@ -7,9 +9,8 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+
 import { PrescribedMedication } from './prescribed-medication.entity';
-import { Physician } from 'src/modules/users/entities/physician.entity';
-import { PatientRecord } from 'src/modules/records/entities/patient-record.entity';
 
 @Entity('prescriptions')
 export class Prescription {

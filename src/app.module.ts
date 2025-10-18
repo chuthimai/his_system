@@ -1,18 +1,19 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
+
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { UsersModule } from './modules/users/users.module';
-import { SpecializationsModule } from './modules/specializations/specializations.module';
-import { SchedulesModule } from './modules/schedules/schedules.module';
 import { AppointmentsModule } from './modules/appointments/appointments.module';
+import { AssessmentsModule } from './modules/assessments/assessments.module';
+import { AuthModule } from './modules/auth/auth.module';
+import { BillingModule } from './modules/billing/billing.module';
 import { MedicinesModule } from './modules/medicines/medicines.module';
 import { RecordsModule } from './modules/records/records.module';
-import { BillingModule } from './modules/billing/billing.module';
-import { AssessmentsModule } from './modules/assessments/assessments.module';
 import { ReportsModule } from './modules/reports/reports.module';
-import { AuthModule } from './modules/auth/auth.module';
+import { SchedulesModule } from './modules/schedules/schedules.module';
+import { SpecializationsModule } from './modules/specializations/specializations.module';
+import { UsersModule } from './modules/users/users.module';
 
 @Module({
   imports: [

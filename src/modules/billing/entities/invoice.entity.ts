@@ -1,3 +1,4 @@
+import { PatientRecord } from 'src/modules/records/entities/patient-record.entity';
 import {
   Column,
   Entity,
@@ -6,8 +7,8 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+
 import { InvoiceService } from './invoice-service.entity';
-import { PatientRecord } from 'src/modules/records/entities/patient-record.entity';
 
 @Entity('invoices')
 export class Invoice {

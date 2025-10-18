@@ -5,6 +5,7 @@ import { ROLES } from 'src/constants/others';
 import { CurrentUser } from 'src/decorators/current-user.decorator.dto';
 import { Roles } from 'src/decorators/roles.decorator';
 import { RolesGuard } from 'src/guards/roles.guard';
+
 import { CreateRecordDto } from './dto/create-record.dto';
 import { UpdateLaboratoryAndImagingDto } from './dto/update-laboratory-and-imaging.dto';
 import { UpdateSpecialtyConsultationDto } from './dto/update-specialty-consultation.dto';
