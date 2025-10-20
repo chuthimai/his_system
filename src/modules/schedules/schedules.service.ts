@@ -280,6 +280,7 @@ export class SchedulesService {
     const currentDate = now.toISOString().split('T')[0];
     const currentTime = now.toTimeString().slice(0, 8);
 
+    // const currentDate = '2025-10-13';
     // const currentTime = '11:20:20';
 
     return await this.staffWorkScheduleRepository.findOne({

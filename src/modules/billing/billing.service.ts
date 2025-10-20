@@ -91,4 +91,19 @@ export class BillingService {
       await this.invoiceServiceRepository.save(newInvoiceService);
     return savedInvoiceService ? true : false;
   }
+
+  async checkServiceIsPaid(
+    patientRecordIdentifier: number,
+    serviceIdentifier: number,
+  ) {
+    const invoice = await this.invoiceRepository.findOne({
+      where: {
+        patientRecordIdentifier,
+        invoiceServices: { serviceIdentifier },
+        status: true,
+      },
+    });
+
+    return invoice ? true : false;
+  }
 }

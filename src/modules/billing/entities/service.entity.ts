@@ -5,8 +5,8 @@ import {
   Column,
   Entity,
   JoinColumn,
+  ManyToOne,
   OneToMany,
-  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
@@ -35,7 +35,7 @@ export class Service {
   @Column({ name: 'location_identifier' })
   locationIdentifier: number;
 
-  @OneToOne(() => Location, (location) => location.service)
+  @ManyToOne(() => Location, (location) => location.services)
   @JoinColumn({
     name: 'location_identifier',
     referencedColumnName: 'identifier',

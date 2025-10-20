@@ -5,10 +5,12 @@ import {
   JoinColumn,
   ManyToOne,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
 import { AssessmentResult } from './assessment-result.entity';
+import { MeasurementItems } from './measurement-item.entity';
 
 @Entity('assessment_items')
 export class AssessmentItem {
@@ -17,6 +19,12 @@ export class AssessmentItem {
 
   @Column()
   name: string;
+
+  @OneToOne(
+    () => MeasurementItems,
+    (measurementItem) => measurementItem.assessmentItem,
+  )
+  measurementItem: MeasurementItems;
 
   @Column({ name: 'service_identifier', nullable: true })
   serviceIdentifier: number;

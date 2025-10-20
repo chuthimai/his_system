@@ -110,4 +110,6 @@ export class ServiceReport {
 
   @OneToOne(() => ImagingReport, (imagingReport) => imagingReport.serviceReport)
   imagingReport: ImagingReport;
+
+  isPaid?: boolean;
 }
