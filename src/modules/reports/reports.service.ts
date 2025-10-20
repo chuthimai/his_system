@@ -17,6 +17,8 @@ import { HttpExceptionWrapper } from 'src/helpers/http-exception-wrapper';
 import { Repository } from 'typeorm';
 
 import { CreateServiceReportDto } from './dto/create-service-report.dto';
+import { UpdateImagingReportResultDto } from './dto/update-imaging-report-result.dto';
+import { UpdateLaboratoryReportResultDto } from './dto/update-laboratory-report-result.dto';
 import { DiagnosisReport } from './entities/diagnosis-report.entity';
 import { ImagingReport } from './entities/imaging-report.entity';
 import { LaboratoryReport } from './entities/laboratory-report.entity';
@@ -58,17 +60,25 @@ export class ReportsService {
     this.mapEntityToRepository.set(ImagingReport, this.imagingReportRepository);
   }
 
+  async updateOne(newDetailReport: ServiceReport): Promise<ServiceReport> {
+    return newDetailReport?.diagnosisReport
+      ? await this.diagnosisReportRepository.save(newDetailReport)
+      : newDetailReport?.laboratoryReport
+        ? await this.laboratoryReportRepository.save(newDetailReport)
+        : await this.imagingReportRepository.save(newDetailReport);
+  }
+
   async findOne(identifier: number): Promise<T | null> {
     const serviceReport = await this.serviceReportRepository.findOne({
       where: { identifier, status: false },
       relations: ['diagnosisReport', 'imagingReport', 'laboratoryReport'],
     });
 
-    return serviceReport?.laboratoryReport
-      ? await this.findOneDetailServiceReport(LaboratoryReport, identifier)
-      : serviceReport?.imagingReport
-        ? await this.findOneDetailServiceReport(ImagingReport, identifier)
-        : await this.findOneDetailServiceReport(DiagnosisReport, identifier);
+    return serviceReport?.diagnosisReport
+      ? await this.findOneDetailServiceReport(DiagnosisReport, identifier)
+      : serviceReport?.laboratoryReport
+        ? await this.findOneDetailServiceReport(LaboratoryReport, identifier)
+        : await this.findOneDetailServiceReport(ImagingReport, identifier);
   }
 
   // For get service report in findOneByPatientRecordIdentifier function here
@@ -152,10 +162,21 @@ export class ReportsService {
     if (!entity) {
       throw new Error(ERROR_MESSAGES.ENTITY_NOT_FOUND);
     }
-    return await this.findOneDetailServiceReport(
+
+    const detailServiceReport = await this.findOneDetailServiceReport(
       entity as new () => T,
       serviceReport.identifier,
     );
+
+    if (entity === LaboratoryReport || entity === ImagingReport) {
+      (detailServiceReport as unknown as ServiceReport).isPaid =
+        await this.billingService.checkServiceIsPaid(
+          serviceReport.patientRecordIdentifier,
+          serviceReport.serviceIdentifier,
+        );
+    }
+
+    return detailServiceReport;
   }
 
   // For create service report in createDetailServiceReport function here
@@ -261,20 +282,24 @@ export class ReportsService {
     });
   }
 
-  async updateDiagnosisReportResult(
-    updateDiagnosisReportResultDto: UpdateDiagnosisReportResultDto,
+  async updateDetailServiceReport(
+    updateDetailReportResultDto:
+      | UpdateDiagnosisReportResultDto
+      | UpdateLaboratoryReportResultDto
+      | UpdateImagingReportResultDto,
     currentUser: User,
   ) {
-    let diagnosisReport = (await this.findOneDetailServiceReport(
-      DiagnosisReport,
-      updateDiagnosisReportResultDto.serviceReportIdentifier,
-    )) as DiagnosisReport;
-    if (!diagnosisReport) {
-      throw new HttpExceptionWrapper(ERROR_MESSAGES.SERVICE_REPORT_NOT_FOUND);
+    let detailReport = await this.findOne(
+      updateDetailReportResultDto.serviceReportIdentifier,
+    );
+    if (!detailReport) {
+      throw new HttpExceptionWrapper(
+        ERROR_MESSAGES.DETAIL_SERVICE_REPORT_NOT_FOUND,
+      );
     }
+
     if (
-      currentUser.identifier !==
-      diagnosisReport.serviceReport.performerIdentifier
+      currentUser.identifier !== detailReport.serviceReport.performerIdentifier
     ) {
       throw new HttpExceptionWrapper(ERROR_MESSAGES.PERMISSION_DENIED);
     }
@@ -283,8 +308,8 @@ export class ReportsService {
 
     const assessmentResultsCreated =
       await this.assessmentsService.createAssessmentResults({
-        serviceReportIdentifier: diagnosisReport.identifier,
-        assessmentResults: updateDiagnosisReportResultDto.assessmentResults,
+        serviceReportIdentifier: detailReport.identifier,
+        assessmentResults: updateDetailReportResultDto.assessmentResults,
       });
     if (!assessmentResultsCreated) {
       throw new HttpExceptionWrapper(
@@ -294,26 +319,42 @@ export class ReportsService {
 
     const date = new Date(0);
     const dateFormatted = date.toISOString().replace('T', ' ').substring(0, 19);
-    diagnosisReport = {
-      ...diagnosisReport,
+
+    const generalServiceInfo = (({ category, method, effectiveTime }) => ({
+      category,
+      method,
+      effectiveTime,
+      recordedTime: dateFormatted,
+    }))(updateDetailReportResultDto);
+
+    const detailServiceInfo =
+      updateDetailReportResultDto instanceof UpdateDiagnosisReportResultDto
+        ? {
+            severity: updateDetailReportResultDto.severity,
+            conclusion: updateDetailReportResultDto.conclusion,
+          }
+        : {
+            interpretation: updateDetailReportResultDto.interpretation,
+            ...(updateDetailReportResultDto instanceof
+            UpdateImagingReportResultDto
+              ? { focus: updateDetailReportResultDto.focus }
+              : {}),
+          };
+
+    detailReport = {
+      ...detailReport,
+      ...detailServiceInfo,
       serviceReport: {
-        ...diagnosisReport.serviceReport,
-        ...(({ category, method, effectiveTime }) => ({
-          category,
-          method,
-          effectiveTime,
-          updateDiagnosisReportResultDto,
-        }))(updateDiagnosisReportResultDto),
-        recordedTime: dateFormatted,
+        ...detailReport.serviceReport,
+        ...generalServiceInfo,
       },
-      ...(({ severity, conclusion }) => ({ severity, conclusion }))(
-        updateDiagnosisReportResultDto,
-      ),
     };
 
-    const diagnosisReportUpdated =
-      await this.diagnosisReportRepository.save(diagnosisReport);
-    return diagnosisReportUpdated ? true : false;
+    const detailReportUpdated = await this.updateOne(
+      detailReport as unknown as ServiceReport,
+    );
+
+    return detailReportUpdated ? true : false;
   }
 
   async closeServiceReport(serviceReportIdentifier: number, currentUser: User) {

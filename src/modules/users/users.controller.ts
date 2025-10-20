@@ -12,9 +12,20 @@ export class UsersController {
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(ROLES.PHYSICIAN)
+  @Get('/in-patient-record-identifier/:patientRecordIdentifier')
+  getOneByPatientRecordIdentifier(
+    @Param('patientRecordIdentifier') patientRecordIdentifier: number,
+  ) {
+    return this.usersService.findOneByPatientRecordIdentifier(
+      patientRecordIdentifier,
+    );
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(ROLES.PHYSICIAN)
   @Get('/by-name')
-  searchByName(@Query('name') name: string) {
-    return this.usersService.searchByName(name);
+  findAllByName(@Query('name') name: string) {
+    return this.usersService.findAllByName(name);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)

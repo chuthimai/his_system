@@ -7,8 +7,8 @@ import { Roles } from 'src/decorators/roles.decorator';
 import { RolesGuard } from 'src/guards/roles.guard';
 
 import { UpdateDiagnosisReportResultDto } from './dto/update-diagnosis-report-result.dto';
-import { UpdateLaboratoryReportResultDto } from './dto/update-imaging-report-result.dto';
-import { UpdateImagingReportResultDto } from './dto/update-laboratoty-report-result.dto';
+import { UpdateImagingReportResultDto } from './dto/update-imaging-report-result.dto';
+import { UpdateLaboratoryReportResultDto } from './dto/update-laboratory-report-result.dto';
 import { ReportsService } from './reports.service';
 
 @Controller('reports')
@@ -35,7 +35,7 @@ export class ReportsController {
     @Body() updateDiagnosisReportResultDto: UpdateDiagnosisReportResultDto,
     @CurrentUser() currentUser: User,
   ) {
-    return this.reportService.updateDiagnosisReportResult(
+    return this.reportService.updateDetailServiceReport(
       updateDiagnosisReportResultDto,
       currentUser,
     );
@@ -48,7 +48,10 @@ export class ReportsController {
     @Body() updateLaboratoryReportResultDto: UpdateLaboratoryReportResultDto,
     @CurrentUser() currentUser: User,
   ) {
-    // TODO
+    return this.reportService.updateDetailServiceReport(
+      updateLaboratoryReportResultDto,
+      currentUser,
+    );
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -58,7 +61,10 @@ export class ReportsController {
     @Body() updateImagingReportResultDto: UpdateImagingReportResultDto,
     @CurrentUser() currentUser: User,
   ) {
-    // TODO
+    return this.reportService.updateDetailServiceReport(
+      updateImagingReportResultDto,
+      currentUser,
+    );
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
