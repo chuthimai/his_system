@@ -44,6 +44,17 @@ export class UsersService {
         });
   }
 
+  async findOneByPatientRecordIdentifier(patientRecordIdentifier: number) {
+    const patientRecord = await this.recordsService.findOnePatientRecord(
+      patientRecordIdentifier,
+    );
+    if (!patientRecord) {
+      throw new HttpExceptionWrapper(ERROR_MESSAGES.PATIENT_RECORD_NOT_FOUND);
+    }
+
+    return await this.findOne(patientRecord.patientIdentifier, false);
+  }
+
   // For check existence, get full information in auth/login (all info)
   // For check existence in schedules/work-schedules-by-condition (just check existence)
   // For check existence, get base information in appointments/create (base info)
@@ -80,6 +91,21 @@ export class UsersService {
         } as Physician);
   }
 
+  async findAllByName(name: string): Promise<User[]> {
+    return await this.userRepository
+      .createQueryBuilder('user')
+      .where('LOWER(user.name) LIKE LOWER(:name)', { name: `%${name}%` })
+      .select([
+        'user.identifier',
+        'user.name',
+        'user.telecom',
+        'user.birthDate',
+        'user.gender',
+        'user.address',
+      ])
+      .getMany();
+  }
+
   async findAllPhysicianBySpecialty(
     specialtyIdentifier: number,
   ): Promise<Physician[]> {
@@ -97,21 +123,6 @@ export class UsersService {
         name: physician?.staff?.user?.name,
       } as Physician;
     });
-  }
-
-  async searchByName(name: string): Promise<User[]> {
-    return await this.userRepository
-      .createQueryBuilder('user')
-      .where('LOWER(user.name) LIKE LOWER(:name)', { name: `%${name}%` })
-      .select([
-        'user.identifier',
-        'user.name',
-        'user.telecom',
-        'user.birthDate',
-        'user.gender',
-        'user.address',
-      ])
-      .getMany();
   }
 
   // For create patient in records/create (all info)

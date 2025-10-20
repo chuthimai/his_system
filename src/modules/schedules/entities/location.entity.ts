@@ -1,14 +1,13 @@
 import { Service } from 'src/modules/billing/entities/service.entity';
-import { WorkSchedule } from 'src/modules/schedules/entities/work-schedule.entity';
 import {
   Column,
   Entity,
   ManyToOne,
   OneToMany,
-  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { JoinColumn } from 'typeorm';
+
 import { StaffWorkSchedule } from './staff-work-schedule.entity';
 
 @Entity('locations')
@@ -35,15 +34,12 @@ export class Location {
   @OneToMany(() => Location, (location) => location.parent)
   children: Location[];
 
-  // @OneToMany(() => WorkSchedule, (workSchedule) => workSchedule.location)
-  // workSchedules: WorkSchedule[];
-
   @OneToMany(
     () => StaffWorkSchedule,
     (staffWorkSchedule) => staffWorkSchedule.location,
   )
   staffWorkSchedules: StaffWorkSchedule[];
 
-  @OneToOne(() => Service, (service) => service.location)
-  service: Service;
+  @OneToMany(() => Service, (service) => service.location)
+  services: Service[];
 }

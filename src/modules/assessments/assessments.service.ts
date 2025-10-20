@@ -28,6 +28,10 @@ export class AssessmentsService {
         'children',
         'children.children',
         'children.children.children',
+        'measurementItem',
+        'children.measurementItem',
+        'children.children.measurementItem',
+        'children.children.children.measurementItem',
       ],
     });
   }
