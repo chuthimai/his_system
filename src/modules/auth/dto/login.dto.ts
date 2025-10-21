@@ -1,7 +1,18 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { Transform } from 'class-transformer';
+import { IsIn, IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { ERROR_MESSAGES } from 'src/constants/error-messages';
+import { ROLES } from 'src/constants/others';
 
 export class LoginDto {
+  @ApiProperty({ enum: Object.values(ROLES) })
+  @IsNotEmpty()
+  @IsString()
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access
+  @Transform(({ value }) => value.toUpperCase())
+  @IsIn(Object.values(ROLES), { message: ERROR_MESSAGES.INVALID_ROLE })
+  role: string;
+
   @ApiProperty()
   @IsNotEmpty()
   @IsNumber()

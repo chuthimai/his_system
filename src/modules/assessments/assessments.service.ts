@@ -38,7 +38,7 @@ export class AssessmentsService {
 
   async createAssessmentResults(
     createAssessmentResults: CreateAssessmentResultsDto,
-  ): Promise<boolean> {
+  ): Promise<AssessmentResult[]> {
     const serviceReport = await this.reportsService.findOne(
       createAssessmentResults.serviceReportIdentifier,
     );
@@ -46,7 +46,7 @@ export class AssessmentsService {
       throw new Error(ERROR_MESSAGES.SERVICE_REPORT_NOT_FOUND);
     }
 
-    const assessmentResultsCreated = await Promise.all(
+    return await Promise.all(
       createAssessmentResults.assessmentResults.map(
         async (assessmentResult) => {
           const preCondition = {
@@ -66,14 +66,11 @@ export class AssessmentsService {
 
           targetAssessmentResult.value = assessmentResult.assessmentResultValue;
 
-          const savedAssessmentResult =
-            await this.assessmentResultRepository.save(targetAssessmentResult);
-          if (!savedAssessmentResult) {
-            throw new Error(ERROR_MESSAGES.CREATE_ASSESSMENT_RESULT_FAIL);
-          }
+          return await this.assessmentResultRepository.save(
+            targetAssessmentResult,
+          );
         },
       ),
     );
-    return assessmentResultsCreated ? true : false;
   }
 }

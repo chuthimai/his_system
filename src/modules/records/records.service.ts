@@ -41,11 +41,10 @@ export class RecordsService {
     private readonly usersService: UsersService,
   ) {}
 
-  // For check existence in createInvoice in billing service
   async findOnePatientRecord(
     patientRecordIdentifier: number,
     isFull: boolean = false,
-  ) {
+  ): Promise<PatientRecord | null> {
     return !isFull
       ? await this.patientRecordRepository.findOneBy({
           identifier: patientRecordIdentifier,
@@ -75,7 +74,6 @@ export class RecordsService {
           .getOne();
   }
 
-  // Must have information: base, patient
   async create(
     createRecordDto: CreateRecordDto,
     currentUser: User,
@@ -85,14 +83,16 @@ export class RecordsService {
       patient = await this.usersService.findOne(
         createRecordDto.patientIdentifier,
       );
+      if (!patient) {
+        throw new HttpExceptionWrapper(ERROR_MESSAGES.PATIENT_NOT_FOUND);
+      }
     } else {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { patientIdentifier, ...userData } = createRecordDto;
       patient = await this.usersService.create(userData as CreateUserDto, true);
-    }
-
-    if (!patient) {
-      throw new HttpExceptionWrapper(ERROR_MESSAGES.PATIENT_NOT_FOUND);
+      if (!patient) {
+        throw new HttpExceptionWrapper(ERROR_MESSAGES.CREATE_PATIENT_FAIL);
+      }
     }
 
     const newPatientRecord = this.patientRecordRepository.create({
@@ -100,6 +100,9 @@ export class RecordsService {
     });
     const savedPatientRecord =
       await this.patientRecordRepository.save(newPatientRecord);
+    if (!savedPatientRecord) {
+      throw new HttpExceptionWrapper(ERROR_MESSAGES.CREATE_PATIENT_RECORD_FAIL);
+    }
 
     if (
       !(await this.createServiceForPatientRecord(
@@ -115,7 +118,6 @@ export class RecordsService {
     return await this.findOnePatientRecord(savedPatientRecord.identifier, true);
   }
 
-  // Update specialty consultation service for patient record
   async updateSpecialtyConsultation(
     updateSpecialtyConsultationDto: UpdateSpecialtyConsultationDto,
     currentUser: User,
@@ -167,7 +169,6 @@ export class RecordsService {
     );
   }
 
-  // Update laboratory tests service for patient record
   async updateLaboratoryAndImaging(
     updateLaboratoryAndImagingDto: UpdateLaboratoryAndImagingDto,
     currentUser: User,
@@ -227,7 +228,6 @@ export class RecordsService {
       invoice = await this.billingService.createInvoice({
         patientRecordIdentifier: patientRecordIdentifier,
       });
-
       if (!invoice) {
         throw new HttpExceptionWrapper(ERROR_MESSAGES.CREATE_INVOICE_FAIL);
       }
@@ -237,7 +237,6 @@ export class RecordsService {
       serviceInfo,
     )) as Service;
     if (!service) {
-      console.log('Service not found with info: ', serviceInfo);
       throw new HttpExceptionWrapper(ERROR_MESSAGES.SERVICE_NOT_FOUND);
     }
 

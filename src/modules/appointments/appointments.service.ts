@@ -20,7 +20,9 @@ export class AppointmentsService {
     private readonly schedulesService: SchedulesService,
   ) {}
 
-  async findAllByUserIdentifier(userIdentifier: number) {
+  async findAllByUserIdentifier(
+    userIdentifier: number,
+  ): Promise<Appointment[]> {
     const appointments = await this.appointmentRepository.find({
       where: { ...(userIdentifier ? { userIdentifier } : {}), status: true },
       relations: ['workSchedule', 'workSchedule.shift'],
@@ -30,11 +32,9 @@ export class AppointmentsService {
       appointments.map(async (appointment) => {
         appointment.physician = (await this.usersService.findOnePhysician(
           appointment.physicianIdentifier,
-          false,
         )) as unknown as Physician;
         appointment.user = (await this.usersService.findOne(
           appointment.userIdentifier,
-          false,
         )) as User;
       }),
     );
@@ -42,7 +42,6 @@ export class AppointmentsService {
     return appointments;
   }
 
-  // Must have information: base, workSchedule, physician, user
   async create(
     createAppointmentDto: CreateAppointmentDto,
   ): Promise<Appointment> {
@@ -52,12 +51,12 @@ export class AppointmentsService {
     const existedWorkSchedule = await this.schedulesService.findOneWorkSchedule(
       createAppointmentDto.workScheduleIdentifier,
     );
-
     if (!existedUser || !existedWorkSchedule) {
       throw !existedUser
         ? new HttpExceptionWrapper(ERROR_MESSAGES.USER_NOT_FOUND)
         : new HttpExceptionWrapper(ERROR_MESSAGES.WORK_SCHEDULE_NOT_FOUND);
     }
+
     if (createAppointmentDto.physicianIdentifier) {
       if (
         createAppointmentDto.physicianIdentifier ==
@@ -101,7 +100,6 @@ export class AppointmentsService {
 
     targetAppointment.physician = (await this.usersService.findOnePhysician(
       targetAppointment.physicianIdentifier,
-      false,
     )) as Physician;
 
     return targetAppointment;

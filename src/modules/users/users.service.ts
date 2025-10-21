@@ -22,12 +22,9 @@ export class UsersService {
     private readonly recordsService: RecordsService,
   ) {}
 
-  // For check existence, get full information in auth/login (all info)
-  // For check existence in records/create (just check existence)
-  // For check existence in appointments/create (just check existence)
   async findOne(
     identifier: number,
-    isFull: boolean = true,
+    isFull: boolean = false,
   ): Promise<User | null> {
     return isFull
       ? await this.userRepository.findOneBy({ identifier })
@@ -44,7 +41,9 @@ export class UsersService {
         });
   }
 
-  async findOneByPatientRecordIdentifier(patientRecordIdentifier: number) {
+  async findOneByPatientRecordIdentifier(
+    patientRecordIdentifier: number,
+  ): Promise<User | null> {
     const patientRecord = await this.recordsService.findOnePatientRecord(
       patientRecordIdentifier,
     );
@@ -52,16 +51,12 @@ export class UsersService {
       throw new HttpExceptionWrapper(ERROR_MESSAGES.PATIENT_RECORD_NOT_FOUND);
     }
 
-    return await this.findOne(patientRecord.patientIdentifier, false);
+    return await this.findOne(patientRecord.patientIdentifier);
   }
 
-  // For check existence, get full information in auth/login (all info)
-  // For check existence in schedules/work-schedules-by-condition (just check existence)
-  // For check existence, get base information in appointments/create (base info)
-  // For check existence in schedules/staff-work-schedule-by-condition (just check existence)
   async findOnePhysician(
     identifier: number,
-    isFull: boolean = true,
+    isFull: boolean = false,
   ): Promise<Physician | null> {
     const physician = await this.physicianRepository.findOne({
       where: {
@@ -71,7 +66,9 @@ export class UsersService {
       relations: ['staff', 'staff.user', 'specialty', 'qualifications'],
     });
 
-    if (!physician) return null;
+    if (!physician) {
+      return null;
+    }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { specialtyIdentifier, staff, ...physicianWithoutStaff } = physician;
@@ -125,7 +122,6 @@ export class UsersService {
     });
   }
 
-  // For create patient in records/create (all info)
   async create(
     createUserDto: CreateUserDto,
     reuseOnDuplicate: boolean = false,
@@ -134,8 +130,11 @@ export class UsersService {
       telecom: createUserDto.telecom,
     });
     if (existedUser) {
-      if (reuseOnDuplicate) return existedUser;
-      else throw new HttpExceptionWrapper(ERROR_MESSAGES.USER_ALREADY_EXISTS);
+      if (reuseOnDuplicate) {
+        return existedUser;
+      } else {
+        throw new HttpExceptionWrapper(ERROR_MESSAGES.USER_ALREADY_EXISTS);
+      }
     }
 
     createUserDto.password = bcrypt.hashSync(createUserDto.password, 10);

@@ -27,38 +27,13 @@ export class SchedulesService {
     private readonly usersService: UsersService,
   ) {}
 
-  // For check existence in appointments/create (just check existence)
-  async findOneWorkSchedule(identifier: number): Promise<WorkSchedule | null> {
-    return await this.workScheduleRepository.findOne({
-      where: { identifier },
-    });
-  }
-
-  // For check existence in records/update (just check existence)
-  async findOneStaffWorkSchedule(
-    identifier: number,
-  ): Promise<StaffWorkSchedule | null> {
-    return await this.staffWorkScheduleRepository.findOne({
-      where: { identifier, active: true },
-    });
-  }
-
-  // For check existence, fetch base info in records/update (base info)
-  async findOneStaffWorkScheduleByCondition(
-    workScheduleIdentifier: number,
-    staffIdentifier: number,
-  ): Promise<StaffWorkSchedule | null> {
-    return await this.staffWorkScheduleRepository.findOne({
-      where: { workScheduleIdentifier, staffIdentifier, active: true },
-    });
-  }
-
-  async findOneLocation(identifier: number) {
-    const childLocation = (await this.locationRepository.findOneBy({
+  async findOneLocation(identifier: number): Promise<Location | null> {
+    const childLocation = await this.locationRepository.findOneBy({
       identifier,
-    })) as Location;
-
-    if (!childLocation) return null;
+    });
+    if (!childLocation) {
+      return null;
+    }
 
     let fullName = childLocation.name;
     let nextLocation: Location | null = { ...childLocation };
@@ -74,7 +49,29 @@ export class SchedulesService {
     return { ...childLocation, name: fullName };
   }
 
-  // Must have information: base, shifts
+  async findOneWorkSchedule(identifier: number): Promise<WorkSchedule | null> {
+    return await this.workScheduleRepository.findOne({
+      where: { identifier },
+    });
+  }
+
+  async findOneStaffWorkSchedule(
+    identifier: number,
+  ): Promise<StaffWorkSchedule | null> {
+    return await this.staffWorkScheduleRepository.findOne({
+      where: { identifier, active: true },
+    });
+  }
+
+  async findOneStaffWorkScheduleByCondition(
+    workScheduleIdentifier: number,
+    staffIdentifier: number,
+  ): Promise<StaffWorkSchedule | null> {
+    return await this.staffWorkScheduleRepository.findOne({
+      where: { workScheduleIdentifier, staffIdentifier, active: true },
+    });
+  }
+
   async findAllWorkSchedulesByCondition(
     workScheduleConditionDto: WorkScheduleConditionDto,
   ): Promise<WorkSchedule[]> {
@@ -82,13 +79,11 @@ export class SchedulesService {
       const existedPhysician = await this.usersService.findOnePhysician(
         workScheduleConditionDto?.physicianIdentifier,
       );
-
       if (!existedPhysician) {
         throw new HttpExceptionWrapper(ERROR_MESSAGES.PHYSICIAN_NOT_FOUND);
       }
     }
 
-    // Get work schedules from today to the end of next month
     const today = new Date();
     const endMonthNext = new Date(today.getFullYear(), today.getMonth() + 3, 0);
     const formatDate = (d: Date) => d.toISOString().split('T')[0];
@@ -128,7 +123,6 @@ export class SchedulesService {
       .getMany();
   }
 
-  // Must have information: base, duty, workSchedule, shift, location, staff
   async findAllStaffWorkSchedulesByCondition(
     staffWorkScheduleConditionDto: StaffWorkScheduleConditionDto,
   ): Promise<StaffWorkSchedule[]> {
@@ -146,7 +140,6 @@ export class SchedulesService {
   ): Promise<StaffWorkSchedule[]> {
     const existedPhysician =
       await this.usersService.findOnePhysician(physicianIdentifier);
-
     if (!existedPhysician) {
       throw new HttpExceptionWrapper(ERROR_MESSAGES.PHYSICIAN_NOT_FOUND);
     }
@@ -188,7 +181,7 @@ export class SchedulesService {
       .innerJoinAndSelect('staff.user', 'user')
       .getMany();
 
-    const updatedStaffWorkSchedules = await Promise.all(
+    return await Promise.all(
       staffWorkSchedules.map(async (staffWorkSchedule) => {
         const location = await this.findOneLocation(
           staffWorkSchedule.location.identifier,
@@ -202,8 +195,6 @@ export class SchedulesService {
         return staffWorkSchedule;
       }),
     );
-
-    return updatedStaffWorkSchedules;
   }
 
   async findAllStaffWorkSchedulesBySpecialtyIdentifier(
@@ -211,7 +202,6 @@ export class SchedulesService {
   ): Promise<StaffWorkSchedule[]> {
     const existedSpecialty =
       await this.specializationsService.findOne(specialtyIdentifier);
-
     if (!existedSpecialty)
       throw new HttpExceptionWrapper(ERROR_MESSAGES.SPECIALTY_NOT_FOUND);
 
@@ -257,7 +247,7 @@ export class SchedulesService {
       .innerJoinAndSelect('staff.user', 'user')
       .getMany();
 
-    const updatedStaffWorkSchedules = await Promise.all(
+    return await Promise.all(
       staffWorkSchedules.map(async (staffWorkSchedule) => {
         const location = await this.findOneLocation(
           staffWorkSchedule.location.identifier,
@@ -271,11 +261,11 @@ export class SchedulesService {
         return staffWorkSchedule;
       }),
     );
-
-    return updatedStaffWorkSchedules;
   }
 
-  async findCurrentStaffWorkSchedule(currentUserIdentifier: number) {
+  async findCurrentStaffWorkSchedule(
+    currentUserIdentifier: number,
+  ): Promise<StaffWorkSchedule | null> {
     const now = new Date();
     const currentDate = now.toISOString().split('T')[0];
     const currentTime = now.toTimeString().slice(0, 8);
