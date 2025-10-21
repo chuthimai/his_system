@@ -15,18 +15,14 @@ export class AuthService {
     private readonly usersService: UsersService,
   ) {}
 
-  async login(loginDto: LoginDto, role: string = ROLES.PATIENT) {
-    role = role.toUpperCase();
+  async login(loginDto: LoginDto): Promise<any> {
+    const { role } = loginDto;
     const user =
       role === ROLES.PATIENT
-        ? await this.usersService.findOne(loginDto.identifier)
-        : await this.usersService.findOnePhysician(loginDto.identifier);
+        ? await this.usersService.findOne(loginDto.identifier, true)
+        : await this.usersService.findOnePhysician(loginDto.identifier, true);
 
-    if (
-      !user ||
-      !user.role ||
-      !(user.role === role || user.role.endsWith(role))
-    ) {
+    if (!user || !user.role || !(user.role === role)) {
       throw new HttpExceptionWrapper(ERROR_MESSAGES.USER_NOT_FOUND);
     }
 

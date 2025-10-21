@@ -60,14 +60,6 @@ export class ReportsService {
     this.mapEntityToRepository.set(ImagingReport, this.imagingReportRepository);
   }
 
-  async updateOne(newDetailReport: ServiceReport): Promise<ServiceReport> {
-    return newDetailReport?.diagnosisReport
-      ? await this.diagnosisReportRepository.save(newDetailReport)
-      : newDetailReport?.laboratoryReport
-        ? await this.laboratoryReportRepository.save(newDetailReport)
-        : await this.imagingReportRepository.save(newDetailReport);
-  }
-
   async findOne(identifier: number): Promise<T | null> {
     const serviceReport = await this.serviceReportRepository.findOne({
       where: { identifier, status: false },
@@ -81,7 +73,6 @@ export class ReportsService {
         : await this.findOneDetailServiceReport(ImagingReport, identifier);
   }
 
-  // For get service report in findOneByPatientRecordIdentifier function here
   async findOneDetailServiceReport(
     entity: new () => T,
     identifier: number,
@@ -109,14 +100,12 @@ export class ReportsService {
       detailServiceReport.serviceReport.performer =
         (await this.usersService.findOnePhysician(
           detailServiceReport?.serviceReport.performerIdentifier,
-          false,
         )) as Physician;
     }
     if (detailServiceReport?.serviceReport.requesterIdentifier) {
       detailServiceReport.serviceReport.requester =
         (await this.usersService.findOnePhysician(
           detailServiceReport?.serviceReport.requesterIdentifier,
-          false,
         )) as Physician;
     }
     return detailServiceReport;
@@ -125,7 +114,7 @@ export class ReportsService {
   async findOneByPatientRecordIdentifier(
     patientRecordIdentifier: number,
     currentUserIdentifier: number,
-  ) {
+  ): Promise<T | null> {
     const staffWorkSchedule =
       await this.schedulesService.findCurrentStaffWorkSchedule(
         currentUserIdentifier,
@@ -179,7 +168,6 @@ export class ReportsService {
     return detailServiceReport;
   }
 
-  // For create service report in createDetailServiceReport function here
   async create(
     createServiceReportDto: CreateServiceReportDto,
   ): Promise<ServiceReport | null> {
@@ -224,7 +212,6 @@ export class ReportsService {
     return await this.serviceReportRepository.save(newServiceReport);
   }
 
-  // For create service report in createServiceReportForPatientRecord in records/create-or-update
   async createDetailServiceReport(
     entity: new () => T,
     createServiceReportDto: CreateServiceReportDto,
@@ -268,11 +255,6 @@ export class ReportsService {
     const newDetailReport = detailReportRepository.create({
       identifier: newServiceReport.identifier,
     });
-    if (!newDetailReport) {
-      throw new HttpExceptionWrapper(
-        ERROR_MESSAGES.CREATE_DETAIL_SERVICE_REPORT_FAIL,
-      );
-    }
     const savedDetailReport =
       await detailReportRepository.save(newDetailReport);
 
@@ -282,13 +264,21 @@ export class ReportsService {
     });
   }
 
+  async update(newDetailReport: ServiceReport): Promise<ServiceReport> {
+    return newDetailReport?.diagnosisReport
+      ? await this.diagnosisReportRepository.save(newDetailReport)
+      : newDetailReport?.laboratoryReport
+        ? await this.laboratoryReportRepository.save(newDetailReport)
+        : await this.imagingReportRepository.save(newDetailReport);
+  }
+
   async updateDetailServiceReport(
     updateDetailReportResultDto:
       | UpdateDiagnosisReportResultDto
       | UpdateLaboratoryReportResultDto
       | UpdateImagingReportResultDto,
     currentUser: User,
-  ) {
+  ): Promise<boolean> {
     let detailReport = await this.findOne(
       updateDetailReportResultDto.serviceReportIdentifier,
     );
@@ -325,8 +315,8 @@ export class ReportsService {
       method,
       effectiveTime,
       recordedTime: dateFormatted,
+      status: true,
     }))(updateDetailReportResultDto);
-
     const detailServiceInfo =
       updateDetailReportResultDto instanceof UpdateDiagnosisReportResultDto
         ? {
@@ -350,31 +340,9 @@ export class ReportsService {
       },
     };
 
-    const detailReportUpdated = await this.updateOne(
+    const detailReportUpdated = await this.update(
       detailReport as unknown as ServiceReport,
     );
-
     return detailReportUpdated ? true : false;
-  }
-
-  async closeServiceReport(serviceReportIdentifier: number, currentUser: User) {
-    const detailServiceReport = (await this.findOne(
-      serviceReportIdentifier,
-    )) as T;
-    if (!detailServiceReport) {
-      throw new HttpExceptionWrapper(ERROR_MESSAGES.SERVICE_REPORT_NOT_FOUND);
-    }
-    if (
-      currentUser.identifier !==
-      detailServiceReport.serviceReport.performerIdentifier
-    ) {
-      throw new HttpExceptionWrapper(ERROR_MESSAGES.PERMISSION_DENIED);
-    }
-
-    detailServiceReport.serviceReport.status = true;
-    const closedServiceReport = await this.serviceReportRepository.save(
-      detailServiceReport.serviceReport,
-    );
-    return closedServiceReport ? true : false;
   }
 }
