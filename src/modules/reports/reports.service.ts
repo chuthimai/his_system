@@ -102,6 +102,13 @@ export class ReportsService {
           detailServiceReport?.serviceReport.performerIdentifier,
         )) as Physician;
     }
+    if (detailServiceReport?.serviceReport.reporterIdentifier) {
+      detailServiceReport.serviceReport.reporter =
+        (await this.usersService.findOnePhysician(
+          detailServiceReport?.serviceReport.reporterIdentifier,
+          false,
+        )) as Physician;
+    }
     if (detailServiceReport?.serviceReport.requesterIdentifier) {
       detailServiceReport.serviceReport.requester =
         (await this.usersService.findOnePhysician(
@@ -157,13 +164,11 @@ export class ReportsService {
       serviceReport.identifier,
     );
 
-    if (entity === LaboratoryReport || entity === ImagingReport) {
-      (detailServiceReport as unknown as ServiceReport).isPaid =
-        await this.billingService.checkServiceIsPaid(
-          serviceReport.patientRecordIdentifier,
-          serviceReport.serviceIdentifier,
-        );
-    }
+    (detailServiceReport as unknown as ServiceReport).isPaid =
+      await this.billingService.checkServiceIsPaid(
+        serviceReport.patientRecordIdentifier,
+        serviceReport.serviceIdentifier,
+      );
 
     return detailServiceReport;
   }
@@ -192,6 +197,16 @@ export class ReportsService {
         createServiceReportDto.performerIdentifier,
       );
       if (!existedPerformer) {
+        throw new HttpExceptionWrapper(ERROR_MESSAGES.PHYSICIAN_NOT_FOUND);
+      }
+    }
+
+    let existedReporter: Physician | null = null;
+    if (createServiceReportDto.reporterIdentifier) {
+      existedReporter = await this.usersService.findOnePhysician(
+        createServiceReportDto.reporterIdentifier,
+      );
+      if (!existedReporter) {
         throw new HttpExceptionWrapper(ERROR_MESSAGES.PHYSICIAN_NOT_FOUND);
       }
     }

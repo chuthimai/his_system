@@ -108,6 +108,7 @@ export class RecordsService {
       !(await this.createServiceForPatientRecord(
         currentUser.identifier,
         currentUser.identifier,
+        currentUser.identifier,
         savedPatientRecord.identifier,
         { type: SERVICE_TYPES.GENERAL_CONSULTATION },
       ))
@@ -156,6 +157,7 @@ export class RecordsService {
       !(await this.createServiceForPatientRecord(
         currentUser.identifier,
         existedStaffWorkSchedule.staffIdentifier,
+        existedStaffWorkSchedule.staffIdentifier,
         updateSpecialtyConsultationDto.patientRecordIdentifier,
         serviceInfo,
       ))
@@ -199,6 +201,7 @@ export class RecordsService {
           !(await this.createServiceForPatientRecord(
             currentUser.identifier,
             null,
+            null,
             updateLaboratoryAndImagingDto.patientRecordIdentifier,
             { identifier: service.identifier },
           ))
@@ -217,6 +220,7 @@ export class RecordsService {
   async createServiceForPatientRecord(
     requesterIdentifier: number,
     performerIdentifier: number | null,
+    reporterIdentifier: number | null,
     patientRecordIdentifier: number,
     serviceInfo: object,
   ): Promise<boolean> {
@@ -254,6 +258,7 @@ export class RecordsService {
     const serviceReportCreated = await this.createServiceReportForPatientRecord(
       requesterIdentifier,
       performerIdentifier,
+      reporterIdentifier,
       patientRecordIdentifier,
       service.identifier,
       service.type,
@@ -264,6 +269,7 @@ export class RecordsService {
   async createServiceReportForPatientRecord(
     requesterIdentifier: number,
     performerIdentifier: number | null,
+    reporterIdentifier: number | null,
     patientRecordIdentifier: number,
     serviceIdentifier: number,
     serviceType: string,
@@ -278,6 +284,7 @@ export class RecordsService {
       serviceIdentifier,
       requesterIdentifier,
       ...(performerIdentifier ? { performerIdentifier } : {}),
+      ...(reporterIdentifier ? { reporterIdentifier } : {}),
     };
     const serviceReport = await this.reportsService.createDetailServiceReport(
       serviceReportEntity as new () => T,
