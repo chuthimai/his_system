@@ -16,12 +16,6 @@ export class Image {
   @Column()
   endpoint: string;
 
-  @Column()
-  comment: string;
-
-  @Column()
-  modality: string;
-
   @Column({ name: 'received_time', type: 'datetime' })
   receivedTime: string;
 

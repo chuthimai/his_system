@@ -18,6 +18,8 @@ export const ERROR_MESSAGES = {
   SERVICE_NAME_NOT_FOUND: 'Invalid service name',
   SERVICE_REPORT_NOT_FOUND: 'Service report not found',
   DETAIL_SERVICE_REPORT_NOT_FOUND: 'Detail service report not found',
+  LABORATORY_REPORT_NOT_FOUND: 'Laboratory report not found',
+  SPECIMEN_NOT_FOUND: 'Specimen not found',
 
   CREATE_PATIENT_FAIL: 'Create patient fail',
   CREATE_INVOICE_FAIL: 'Create invoice fail',
@@ -29,6 +31,7 @@ export const ERROR_MESSAGES = {
 
   INVALID_PASSWORD: 'Invalid password',
   INVALID_ROLE: 'Invalid role',
+  INVALID_FILE_TYPE: 'Invalid file type',
   USER_ALREADY_EXISTS: 'User already exists',
   APPOINTMENT_USER_CANNOT_BE_PHYSICIAN: 'Appointment user cannot be physician',
   PERFORMER_PHYSICIAN_MUST_BE_SPECIFY: 'Performer physician must be specify',

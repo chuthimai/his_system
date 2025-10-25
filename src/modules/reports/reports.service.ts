@@ -5,24 +5,30 @@ import {
   RecordsService,
 } from '@modules/records/records.service';
 import { UpdateDiagnosisReportResultDto } from '@modules/reports/dto/update-diagnosis-report-result.dto';
+import { S3Service } from '@modules/s3/s3.service';
 import { SchedulesService } from '@modules/schedules/schedules.service';
 import { Physician } from '@modules/users/entities/physician.entity';
 import { User } from '@modules/users/entities/user.entity';
 import { UsersService } from '@modules/users/users.service';
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ERROR_MESSAGES } from 'src/constants/error-messages';
-import { SERVICE_TYPES } from 'src/constants/others';
-import { HttpExceptionWrapper } from 'src/helpers/http-exception-wrapper';
+import { ERROR_MESSAGES } from 'src/common/constants/error-messages';
+import { SERVICE_TYPES } from 'src/common/constants/others';
+import { HttpExceptionWrapper } from 'src/common/helpers/http-exception-wrapper';
 import { Repository } from 'typeorm';
 
+import { CreateImagesDto } from './dto/create-images.dto';
 import { CreateServiceReportDto } from './dto/create-service-report.dto';
+import { CreateSpecimenDto } from './dto/create-specimen.dto';
 import { UpdateImagingReportResultDto } from './dto/update-imaging-report-result.dto';
 import { UpdateLaboratoryReportResultDto } from './dto/update-laboratory-report-result.dto';
+import { UpdateSpecimenDto } from './dto/update-specimen.dto';
 import { DiagnosisReport } from './entities/diagnosis-report.entity';
+import { Image } from './entities/image.entity';
 import { ImagingReport } from './entities/imaging-report.entity';
 import { LaboratoryReport } from './entities/laboratory-report.entity';
 import { ServiceReport } from './entities/service-report.entity';
+import { Specimen } from './entities/specimen.entity';
 
 export type T = DiagnosisReport | LaboratoryReport | ImagingReport;
 
@@ -40,6 +46,10 @@ export class ReportsService {
     private readonly laboratoryReportRepository: Repository<LaboratoryReport>,
     @InjectRepository(ImagingReport)
     private readonly imagingReportRepository: Repository<ImagingReport>,
+    @InjectRepository(Specimen)
+    private readonly specimenRepository: Repository<Specimen>,
+    @InjectRepository(Image)
+    private readonly imageRepository: Repository<Image>,
     @Inject(forwardRef(() => BillingService))
     private readonly billingService: BillingService,
     @Inject(forwardRef(() => RecordsService))
@@ -48,6 +58,7 @@ export class ReportsService {
     private readonly assessmentsService: AssessmentsService,
     private readonly schedulesService: SchedulesService,
     private readonly usersService: UsersService,
+    private readonly s3Service: S3Service,
   ) {
     this.mapEntityToRepository.set(
       DiagnosisReport,
@@ -84,7 +95,11 @@ export class ReportsService {
 
     const detailServiceReport = await detailReportRepository.findOne({
       where: { identifier, serviceReport: { status: false } },
-      relations: ['serviceReport', 'serviceReport.service'],
+      relations: [
+        'serviceReport',
+        'serviceReport.service',
+        ...(entity === ImagingReport ? ['images'] : []),
+      ],
     });
     if (!detailServiceReport) {
       throw new HttpExceptionWrapper(
@@ -114,6 +129,16 @@ export class ReportsService {
         (await this.usersService.findOnePhysician(
           detailServiceReport?.serviceReport.requesterIdentifier,
         )) as Physician;
+    }
+    if (
+      entity === ImagingReport &&
+      (detailServiceReport as ImagingReport).images.length > 0
+    ) {
+      await Promise.all(
+        (detailServiceReport as ImagingReport).images.map(async (image) => {
+          image.endpoint = await this.s3Service.getSignedUrl(image.endpoint);
+        }),
+      );
     }
     return detailServiceReport;
   }
@@ -171,6 +196,20 @@ export class ReportsService {
       );
 
     return detailServiceReport;
+  }
+
+  async findOneBySpecimenIdentifier(
+    specimenIdentifier: number,
+  ): Promise<T | null> {
+    const specimen = await this.findOneSpecimen(specimenIdentifier);
+    if (!specimen) {
+      throw new HttpExceptionWrapper(ERROR_MESSAGES.SPECIMEN_NOT_FOUND);
+    }
+
+    return this.findOneDetailServiceReport(
+      LaboratoryReport,
+      specimen.laboratoryReportIdentifier,
+    );
   }
 
   async create(
@@ -304,7 +343,7 @@ export class ReportsService {
     }
 
     if (
-      currentUser.identifier !== detailReport.serviceReport.performerIdentifier
+      currentUser.identifier !== detailReport.serviceReport.reporterIdentifier
     ) {
       throw new HttpExceptionWrapper(ERROR_MESSAGES.PERMISSION_DENIED);
     }
@@ -323,7 +362,9 @@ export class ReportsService {
     }
 
     const date = new Date(0);
-    const dateFormatted = date.toISOString().replace('T', ' ').substring(0, 19);
+    const dateFormatted = date
+      .toLocaleString('sv-SE', { timeZone: 'Asia/Ho_Chi_Minh' })
+      .replace('T', ' ');
 
     const generalServiceInfo = (({ category, method, effectiveTime }) => ({
       category,
@@ -382,5 +423,124 @@ export class ReportsService {
       detailReport as unknown as ServiceReport,
     );
     return detailReportUpdated ? true : false;
+  }
+
+  async findOneSpecimen(identifier: number): Promise<Specimen | null> {
+    return await this.specimenRepository.findOne({
+      where: { identifier, status: false },
+    });
+  }
+
+  async findAllSpecimenByServiceIdentifier(
+    serviceIdentifier: number,
+  ): Promise<Specimen[]> {
+    return await this.specimenRepository
+      .createQueryBuilder('specimen')
+      .andWhere('specimen.status = false')
+      .innerJoin('specimen.laboratoryReport', 'laboratoryReport')
+      .innerJoin('laboratoryReport.serviceReport', 'serviceReport')
+      .where(
+        serviceIdentifier
+          ? 'serviceReport.serviceIdentifier = :serviceIdentifier'
+          : '1=1',
+        {
+          serviceIdentifier,
+        },
+      )
+      .getMany();
+  }
+
+  async createSpecimen(
+    createSpecimenDto: CreateSpecimenDto,
+  ): Promise<Specimen | null> {
+    const existedLaboratoryReport =
+      await this.laboratoryReportRepository.findOne({
+        where: {
+          identifier: createSpecimenDto.laboratoryReportIdentifier,
+          serviceReport: { status: false },
+        },
+      });
+    if (!existedLaboratoryReport) {
+      throw new HttpExceptionWrapper(
+        ERROR_MESSAGES.LABORATORY_REPORT_NOT_FOUND,
+      );
+    }
+
+    const newSpecimen = this.specimenRepository.create({
+      ...createSpecimenDto,
+      receivedTime: new Date()
+        .toLocaleString('sv-SE', { timeZone: 'Asia/Ho_Chi_Minh' })
+        .replace('T', ' '),
+    });
+    return await this.specimenRepository.save(newSpecimen);
+  }
+
+  async findAllImagingReport(
+    serviceIdentifier: number,
+  ): Promise<ImagingReport[]> {
+    const imagingReports = await this.imagingReportRepository.find({
+      where: {
+        serviceReport: {
+          status: false,
+          ...(serviceIdentifier
+            ? { service: { identifier: serviceIdentifier } }
+            : {}),
+        },
+      },
+      relations: ['serviceReport', 'images'],
+    });
+
+    await Promise.all(
+      imagingReports.map(async (imagingReport) => {
+        imagingReport.serviceReport.performer =
+          (await this.usersService.findOnePhysician(
+            imagingReport.serviceReport.performerIdentifier,
+          )) as Physician;
+      }),
+    );
+
+    return imagingReports;
+  }
+
+  async updateSpecimen(
+    specimenIdentifier: number,
+    updateSpecimenDto: UpdateSpecimenDto,
+  ): Promise<Specimen | null> {
+    const existedSpecimen = await this.findOneSpecimen(specimenIdentifier);
+    if (!existedSpecimen) {
+      throw new HttpExceptionWrapper(ERROR_MESSAGES.SPECIMEN_NOT_FOUND);
+    }
+
+    const { close, ...restUpdateSpecimenDto } = updateSpecimenDto;
+
+    const updatedSpecimen = {
+      ...existedSpecimen,
+      ...restUpdateSpecimenDto,
+      ...(close ? { status: true } : {}),
+    };
+    return await this.specimenRepository.save(updatedSpecimen);
+  }
+
+  async createImages(
+    createImagesDto: CreateImagesDto,
+    images: Express.Multer.File[],
+  ): Promise<Image[]> {
+    const createdImages = await Promise.all(
+      images.map(async (file, i) => {
+        const newName = `${createImagesDto.imagingReportIdentifier}-${Date.now()}-${i}`;
+        await this.s3Service.uploadBuffer(file, newName);
+
+        const newImage = this.imageRepository.create({
+          endpoint: newName,
+          receivedTime: new Date()
+            .toLocaleString('sv-SE', { timeZone: 'Asia/Ho_Chi_Minh' })
+            .replace('T', ' '),
+          imagingReportIdentifier: createImagesDto.imagingReportIdentifier,
+        });
+        return await this.imageRepository.save(newImage);
+      }),
+    );
+
+    return createdImages;
   }
 }
