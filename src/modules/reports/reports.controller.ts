@@ -67,6 +67,34 @@ export class ReportsController {
     );
   }
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(ROLES.PHYSICIAN)
+  @Post('/update-performer-physician/:serviceReportIdentifier')
+  updatePerformerPhysician(
+    @Param('serviceReportIdentifier') serviceReportIdentifier: number,
+    @CurrentUser() currentUser: User,
+  ) {
+    return this.reportService.updateServiceParticipant(
+      serviceReportIdentifier,
+      'performer',
+      currentUser,
+    );
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(ROLES.PHYSICIAN)
+  @Post('/update-reporter-physician/:serviceReportIdentifier')
+  updateReporterPhysician(
+    @Param('serviceReportIdentifier') serviceReportIdentifier: number,
+    @CurrentUser() currentUser: User,
+  ) {
+    return this.reportService.updateServiceParticipant(
+      serviceReportIdentifier,
+      'reporter',
+      currentUser,
+    );
+  }
+
   // !!! FOR TESTING PURPOSE ONLY !!!
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(ROLES.PHYSICIAN)
