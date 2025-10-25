@@ -57,8 +57,11 @@ export class Physician {
   prescriptions: Prescription[];
 
   @OneToMany(() => ServiceReport, (serviceReport) => serviceReport.performer)
-  servicePerformanceReports: ServiceReport[];
+  performedServiceReports: ServiceReport[];
+
+  @OneToMany(() => ServiceReport, (serviceReport) => serviceReport.reporter)
+  reportedServiceReports: ServiceReport[];
 
   @OneToMany(() => ServiceReport, (serviceReport) => serviceReport.requester)
-  serviceRequestReports: ServiceReport[];
+  requestedServiceReports: ServiceReport[];
 }
