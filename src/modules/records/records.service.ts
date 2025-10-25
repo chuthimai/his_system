@@ -10,9 +10,9 @@ import { User } from '@modules/users/entities/user.entity';
 import { UsersService } from '@modules/users/users.service';
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ERROR_MESSAGES } from 'src/constants/error-messages';
-import { SERVICE_TYPES } from 'src/constants/others';
-import { HttpExceptionWrapper } from 'src/helpers/http-exception-wrapper';
+import { ERROR_MESSAGES } from 'src/common/constants/error-messages';
+import { SERVICE_TYPES } from 'src/common/constants/others';
+import { HttpExceptionWrapper } from 'src/common/helpers/http-exception-wrapper';
 import { Repository } from 'typeorm';
 
 import { CreateRecordDto } from './dto/create-record.dto';

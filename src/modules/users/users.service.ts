@@ -2,9 +2,9 @@ import { RecordsService } from '@modules/records/records.service';
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
-import { ERROR_MESSAGES } from 'src/constants/error-messages';
-import { ROLES } from 'src/constants/others';
-import { HttpExceptionWrapper } from 'src/helpers/http-exception-wrapper';
+import { ERROR_MESSAGES } from 'src/common/constants/error-messages';
+import { ROLES } from 'src/common/constants/others';
+import { HttpExceptionWrapper } from 'src/common/helpers/http-exception-wrapper';
 import { Repository } from 'typeorm';
 
 import { CreateUserDto } from './dto/create-user.dto';

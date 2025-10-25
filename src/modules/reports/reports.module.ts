@@ -1,4 +1,5 @@
 import { RecordsModule } from '@modules/records/records.module';
+import { S3Module } from '@modules/s3/s3.module';
 import { SchedulesModule } from '@modules/schedules/schedules.module';
 import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -7,9 +8,11 @@ import { BillingModule } from 'src/modules/billing/billing.module';
 import { UsersModule } from 'src/modules/users/users.module';
 
 import { DiagnosisReport } from './entities/diagnosis-report.entity';
+import { Image } from './entities/image.entity';
 import { ImagingReport } from './entities/imaging-report.entity';
 import { LaboratoryReport } from './entities/laboratory-report.entity';
 import { ServiceReport } from './entities/service-report.entity';
+import { Specimen } from './entities/specimen.entity';
 import { ReportsController } from './reports.controller';
 import { ReportsService } from './reports.service';
 
@@ -20,6 +23,8 @@ import { ReportsService } from './reports.service';
       DiagnosisReport,
       LaboratoryReport,
       ImagingReport,
+      Specimen,
+      Image,
     ]),
     forwardRef(() => BillingModule),
     forwardRef(() => UsersModule),
@@ -27,6 +32,7 @@ import { ReportsService } from './reports.service';
     forwardRef(() => RecordsModule),
     forwardRef(() => SchedulesModule),
     forwardRef(() => AssessmentsModule),
+    S3Module,
   ],
   controllers: [ReportsController],
   providers: [ReportsService],
