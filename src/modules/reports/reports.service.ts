@@ -360,4 +360,27 @@ export class ReportsService {
     );
     return detailReportUpdated ? true : false;
   }
+
+  async updateServiceParticipant(
+    serviceReportIdentifier: number,
+    roleParticipant: 'performer' | 'reporter',
+    currentUser: User,
+  ): Promise<boolean> {
+    const detailReport = await this.findOne(serviceReportIdentifier);
+    if (!detailReport) {
+      throw new HttpExceptionWrapper(
+        ERROR_MESSAGES.DETAIL_SERVICE_REPORT_NOT_FOUND,
+      );
+    }
+
+    if (roleParticipant === 'performer')
+      detailReport.serviceReport.performerIdentifier = currentUser.identifier;
+    else if (roleParticipant === 'reporter')
+      detailReport.serviceReport.reporterIdentifier = currentUser.identifier;
+
+    const detailReportUpdated = await this.update(
+      detailReport as unknown as ServiceReport,
+    );
+    return detailReportUpdated ? true : false;
+  }
 }
