@@ -67,19 +67,6 @@ export class ReportsController {
     );
   }
 
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(ROLES.PHYSICIAN)
-  @Get('/close-service-report/:serviceReportIdentifier')
-  closeServiceReport(
-    @Param('serviceReportIdentifier') serviceReportIdentifier: number,
-    @CurrentUser() currentUser: User,
-  ) {
-    return this.reportService.closeServiceReport(
-      serviceReportIdentifier,
-      currentUser,
-    );
-  }
-
   // !!! FOR TESTING PURPOSE ONLY !!!
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(ROLES.PHYSICIAN)

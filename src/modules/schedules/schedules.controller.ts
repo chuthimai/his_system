@@ -23,7 +23,6 @@ export class SchedulesController {
     );
   }
 
-  // Api for get information to show on physician's profile and specify specialty examination
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(ROLES.PHYSICIAN)
   @Post('/staff-work-schedules-by-condition')

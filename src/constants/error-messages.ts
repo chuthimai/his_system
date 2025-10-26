@@ -19,13 +19,16 @@ export const ERROR_MESSAGES = {
   SERVICE_REPORT_NOT_FOUND: 'Service report not found',
   DETAIL_SERVICE_REPORT_NOT_FOUND: 'Detail service report not found',
 
+  CREATE_PATIENT_FAIL: 'Create patient fail',
   CREATE_INVOICE_FAIL: 'Create invoice fail',
   CREATE_INVOICE_SERVICE_FAIL: 'Create invoice service fail',
   CREATE_SERVICE_REPORT_FAIL: 'Create service report fail',
   CREATE_DETAIL_SERVICE_REPORT_FAIL: 'Create service report fail',
   CREATE_ASSESSMENT_RESULT_FAIL: 'Update assessment result fail',
+  CREATE_PATIENT_RECORD_FAIL: 'Create patient record fail',
 
   INVALID_PASSWORD: 'Invalid password',
+  INVALID_ROLE: 'Invalid role',
   USER_ALREADY_EXISTS: 'User already exists',
   APPOINTMENT_USER_CANNOT_BE_PHYSICIAN: 'Appointment user cannot be physician',
   PERFORMER_PHYSICIAN_MUST_BE_SPECIFY: 'Performer physician must be specify',

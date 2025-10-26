@@ -23,29 +23,25 @@ export class BillingService {
     private readonly recordService: RecordsService,
   ) {}
 
-  // For check existence in createInvoice function here
-  async findOneService(serviceIdentifier: number) {
+  async findOneService(serviceIdentifier: number): Promise<Service | null> {
     return await this.serviceRepository.findOneBy({
       identifier: serviceIdentifier,
     });
   }
 
-  // For check existence in createServiceForPatientRecord function in records service
-  async findOneServiceByCondition(condition: object) {
+  async findOneServiceByCondition(condition: object): Promise<Service | null> {
     return await this.serviceRepository.findOneBy(condition);
   }
 
-  // For check existence in createInvoice function here
-  async findOneInvoice(invoiceIdentifier: number) {
+  async findOneInvoice(invoiceIdentifier: number): Promise<Invoice | null> {
     return await this.invoiceRepository.findOneBy({
       identifier: invoiceIdentifier,
     });
   }
 
-  // For check existence in createServiceForPatientRecord function in records service
   async findOneInvoiceByPatientRecordIdentifier(
     patientRecordIdentifier: number,
-  ) {
+  ): Promise<Invoice | null> {
     return await this.invoiceRepository.findOneBy({
       patientRecordIdentifier: patientRecordIdentifier,
     });
@@ -57,7 +53,7 @@ export class BillingService {
     });
   }
 
-  async createInvoice(createInvoiceDto: CreateInvoiceDto) {
+  async createInvoice(createInvoiceDto: CreateInvoiceDto): Promise<Invoice> {
     const existedPatientRecord = await this.recordService.findOnePatientRecord(
       createInvoiceDto.patientRecordIdentifier,
     );
@@ -69,7 +65,9 @@ export class BillingService {
     return await this.invoiceRepository.save(newInvoice);
   }
 
-  async createInvoiceService(createInvoiceServiceDto: CreateInvoiceServiceDto) {
+  async createInvoiceService(
+    createInvoiceServiceDto: CreateInvoiceServiceDto,
+  ): Promise<InvoiceService | boolean> {
     const existedInvoice = await this.findOneInvoice(
       createInvoiceServiceDto.invoiceIdentifier,
     );
@@ -87,15 +85,13 @@ export class BillingService {
     const newInvoiceService = this.invoiceServiceRepository.create(
       createInvoiceServiceDto,
     );
-    const savedInvoiceService =
-      await this.invoiceServiceRepository.save(newInvoiceService);
-    return savedInvoiceService ? true : false;
+    return await this.invoiceServiceRepository.save(newInvoiceService);
   }
 
   async checkServiceIsPaid(
     patientRecordIdentifier: number,
     serviceIdentifier: number,
-  ) {
+  ): Promise<boolean> {
     const invoice = await this.invoiceRepository.findOne({
       where: {
         patientRecordIdentifier,
