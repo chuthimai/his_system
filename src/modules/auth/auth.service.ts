@@ -22,7 +22,11 @@ export class AuthService {
         ? await this.usersService.findOne(loginDto.identifier, true)
         : await this.usersService.findOnePhysician(loginDto.identifier, true);
 
-    if (!user || !user.role || !(user.role === role)) {
+    if (
+      !user ||
+      !user.role ||
+      !(user.role === role || user.role.endsWith(role))
+    ) {
       throw new HttpExceptionWrapper(ERROR_MESSAGES.USER_NOT_FOUND);
     }
 

@@ -20,6 +20,8 @@ export const ERROR_MESSAGES = {
   DETAIL_SERVICE_REPORT_NOT_FOUND: 'Detail service report not found',
   LABORATORY_REPORT_NOT_FOUND: 'Laboratory report not found',
   SPECIMEN_NOT_FOUND: 'Specimen not found',
+  MEDICATION_NOT_FOUND: 'Medication not found',
+  PRESCRIPTION_NOT_FOUND: 'Prescription not found',
 
   CREATE_PATIENT_FAIL: 'Create patient fail',
   CREATE_INVOICE_FAIL: 'Create invoice fail',
@@ -28,6 +30,8 @@ export const ERROR_MESSAGES = {
   CREATE_DETAIL_SERVICE_REPORT_FAIL: 'Create service report fail',
   CREATE_ASSESSMENT_RESULT_FAIL: 'Update assessment result fail',
   CREATE_PATIENT_RECORD_FAIL: 'Create patient record fail',
+  CREATE_PRESCRIPTION_FAIL: 'Create prescription fail',
+  CREATE_PRESCRIBED_MEDICATIONS_FAIL: 'Create prescribed medications fail',
 
   INVALID_PASSWORD: 'Invalid password',
   INVALID_ROLE: 'Invalid role',

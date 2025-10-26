@@ -217,6 +217,12 @@ export class RecordsService {
     );
   }
 
+  async updatePatientRecord(
+    patientRecord: PatientRecord,
+  ): Promise<PatientRecord> {
+    return await this.patientRecordRepository.save(patientRecord);
+  }
+
   async createServiceForPatientRecord(
     requesterIdentifier: number,
     performerIdentifier: number | null,
