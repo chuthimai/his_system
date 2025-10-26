@@ -18,10 +18,7 @@ export class PrescribedMedication {
   quantity: number;
 
   @Column({ name: 'dose_instruction' })
-  doseInstruction: string;
-
-  @Column({ nullable: true })
-  note: string;
+  dosageInstruction: string;
 
   @Column({ name: 'medication_identifier' })
   medicationIdentifier: number;

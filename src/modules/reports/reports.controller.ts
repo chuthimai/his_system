@@ -109,12 +109,14 @@ export class ReportsController {
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(ROLES.PHYSICIAN)
-  @Post('/update-diagnosis-report-result')
+  @Post('/update-diagnosis-report-result/:serviceReportIdentifier')
   updateDiagnosisReportResult(
+    @Param('serviceReportIdentifier') serviceReportIdentifier: number,
     @Body() updateDiagnosisReportResultDto: UpdateDiagnosisReportResultDto,
     @CurrentUser() currentUser: User,
   ) {
     return this.reportService.updateDetailServiceReport(
+      serviceReportIdentifier,
       updateDiagnosisReportResultDto,
       currentUser,
     );
@@ -122,12 +124,14 @@ export class ReportsController {
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(ROLES.PHYSICIAN)
-  @Post('/update-laboratory-report-result')
+  @Post('/update-laboratory-report-result/:serviceReportIdentifier')
   updateLaboratoryReportResult(
+    @Param('serviceReportIdentifier') serviceReportIdentifier: number,
     @Body() updateLaboratoryReportResultDto: UpdateLaboratoryReportResultDto,
     @CurrentUser() currentUser: User,
   ) {
     return this.reportService.updateDetailServiceReport(
+      serviceReportIdentifier,
       updateLaboratoryReportResultDto,
       currentUser,
     );
@@ -135,12 +139,14 @@ export class ReportsController {
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(ROLES.PHYSICIAN)
-  @Post('/update-imaging-report-result')
+  @Post('/update-imaging-report-result/:serviceReportIdentifier')
   updateImagingReportResult(
+    @Param('serviceReportIdentifier') serviceReportIdentifier: number,
     @Body() updateImagingReportResultDto: UpdateImagingReportResultDto,
     @CurrentUser() currentUser: User,
   ) {
     return this.reportService.updateDetailServiceReport(
+      serviceReportIdentifier,
       updateImagingReportResultDto,
       currentUser,
     );

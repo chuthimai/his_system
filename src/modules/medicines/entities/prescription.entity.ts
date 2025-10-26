@@ -17,7 +17,14 @@ export class Prescription {
   @PrimaryGeneratedColumn()
   identifier: number;
 
-  @Column({ name: 'create_time', type: 'datetime' })
+  @Column()
+  advice: string;
+
+  @Column({
+    name: 'create_time',
+    type: 'datetime',
+    default: () => 'CURRENT_TIMESTAMP',
+  })
   createdTime: string;
 
   @OneToMany(

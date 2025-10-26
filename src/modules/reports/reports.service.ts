@@ -327,15 +327,14 @@ export class ReportsService {
   }
 
   async updateDetailServiceReport(
+    serviceReportIdentifier: number,
     updateDetailReportResultDto:
       | UpdateDiagnosisReportResultDto
       | UpdateLaboratoryReportResultDto
       | UpdateImagingReportResultDto,
     currentUser: User,
   ): Promise<boolean> {
-    let detailReport = await this.findOne(
-      updateDetailReportResultDto.serviceReportIdentifier,
-    );
+    let detailReport = await this.findOne(serviceReportIdentifier);
     if (!detailReport) {
       throw new HttpExceptionWrapper(
         ERROR_MESSAGES.DETAIL_SERVICE_REPORT_NOT_FOUND,
