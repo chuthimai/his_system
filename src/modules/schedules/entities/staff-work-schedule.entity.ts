@@ -1,3 +1,4 @@
+import { Staff } from 'src/modules/users/entities/staff.entity';
 import {
   Column,
   Entity,
@@ -5,9 +6,9 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { WorkSchedule } from './work-schedule.entity';
-import { Staff } from 'src/modules/users/entities/staff.entity';
+
 import { Location } from './location.entity';
+import { WorkSchedule } from './work-schedule.entity';
 
 @Entity('staff_work_schedules')
 export class StaffWorkSchedule {
@@ -33,6 +34,13 @@ export class StaffWorkSchedule {
   })
   workSchedule: WorkSchedule;
 
+  @Column({ name: 'staff_identifier' })
+  staffIdentifier: number;
+
+  @ManyToOne(() => Staff, (staff) => staff.staffWorkSchedules)
+  @JoinColumn({ name: 'staff_identifier', referencedColumnName: 'identifier' })
+  staff: Staff;
+
   @Column({ name: 'location_identifier' })
   locationIdentifier: number;
 
@@ -42,13 +50,6 @@ export class StaffWorkSchedule {
     referencedColumnName: 'identifier',
   })
   location: Location;
-
-  @Column({ name: 'staff_identifier' })
-  staffIdentifier: number;
-
-  @ManyToOne(() => Staff, (staff) => staff.staffWorkSchedules)
-  @JoinColumn({ name: 'staff_identifier', referencedColumnName: 'identifier' })
-  staff: Staff;
 
   // @OneToMany(() => Appointment, (appointment) => appointment.staffWorkSchedule)
   // appointments: Appointment[];

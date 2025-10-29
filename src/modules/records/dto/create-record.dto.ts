@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
+  IsBoolean,
   IsDateString,
   IsNumber,
   IsOptional,
@@ -38,7 +39,8 @@ export class CreateRecordDto {
   @ApiProperty()
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
   @ValidateIf((obj) => obj.patientIdentifier == undefined)
-  gender?: string;
+  @IsBoolean()
+  gender?: boolean;
 
   @ApiProperty()
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
