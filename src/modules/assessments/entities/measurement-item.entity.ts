@@ -17,9 +17,17 @@ export class MeasurementItems {
   @Column()
   unit: string;
 
-  @Column()
-  minimum: number;
+  @Column({
+    type: 'varchar',
+    charset: 'utf8mb4',
+    collation: 'utf8mb4_unicode_ci',
+  })
+  minimum: string;
 
-  @Column()
-  maximum: number;
+  @Column({
+    type: 'varchar',
+    charset: 'utf8mb4',
+    collation: 'utf8mb4_unicode_ci',
+  })
+  maximum: string;
 }

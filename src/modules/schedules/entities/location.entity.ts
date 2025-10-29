@@ -2,11 +2,11 @@ import { Service } from 'src/modules/billing/entities/service.entity';
 import {
   Column,
   Entity,
+  JoinColumn,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { JoinColumn } from 'typeorm';
 
 import { StaffWorkSchedule } from './staff-work-schedule.entity';
 
@@ -16,10 +16,10 @@ export class Location {
   identifier: number;
 
   @Column()
-  name: string;
+  type: string;
 
   @Column()
-  type: string;
+  name: string;
 
   @Column({ name: 'parent_identifier', nullable: true })
   parentIdentifier: number;
