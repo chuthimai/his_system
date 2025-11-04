@@ -20,7 +20,7 @@ export class Appointment {
   @Column({ nullable: true })
   reason: string;
 
-  @Column({ name: 'cancellation_date', nullable: true })
+  @Column({ name: 'cancellation_date', type: 'date', nullable: true })
   cancellationDate: string;
 
   @Column({ name: 'work_schedule_identifier' })

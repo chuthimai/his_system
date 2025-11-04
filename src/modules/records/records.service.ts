@@ -6,6 +6,7 @@ import { LaboratoryReport } from '@modules/reports/entities/laboratory-report.en
 import { ReportsService, T } from '@modules/reports/reports.service';
 import { SchedulesService } from '@modules/schedules/schedules.service';
 import { CreateUserDto } from '@modules/users/dto/create-user.dto';
+import { Physician } from '@modules/users/entities/physician.entity';
 import { User } from '@modules/users/entities/user.entity';
 import { UsersService } from '@modules/users/users.service';
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
@@ -38,21 +39,22 @@ export class RecordsService {
     private readonly reportsService: ReportsService,
     @Inject(forwardRef(() => SchedulesService))
     private readonly schedulesService: SchedulesService,
+    @Inject(forwardRef(() => UsersService))
     private readonly usersService: UsersService,
   ) {}
 
-  async findOnePatientRecord(
-    patientRecordIdentifier: number,
+  async findOne(
+    identifier: number,
     isFull: boolean = false,
   ): Promise<PatientRecord | null> {
     return !isFull
       ? await this.patientRecordRepository.findOneBy({
-          identifier: patientRecordIdentifier,
+          identifier,
         })
       : await this.patientRecordRepository
           .createQueryBuilder('record')
           .where('record.identifier = :identifier', {
-            identifier: patientRecordIdentifier,
+            identifier,
           })
           .leftJoin('record.patient', 'patient')
           .addSelect([
@@ -72,6 +74,77 @@ export class RecordsService {
           .addSelect(['service.identifier', 'service.type', 'service.name'])
           .addSelect([])
           .getOne();
+  }
+
+  async findOneDetail(identifier: number): Promise<any> {
+    const record = await this.findOne(identifier);
+    if (!record) {
+      throw new HttpExceptionWrapper(ERROR_MESSAGES.PATIENT_RECORD_NOT_FOUND);
+    }
+
+    return record.status
+      ? await this.findOneClosedRecords(identifier)
+      : await this.findOneUnclosedRecords(identifier);
+  }
+
+  async findOneClosedRecords(
+    identifier: number,
+  ): Promise<PatientRecord | null> {
+    return null;
+  }
+
+  async findOneUnclosedRecords(
+    identifier: number,
+  ): Promise<PatientRecord | null> {
+    const unclosedRecord = await this.patientRecordRepository.findOne({
+      where: { identifier },
+      relations: [
+        'serviceReports',
+        'serviceReports.service',
+        'serviceReports.service.assessmentItems',
+        'serviceReports.assessmentResults',
+      ],
+      order: {
+        serviceReports: {
+          service: {
+            identifier: 'ASC',
+          },
+        },
+      },
+    });
+
+    if (!unclosedRecord) return unclosedRecord;
+
+    unclosedRecord.serviceReports = await Promise.all(
+      unclosedRecord.serviceReports.map(async (serviceReport) => {
+        serviceReport.performer = (await this.usersService.findOnePhysician(
+          serviceReport.performerIdentifier,
+        )) as Physician;
+
+        serviceReport.reporter = (await this.usersService.findOnePhysician(
+          serviceReport.reporterIdentifier,
+        )) as Physician;
+
+        return serviceReport;
+      }),
+    );
+
+    return unclosedRecord;
+  }
+
+  async findLatestPatientRecord(
+    patientIdentifier: number,
+  ): Promise<PatientRecord | null> {
+    return await this.patientRecordRepository.findOne({
+      where: { patientIdentifier, status: false },
+      order: { identifier: 'DESC' },
+    });
+  }
+
+  async findAll(currentUser: User): Promise<PatientRecord[]> {
+    return await this.patientRecordRepository.find({
+      where: { patientIdentifier: currentUser.identifier },
+    });
   }
 
   async create(
@@ -116,14 +189,14 @@ export class RecordsService {
       throw new HttpExceptionWrapper(ERROR_MESSAGES.UNEXPECTABLE_FAULT);
     }
 
-    return await this.findOnePatientRecord(savedPatientRecord.identifier, true);
+    return await this.findOne(savedPatientRecord.identifier, true);
   }
 
   async updateSpecialtyConsultation(
     updateSpecialtyConsultationDto: UpdateSpecialtyConsultationDto,
     currentUser: User,
   ): Promise<PatientRecord | null> {
-    const existedRecord = await this.findOnePatientRecord(
+    const existedRecord = await this.findOne(
       updateSpecialtyConsultationDto.patientRecordIdentifier,
       true,
     );
@@ -165,7 +238,7 @@ export class RecordsService {
       throw new HttpExceptionWrapper(ERROR_MESSAGES.UNEXPECTABLE_FAULT);
     }
 
-    return await this.findOnePatientRecord(
+    return await this.findOne(
       updateSpecialtyConsultationDto.patientRecordIdentifier,
       true,
     );
@@ -175,7 +248,7 @@ export class RecordsService {
     updateLaboratoryAndImagingDto: UpdateLaboratoryAndImagingDto,
     currentUser: User,
   ): Promise<PatientRecord | null> {
-    const existedRecord = await this.findOnePatientRecord(
+    const existedRecord = await this.reportsService.findOne(
       updateLaboratoryAndImagingDto.patientRecordIdentifier,
     );
     if (!existedRecord) {
@@ -211,7 +284,7 @@ export class RecordsService {
       }),
     );
 
-    return await this.findOnePatientRecord(
+    return await this.findOne(
       updateLaboratoryAndImagingDto.patientRecordIdentifier,
       true,
     );
