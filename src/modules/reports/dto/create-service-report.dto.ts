@@ -20,5 +20,10 @@ export class CreateServiceReportDto {
   @ApiProperty()
   @IsOptional()
   @IsNumber()
-  requesterIdentifier?: number;
+  reporterIdentifier?: number;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsNumber()
+  requesterIdentifier: number;
 }

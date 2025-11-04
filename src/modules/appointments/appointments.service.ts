@@ -4,8 +4,8 @@ import { User } from '@modules/users/entities/user.entity';
 import { UsersService } from '@modules/users/users.service';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ERROR_MESSAGES } from 'src/constants/error-messages';
-import { HttpExceptionWrapper } from 'src/helpers/http-exception-wrapper';
+import { ERROR_MESSAGES } from 'src/common/constants/error-messages';
+import { HttpExceptionWrapper } from 'src/common/helpers/http-exception-wrapper';
 import { Repository } from 'typeorm';
 
 import { CreateAppointmentDto } from './dto/create-appointment.dto';

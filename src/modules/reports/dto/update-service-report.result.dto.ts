@@ -5,17 +5,11 @@ import {
   IsArray,
   IsDateString,
   IsNotEmpty,
-  IsNumber,
   IsString,
   ValidateNested,
 } from 'class-validator';
 
 export class UpdateServiceReportResultDto {
-  @ApiProperty()
-  @IsNotEmpty()
-  @IsNumber()
-  serviceReportIdentifier: number;
-
   @ApiProperty({ type: [CreateAssessmentResultDto] })
   @IsNotEmpty()
   @IsArray()

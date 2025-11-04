@@ -10,9 +10,9 @@ import { User } from '@modules/users/entities/user.entity';
 import { UsersService } from '@modules/users/users.service';
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ERROR_MESSAGES } from 'src/constants/error-messages';
-import { SERVICE_TYPES } from 'src/constants/others';
-import { HttpExceptionWrapper } from 'src/helpers/http-exception-wrapper';
+import { ERROR_MESSAGES } from 'src/common/constants/error-messages';
+import { SERVICE_TYPES } from 'src/common/constants/others';
+import { HttpExceptionWrapper } from 'src/common/helpers/http-exception-wrapper';
 import { Repository } from 'typeorm';
 
 import { CreateRecordDto } from './dto/create-record.dto';
@@ -108,6 +108,7 @@ export class RecordsService {
       !(await this.createServiceForPatientRecord(
         currentUser.identifier,
         currentUser.identifier,
+        currentUser.identifier,
         savedPatientRecord.identifier,
         { type: SERVICE_TYPES.GENERAL_CONSULTATION },
       ))
@@ -156,6 +157,7 @@ export class RecordsService {
       !(await this.createServiceForPatientRecord(
         currentUser.identifier,
         existedStaffWorkSchedule.staffIdentifier,
+        existedStaffWorkSchedule.staffIdentifier,
         updateSpecialtyConsultationDto.patientRecordIdentifier,
         serviceInfo,
       ))
@@ -199,6 +201,7 @@ export class RecordsService {
           !(await this.createServiceForPatientRecord(
             currentUser.identifier,
             null,
+            null,
             updateLaboratoryAndImagingDto.patientRecordIdentifier,
             { identifier: service.identifier },
           ))
@@ -214,9 +217,16 @@ export class RecordsService {
     );
   }
 
+  async updatePatientRecord(
+    patientRecord: PatientRecord,
+  ): Promise<PatientRecord> {
+    return await this.patientRecordRepository.save(patientRecord);
+  }
+
   async createServiceForPatientRecord(
     requesterIdentifier: number,
     performerIdentifier: number | null,
+    reporterIdentifier: number | null,
     patientRecordIdentifier: number,
     serviceInfo: object,
   ): Promise<boolean> {
@@ -254,6 +264,7 @@ export class RecordsService {
     const serviceReportCreated = await this.createServiceReportForPatientRecord(
       requesterIdentifier,
       performerIdentifier,
+      reporterIdentifier,
       patientRecordIdentifier,
       service.identifier,
       service.type,
@@ -264,6 +275,7 @@ export class RecordsService {
   async createServiceReportForPatientRecord(
     requesterIdentifier: number,
     performerIdentifier: number | null,
+    reporterIdentifier: number | null,
     patientRecordIdentifier: number,
     serviceIdentifier: number,
     serviceType: string,
@@ -278,6 +290,7 @@ export class RecordsService {
       serviceIdentifier,
       requesterIdentifier,
       ...(performerIdentifier ? { performerIdentifier } : {}),
+      ...(reporterIdentifier ? { reporterIdentifier } : {}),
     };
     const serviceReport = await this.reportsService.createDetailServiceReport(
       serviceReportEntity as new () => T,

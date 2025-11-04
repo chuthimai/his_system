@@ -13,16 +13,23 @@ export class Specimen {
   @PrimaryGeneratedColumn()
   identifier: number;
 
-  @Column()
+  @Column({ default: '' })
   type: string;
 
-  @Column()
+  @Column({ default: '' })
   condition: string;
 
-  @Column({ type: 'boolean', default: false }) // true ~ cancelled?
+  @Column({ default: '' })
+  state: string;
+
+  @Column({ type: 'boolean', default: false }) // true ~ close?
   status: boolean;
 
-  @Column({ name: 'received_time', type: 'datetime' })
+  @Column({
+    name: 'received_time',
+    type: 'datetime',
+    default: () => "'1000-01-01 00:00:00'",
+  })
   receivedTime: string;
 
   @Column({ name: 'laboratory_report_identifier' })

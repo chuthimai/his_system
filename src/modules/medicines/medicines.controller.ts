@@ -1,46 +1,35 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Patch,
-  Post,
-} from '@nestjs/common';
+import { JwtAuthGuard } from '@modules/auth/guards/jwt.guard';
+import { User } from '@modules/users/entities/user.entity';
+import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { ROLES } from 'src/common/constants/others';
+import { CurrentUser } from 'src/common/decorators/current-user.decorator.dto';
+import { Roles } from 'src/common/decorators/roles.decorator';
+import { RolesGuard } from 'src/common/guards/roles.guard';
 
-import { CreateMedicineDto } from './dto/create-medicine.dto';
-import { UpdateMedicineDto } from './dto/update-medicine.dto';
+import { PrescribeMedicineDto } from './dto/prescribe-medicine.dto';
 import { MedicinesService } from './medicines.service';
 
 @Controller('medicines')
 export class MedicinesController {
   constructor(private readonly medicinesService: MedicinesService) {}
 
-  @Post()
-  create(@Body() createMedicineDto: CreateMedicineDto) {
-    return this.medicinesService.create(createMedicineDto);
-  }
-
-  @Get()
-  findAll() {
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(ROLES.PHYSICIAN)
+  @Get('/')
+  getAll() {
     return this.medicinesService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.medicinesService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateMedicineDto: UpdateMedicineDto,
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(ROLES.PHYSICIAN)
+  @Post('/prescriptions')
+  prescribeMedicine(
+    @Body() prescribeMedicineDto: PrescribeMedicineDto,
+    @CurrentUser() currentUser: User,
   ) {
-    return this.medicinesService.update(+id, updateMedicineDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.medicinesService.remove(+id);
+    return this.medicinesService.prescribeMedicine(
+      prescribeMedicineDto,
+      currentUser,
+    );
   }
 }

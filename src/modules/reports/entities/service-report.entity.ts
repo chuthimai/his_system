@@ -76,20 +76,27 @@ export class ServiceReport {
   @Column({ name: 'performer_identifier', nullable: true })
   performerIdentifier: number;
 
-  @ManyToOne(
-    () => Physician,
-    (performer) => performer.servicePerformanceReports,
-  )
+  @ManyToOne(() => Physician, (performer) => performer.performedServiceReports)
   @JoinColumn({
     name: 'performer_identifier',
     referencedColumnName: 'identifier',
   })
   performer: Physician;
 
+  @Column({ name: 'reporter_identifier', nullable: true })
+  reporterIdentifier: number;
+
+  @ManyToOne(() => Physician, (reporter) => reporter.reportedServiceReports)
+  @JoinColumn({
+    name: 'reporter_identifier',
+    referencedColumnName: 'identifier',
+  })
+  reporter: Physician;
+
   @Column({ name: 'requester_identifier', nullable: true })
   requesterIdentifier: number;
 
-  @ManyToOne(() => Physician, (requester) => requester.serviceRequestReports)
+  @ManyToOne(() => Physician, (requester) => requester.requestedServiceReports)
   @JoinColumn({
     name: 'requester_identifier',
     referencedColumnName: 'identifier',

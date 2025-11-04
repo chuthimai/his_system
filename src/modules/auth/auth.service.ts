@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
-import { ERROR_MESSAGES } from 'src/constants/error-messages';
-import { ROLES } from 'src/constants/others';
-import { HttpExceptionWrapper } from 'src/helpers/http-exception-wrapper';
+import { ERROR_MESSAGES } from 'src/common/constants/error-messages';
+import { ROLES } from 'src/common/constants/others';
+import { HttpExceptionWrapper } from 'src/common/helpers/http-exception-wrapper';
 import { UsersService } from 'src/modules/users/users.service';
 
 import { LoginDto } from './dto/login.dto';
@@ -22,7 +22,11 @@ export class AuthService {
         ? await this.usersService.findOne(loginDto.identifier, true)
         : await this.usersService.findOnePhysician(loginDto.identifier, true);
 
-    if (!user || !user.role || !(user.role === role)) {
+    if (
+      !user ||
+      !user.role ||
+      !(user.role === role || user.role.endsWith(role))
+    ) {
       throw new HttpExceptionWrapper(ERROR_MESSAGES.USER_NOT_FOUND);
     }
 

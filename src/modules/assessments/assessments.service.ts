@@ -1,7 +1,7 @@
 import { ReportsService } from '@modules/reports/reports.service';
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ERROR_MESSAGES } from 'src/constants/error-messages';
+import { ERROR_MESSAGES } from 'src/common/constants/error-messages';
 import { IsNull, Repository } from 'typeorm';
 
 import { CreateAssessmentResultsDto } from './dto/create-assessment-results.dto';

@@ -1,8 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { IsIn, IsNotEmpty, IsNumber, IsString } from 'class-validator';
-import { ERROR_MESSAGES } from 'src/constants/error-messages';
-import { ROLES } from 'src/constants/others';
+import { ERROR_MESSAGES } from 'src/common/constants/error-messages';
+import { ROLES } from 'src/common/constants/others';
 
 export class LoginDto {
   @ApiProperty({ enum: Object.values(ROLES) })
