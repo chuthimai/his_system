@@ -56,7 +56,9 @@ export class ReportsService {
     private readonly patientRecordService: RecordsService,
     @Inject(forwardRef(() => AssessmentsService))
     private readonly assessmentsService: AssessmentsService,
+    @Inject(forwardRef(() => SchedulesService))
     private readonly schedulesService: SchedulesService,
+    @Inject(forwardRef(() => UsersService))
     private readonly usersService: UsersService,
     private readonly s3Service: S3Service,
   ) {
@@ -157,10 +159,9 @@ export class ReportsService {
       );
     }
 
-    const existedPatientRecord =
-      await this.patientRecordService.findOnePatientRecord(
-        patientRecordIdentifier,
-      );
+    const existedPatientRecord = await this.patientRecordService.findOne(
+      patientRecordIdentifier,
+    );
     if (!existedPatientRecord) {
       throw new HttpExceptionWrapper(ERROR_MESSAGES.PATIENT_RECORD_NOT_FOUND);
     }
@@ -222,10 +223,9 @@ export class ReportsService {
       throw new HttpExceptionWrapper(ERROR_MESSAGES.SERVICE_NOT_FOUND);
     }
 
-    const existedPatientRecord =
-      await this.patientRecordService.findOnePatientRecord(
-        createServiceReportDto.patientRecordIdentifier,
-      );
+    const existedPatientRecord = await this.patientRecordService.findOne(
+      createServiceReportDto.patientRecordIdentifier,
+    );
     if (!existedPatientRecord) {
       throw new HttpExceptionWrapper(ERROR_MESSAGES.PATIENT_RECORD_NOT_FOUND);
     }
@@ -312,6 +312,20 @@ export class ReportsService {
     const savedDetailReport =
       await detailReportRepository.save(newDetailReport);
 
+    if (entity === DiagnosisReport) {
+      const createdDetailReport = await this.findOneDetailServiceReport(
+        DiagnosisReport,
+        savedDetailReport.identifier,
+      );
+
+      (createdDetailReport as DiagnosisReport).serviceReport.effectiveTime =
+        new Date().toISOString().split('T')[0];
+
+      return await detailReportRepository.save(
+        createdDetailReport as unknown as T,
+      );
+    }
+
     return await detailReportRepository.findOne({
       where: { identifier: savedDetailReport.identifier },
       relations: ['serviceReport'],
@@ -347,6 +361,10 @@ export class ReportsService {
       throw new HttpExceptionWrapper(ERROR_MESSAGES.PERMISSION_DENIED);
     }
 
+    await this.closeAllSpecimenByLaboratoryReportIdentifier(
+      detailReport.identifier,
+    );
+
     // Chưa check đẩy đủ assessment results
 
     const assessmentResultsCreated =
@@ -360,15 +378,12 @@ export class ReportsService {
       );
     }
 
-    const date = new Date(0);
-    const dateFormatted = date
-      .toLocaleString('sv-SE', { timeZone: 'Asia/Ho_Chi_Minh' })
-      .replace('T', ' ');
+    const now = new Date();
+    const dateFormatted = now.toISOString().split('T')[0];
 
-    const generalServiceInfo = (({ category, method, effectiveTime }) => ({
+    const generalServiceInfo = (({ category, method }) => ({
       category,
       method,
-      effectiveTime,
       recordedTime: dateFormatted,
       status: true,
     }))(updateDetailReportResultDto);
@@ -465,6 +480,11 @@ export class ReportsService {
       );
     }
 
+    existedLaboratoryReport.serviceReport.effectiveTime = new Date()
+      .toISOString()
+      .split('T')[0];
+    await this.serviceReportRepository.save(existedLaboratoryReport);
+
     const newSpecimen = this.specimenRepository.create({
       ...createSpecimenDto,
       receivedTime: new Date()
@@ -472,6 +492,25 @@ export class ReportsService {
         .replace('T', ' '),
     });
     return await this.specimenRepository.save(newSpecimen);
+  }
+
+  async closeAllSpecimenByLaboratoryReportIdentifier(
+    laboratoryReportIdentifier: number,
+  ): Promise<boolean> {
+    const specimens = await this.specimenRepository.find({
+      where: {
+        laboratoryReportIdentifier,
+        status: false,
+      },
+    });
+
+    await Promise.all(
+      specimens.map(async (specimen) => {
+        specimen.status = true;
+        await this.specimenRepository.save(specimen);
+      }),
+    );
+    return true;
   }
 
   async findAllImagingReport(
@@ -510,12 +549,9 @@ export class ReportsService {
       throw new HttpExceptionWrapper(ERROR_MESSAGES.SPECIMEN_NOT_FOUND);
     }
 
-    const { close, ...restUpdateSpecimenDto } = updateSpecimenDto;
-
     const updatedSpecimen = {
       ...existedSpecimen,
-      ...restUpdateSpecimenDto,
-      ...(close ? { status: true } : {}),
+      ...updateSpecimenDto,
     };
     return await this.specimenRepository.save(updatedSpecimen);
   }
@@ -524,6 +560,21 @@ export class ReportsService {
     createImagesDto: CreateImagesDto,
     images: Express.Multer.File[],
   ): Promise<Image[]> {
+    const existedImagingReport = await this.imagingReportRepository.findOne({
+      where: {
+        identifier: createImagesDto.imagingReportIdentifier,
+        serviceReport: { status: false },
+      },
+    });
+    if (!existedImagingReport) {
+      throw new HttpExceptionWrapper(ERROR_MESSAGES.IMAGING_REPORT_NOT_FOUND);
+    }
+
+    existedImagingReport.serviceReport.effectiveTime = new Date()
+      .toISOString()
+      .split('T')[0];
+    await this.serviceReportRepository.save(existedImagingReport);
+
     const createdImages = await Promise.all(
       images.map(async (file, i) => {
         const newName = `${createImagesDto.imagingReportIdentifier}-${Date.now()}-${i}`;

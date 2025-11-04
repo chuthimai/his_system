@@ -9,6 +9,7 @@ import { HttpExceptionWrapper } from 'src/common/helpers/http-exception-wrapper'
 import { Repository } from 'typeorm';
 
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
+import { DeleteAppointmentDto } from './dto/delete-appointment.dto';
 import { Appointment } from './entities/appointment.entity';
 
 @Injectable()
@@ -19,6 +20,13 @@ export class AppointmentsService {
     private readonly usersService: UsersService,
     private readonly schedulesService: SchedulesService,
   ) {}
+
+  async findOne(identifier: number): Promise<Appointment | null> {
+    return await this.appointmentRepository.findOne({
+      where: { identifier, status: false },
+      relations: ['workSchedule'],
+    });
+  }
 
   async findAllByUserIdentifier(
     userIdentifier: number,
@@ -103,5 +111,44 @@ export class AppointmentsService {
     )) as Physician;
 
     return targetAppointment;
+  }
+
+  async delete(
+    identifier: number,
+    deleteAppointmentDto: DeleteAppointmentDto,
+    currentUser: User,
+  ): Promise<boolean> {
+    let existedAppointment = await this.findOne(identifier);
+    if (!existedAppointment) {
+      throw new HttpExceptionWrapper(ERROR_MESSAGES.APPOINTMENT_NOT_FOUND);
+    }
+
+    if (
+      ![
+        existedAppointment.physicianIdentifier,
+        existedAppointment.userIdentifier,
+      ].includes(currentUser.identifier)
+    ) {
+      throw new HttpExceptionWrapper(ERROR_MESSAGES.PERMISSION_DENIED);
+    }
+
+    const now = new Date();
+    const formattedDate = now.toISOString().split('T')[0];
+
+    // Consider
+    if (!(new Date(existedAppointment.workSchedule.date) > now)) {
+      throw new HttpExceptionWrapper(ERROR_MESSAGES.CAN_NOT_CANCEL_APPOINTMENT);
+    }
+
+    existedAppointment = {
+      ...existedAppointment,
+      reason: deleteAppointmentDto.reason,
+      cancellationDate: formattedDate,
+      status: true,
+    };
+
+    const cancelAppointment =
+      await this.appointmentRepository.save(existedAppointment);
+    return cancelAppointment ? true : false;
   }
 }

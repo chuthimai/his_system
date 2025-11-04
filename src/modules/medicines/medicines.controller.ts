@@ -1,6 +1,6 @@
 import { JwtAuthGuard } from '@modules/auth/guards/jwt.guard';
 import { User } from '@modules/users/entities/user.entity';
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { ROLES } from 'src/common/constants/others';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator.dto';
 import { Roles } from 'src/common/decorators/roles.decorator';
@@ -14,10 +14,29 @@ export class MedicinesController {
   constructor(private readonly medicinesService: MedicinesService) {}
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(ROLES.PHYSICIAN)
+  @Roles(ROLES.PHYSICIAN, ROLES.PATIENT)
   @Get('/')
   getAll() {
     return this.medicinesService.findAll();
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(ROLES.PATIENT)
+  @Get('/prescriptions')
+  getAllPrescriptionsOfCurrentUser(@CurrentUser() currentUser: User) {
+    return this.medicinesService.findAllPrescriptionsOfCurrentUser(currentUser);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(ROLES.PATIENT)
+  @Get('/prescriptions/:prescriptionIdentifier')
+  getOnePrescription(
+    @Param('prescriptionIdentifier') prescriptionIdentifier: number,
+  ) {
+    return this.medicinesService.findOnePrescription(
+      prescriptionIdentifier,
+      true,
+    );
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)

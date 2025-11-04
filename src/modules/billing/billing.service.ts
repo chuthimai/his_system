@@ -1,5 +1,8 @@
 import { RecordsService } from '@modules/records/records.service';
-import { Injectable } from '@nestjs/common';
+import { Location } from '@modules/schedules/entities/location.entity';
+import { SchedulesService } from '@modules/schedules/schedules.service';
+import { User } from '@modules/users/entities/user.entity';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ERROR_MESSAGES } from 'src/common/constants/error-messages';
 import { HttpExceptionWrapper } from 'src/common/helpers/http-exception-wrapper';
@@ -20,7 +23,10 @@ export class BillingService {
     private readonly invoiceRepository: Repository<Invoice>,
     @InjectRepository(InvoiceService)
     private readonly invoiceServiceRepository: Repository<InvoiceService>,
+    @Inject(forwardRef(() => RecordsService))
     private readonly recordService: RecordsService,
+    @Inject(forwardRef(() => SchedulesService))
+    private readonly scheduleService: SchedulesService,
   ) {}
 
   async findOneService(serviceIdentifier: number): Promise<Service | null> {
@@ -33,10 +39,32 @@ export class BillingService {
     return await this.serviceRepository.findOneBy(condition);
   }
 
-  async findOneInvoice(invoiceIdentifier: number): Promise<Invoice | null> {
-    return await this.invoiceRepository.findOneBy({
-      identifier: invoiceIdentifier,
-    });
+  async findOneSpecialtyServiceByPatientRecord(
+    patientRecordIdentifier: number,
+  ): Promise<Service | null> {
+    return await this.serviceRepository
+      .createQueryBuilder('service')
+      .where('service.type = :type', { type: 'Chuyên khoa' })
+      .leftJoinAndSelect('service.invoiceServices', 'invoiceServices')
+      .leftJoinAndSelect('invoiceServices.invoice', 'invoice')
+      .andWhere('invoice.patientRecordIdentifier = :patientRecordIdentifier', {
+        patientRecordIdentifier,
+      })
+      .getOne();
+  }
+
+  async findOneInvoice(
+    identifier: number,
+    isFull: boolean = false,
+  ): Promise<Invoice | null> {
+    return !isFull
+      ? await this.invoiceRepository.findOneBy({
+          identifier,
+        })
+      : await this.invoiceRepository.findOne({
+          where: { identifier },
+          relations: ['invoiceServices', 'invoiceServices.service'],
+        });
   }
 
   async findOneInvoiceByPatientRecordIdentifier(
@@ -47,14 +75,47 @@ export class BillingService {
     });
   }
 
-  async findAllServicesByTypes(type: string | null = null) {
+  async findAllServicesByTypes(type: string | null = null): Promise<Service[]> {
     return this.serviceRepository.find({
       ...(type ? { where: { type } } : {}),
     });
   }
 
+  async findAllServicesRequired(currentUser: User): Promise<Service[]> {
+    const patientRecord = await this.recordService.findLatestPatientRecord(
+      currentUser.identifier,
+    );
+    if (!patientRecord) {
+      throw new HttpExceptionWrapper(ERROR_MESSAGES.PATIENT_RECORD_NOT_FOUND);
+    }
+
+    const services = await this.serviceRepository
+      .createQueryBuilder('service')
+      .leftJoin('service.invoiceServices', 'invoiceServices')
+      .leftJoin('invoiceServices.invoice', 'invoice')
+      .where('invoice.patientRecordIdentifier = :patientRecordIdentifier', {
+        patientRecordIdentifier: patientRecord.identifier,
+      })
+      .getMany();
+
+    return await Promise.all(
+      services.map(async (service) => {
+        service.location = (await this.scheduleService.findOneLocation(
+          service.locationIdentifier,
+        )) as Location;
+        return service;
+      }),
+    );
+  }
+
+  async findAllInvoices(currentUser: User): Promise<Invoice[]> {
+    return await this.invoiceRepository.find({
+      where: { patientRecord: { patientIdentifier: currentUser.identifier } },
+    });
+  }
+
   async createInvoice(createInvoiceDto: CreateInvoiceDto): Promise<Invoice> {
-    const existedPatientRecord = await this.recordService.findOnePatientRecord(
+    const existedPatientRecord = await this.recordService.findOne(
       createInvoiceDto.patientRecordIdentifier,
     );
     if (!existedPatientRecord) {

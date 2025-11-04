@@ -1,6 +1,6 @@
 import { JwtAuthGuard } from '@modules/auth/guards/jwt.guard';
 import { User } from '@modules/users/entities/user.entity';
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { ROLES } from 'src/common/constants/others';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator.dto';
 import { Roles } from 'src/common/decorators/roles.decorator';
@@ -14,6 +14,20 @@ import { RecordsService } from './records.service';
 @Controller('records')
 export class RecordsController {
   constructor(private readonly recordsService: RecordsService) {}
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(ROLES.PATIENT)
+  @Get('/')
+  getAll(@CurrentUser() currentUser: User) {
+    return this.recordsService.findAll(currentUser);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(ROLES.PATIENT)
+  @Get('/:recordIdentifier')
+  getOne(@Param('recordIdentifier') recordIdentifier: number) {
+    return this.recordsService.findOneDetail(recordIdentifier);
+  }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(ROLES.PHYSICIAN)
