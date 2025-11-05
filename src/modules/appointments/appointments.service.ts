@@ -23,7 +23,7 @@ export class AppointmentsService {
 
   async findOne(identifier: number): Promise<Appointment | null> {
     return await this.appointmentRepository.findOne({
-      where: { identifier, status: false },
+      where: { identifier, status: true },
       relations: ['workSchedule'],
     });
   }
@@ -38,9 +38,12 @@ export class AppointmentsService {
 
     await Promise.all(
       appointments.map(async (appointment) => {
-        appointment.physician = (await this.usersService.findOnePhysician(
-          appointment.physicianIdentifier,
-        )) as unknown as Physician;
+        if (appointment.physicianIdentifier) {
+          appointment.physician = (await this.usersService.findOnePhysician(
+            appointment.physicianIdentifier,
+          )) as unknown as Physician;
+        }
+
         appointment.user = (await this.usersService.findOne(
           appointment.userIdentifier,
         )) as User;
@@ -135,9 +138,8 @@ export class AppointmentsService {
     const now = new Date();
     const formattedDate = now.toISOString().split('T')[0];
 
-    // Consider
     if (!(new Date(existedAppointment.workSchedule.date) > now)) {
-      throw new HttpExceptionWrapper(ERROR_MESSAGES.CAN_NOT_CANCEL_APPOINTMENT);
+      throw new HttpExceptionWrapper(ERROR_MESSAGES.LATE_TO_CANCEL_APPOINTMENT);
     }
 
     existedAppointment = {
