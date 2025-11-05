@@ -44,7 +44,7 @@ export const ERROR_MESSAGES = {
   REQUESTER_PHYSICIAN_MUST_BE_SPECIFY: 'Requester physician must be specify',
   SPECIALTY_CONSULTATION_SPECIFIED: 'Specialty consultation specified',
 
-  CAN_NOT_CANCEL_APPOINTMENT: 'Can not cancel this appointment',
+  LATE_TO_CANCEL_APPOINTMENT: 'Too late to cancel this appointment',
 
   UNEXPECTABLE_FAULT: 'Unexpectable fail',
   PERMISSION_DENIED: 'Permission denied',
