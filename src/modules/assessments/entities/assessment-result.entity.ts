@@ -15,7 +15,7 @@ export class AssessmentResult {
   @PrimaryGeneratedColumn()
   identifier: number;
 
-  @Column()
+  @Column({ length: 10000, default: '' })
   value: string;
 
   @Column({ name: 'assessment_item_identifier' })

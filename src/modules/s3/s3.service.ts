@@ -7,6 +7,7 @@ import {
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import fs from 'fs';
 
 @Injectable()
 export class S3Service {
@@ -26,22 +27,6 @@ export class S3Service {
     this.bucket = this.configService.get<string>('AWS_S3_BUCKET') ?? '';
   }
 
-  async uploadBuffer(
-    file: Express.Multer.File,
-    fileName: string,
-  ): Promise<string> {
-    const putObjectCommand = new PutObjectCommand({
-      Bucket: this.bucket,
-      Key: fileName,
-      Body: file.buffer,
-      ContentType: file.mimetype,
-    });
-
-    await this.s3.send(putObjectCommand);
-
-    return this.getSignedUrl(fileName);
-  }
-
   async getSignedUrl(fileName: string): Promise<string> {
     const getObjectCommand = new GetObjectCommand({
       Bucket: this.bucket,
@@ -51,5 +36,38 @@ export class S3Service {
     return await getSignedUrl(this.s3, getObjectCommand, {
       expiresIn: 3600,
     });
+  }
+
+  async uploadBuffer(
+    file: Express.Multer.File,
+    fileName: string,
+  ): Promise<boolean> {
+    const putObjectCommand = new PutObjectCommand({
+      Bucket: this.bucket,
+      Key: fileName,
+      Body: file.buffer,
+      ContentType: file.mimetype,
+    });
+
+    await this.s3.send(putObjectCommand);
+    return true;
+  }
+
+  async uploadFile(
+    filePath: string,
+    fileName: string,
+    contentType?: string,
+  ): Promise<boolean> {
+    const fileBuffer = fs.readFileSync(filePath);
+
+    const putObjectCommand = new PutObjectCommand({
+      Bucket: this.bucket,
+      Key: fileName,
+      Body: fileBuffer,
+      ContentType: contentType,
+    });
+
+    await this.s3.send(putObjectCommand);
+    return true;
   }
 }

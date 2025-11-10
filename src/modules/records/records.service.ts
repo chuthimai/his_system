@@ -1,9 +1,11 @@
 import { BillingService } from '@modules/billing/billing.service';
 import { Service } from '@modules/billing/entities/service.entity';
+import { MedicinesService } from '@modules/medicines/medicines.service';
 import { DiagnosisReport } from '@modules/reports/entities/diagnosis-report.entity';
 import { ImagingReport } from '@modules/reports/entities/imaging-report.entity';
 import { LaboratoryReport } from '@modules/reports/entities/laboratory-report.entity';
 import { ReportsService, T } from '@modules/reports/reports.service';
+import { S3Service } from '@modules/s3/s3.service';
 import { SchedulesService } from '@modules/schedules/schedules.service';
 import { CreateUserDto } from '@modules/users/dto/create-user.dto';
 import { Physician } from '@modules/users/entities/physician.entity';
@@ -11,8 +13,14 @@ import { User } from '@modules/users/entities/user.entity';
 import { UsersService } from '@modules/users/users.service';
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import path from 'path';
 import { ERROR_MESSAGES } from 'src/common/constants/error-messages';
-import { SERVICE_TYPES } from 'src/common/constants/others';
+import {
+  EXPORT_PATH,
+  PROCESS_PATH,
+  SERVICE_TYPES,
+} from 'src/common/constants/others';
+import { mergePdfs } from 'src/common/files/utils/render';
 import { HttpExceptionWrapper } from 'src/common/helpers/http-exception-wrapper';
 import { Repository } from 'typeorm';
 
@@ -41,6 +49,10 @@ export class RecordsService {
     private readonly schedulesService: SchedulesService,
     @Inject(forwardRef(() => UsersService))
     private readonly usersService: UsersService,
+    @Inject(forwardRef(() => MedicinesService))
+    private readonly medicinesService: MedicinesService,
+    @Inject(forwardRef(() => S3Service))
+    private readonly s3Service: S3Service,
   ) {}
 
   async findOne(
@@ -69,10 +81,10 @@ export class RecordsService {
           .addSelect([
             'serviceReports.identifier',
             'serviceReports.serviceIdentifier',
+            'serviceReports.performerIdentifier',
           ])
           .leftJoin('serviceReports.service', 'service')
           .addSelect(['service.identifier', 'service.type', 'service.name'])
-          .addSelect([])
           .getOne();
   }
 
@@ -90,7 +102,16 @@ export class RecordsService {
   async findOneClosedRecords(
     identifier: number,
   ): Promise<PatientRecord | null> {
-    return null;
+    const closedRecord = await this.patientRecordRepository.findOne({
+      where: { identifier },
+    });
+
+    if (!closedRecord) return closedRecord;
+
+    closedRecord.exportFileName = await this.s3Service.getSignedUrl(
+      closedRecord.exportFileName,
+    );
+    return closedRecord;
   }
 
   async findOneUnclosedRecords(
@@ -184,6 +205,7 @@ export class RecordsService {
         currentUser.identifier,
         savedPatientRecord.identifier,
         { type: SERVICE_TYPES.GENERAL_CONSULTATION },
+        '',
       ))
     ) {
       throw new HttpExceptionWrapper(ERROR_MESSAGES.UNEXPECTABLE_FAULT);
@@ -233,6 +255,7 @@ export class RecordsService {
         existedStaffWorkSchedule.staffIdentifier,
         updateSpecialtyConsultationDto.patientRecordIdentifier,
         serviceInfo,
+        updateSpecialtyConsultationDto.request,
       ))
     ) {
       throw new HttpExceptionWrapper(ERROR_MESSAGES.UNEXPECTABLE_FAULT);
@@ -256,20 +279,19 @@ export class RecordsService {
     }
 
     const services = await Promise.all(
-      updateLaboratoryAndImagingDto.serviceIdentifiers.map(
-        async (serviceIdentifier) => {
-          const service =
-            await this.billingService.findOneService(serviceIdentifier);
-          if (!service) {
-            throw new HttpExceptionWrapper(ERROR_MESSAGES.SERVICE_NOT_FOUND);
-          }
-          return service;
-        },
-      ),
+      updateLaboratoryAndImagingDto.serviceInfo.map(async (info) => {
+        const service = await this.billingService.findOneService(
+          info.serviceIdentifier,
+        );
+        if (!service) {
+          throw new HttpExceptionWrapper(ERROR_MESSAGES.SERVICE_NOT_FOUND);
+        }
+        return service;
+      }),
     );
 
     await Promise.all(
-      services.map(async (service) => {
+      services.map(async (service, index) => {
         if (
           !(await this.createServiceForPatientRecord(
             currentUser.identifier,
@@ -277,6 +299,7 @@ export class RecordsService {
             null,
             updateLaboratoryAndImagingDto.patientRecordIdentifier,
             { identifier: service.identifier },
+            updateLaboratoryAndImagingDto.serviceInfo[index].serviceRequest,
           ))
         ) {
           throw new HttpExceptionWrapper(ERROR_MESSAGES.UNEXPECTABLE_FAULT);
@@ -296,12 +319,65 @@ export class RecordsService {
     return await this.patientRecordRepository.save(patientRecord);
   }
 
+  async closePatientRecord(
+    identifier: number,
+    currentUser: User,
+  ): Promise<boolean> {
+    const existedPatientRecord = await this.findOne(identifier, true);
+    if (!existedPatientRecord) {
+      throw new HttpExceptionWrapper(ERROR_MESSAGES.PATIENT_RECORD_NOT_FOUND);
+    }
+
+    if (
+      currentUser.identifier !==
+      existedPatientRecord.serviceReports[1].performerIdentifier
+    ) {
+      throw new HttpExceptionWrapper(ERROR_MESSAGES.PERMISSION_DENIED);
+    }
+
+    const exportFilePaths: string[] = [];
+    for (const serviceReport of existedPatientRecord.serviceReports) {
+      exportFilePaths.push(
+        await this.reportsService.exportReport(serviceReport.identifier),
+      );
+    }
+    exportFilePaths.push(
+      await this.medicinesService.exportPrescription(
+        existedPatientRecord.prescriptionIdentifier,
+      ),
+    );
+
+    const now = new Date();
+    const yyyyMMdd = now.toISOString().slice(0, 10).replace(/-/g, '');
+
+    const exportFileName = `record_${existedPatientRecord.identifier}_${yyyyMMdd}.pdf`;
+    const exportFilePath: string = path.resolve(
+      PROCESS_PATH,
+      `${EXPORT_PATH}${exportFileName}`,
+    );
+    await mergePdfs(exportFilePaths, exportFilePath);
+
+    await this.s3Service.uploadFile(
+      exportFilePath,
+      exportFileName,
+      'application/pdf',
+    );
+
+    existedPatientRecord.status = true;
+    existedPatientRecord.exportFileName = exportFileName;
+    const updatedPatientRecord =
+      await this.updatePatientRecord(existedPatientRecord);
+
+    return updatedPatientRecord ? true : false;
+  }
+
   async createServiceForPatientRecord(
     requesterIdentifier: number,
     performerIdentifier: number | null,
     reporterIdentifier: number | null,
     patientRecordIdentifier: number,
     serviceInfo: object,
+    serviceRequest: string,
   ): Promise<boolean> {
     let invoice =
       await this.billingService.findOneInvoiceByPatientRecordIdentifier(
@@ -341,6 +417,7 @@ export class RecordsService {
       patientRecordIdentifier,
       service.identifier,
       service.type,
+      serviceRequest,
     );
     return serviceReportCreated ? true : false;
   }
@@ -352,6 +429,7 @@ export class RecordsService {
     patientRecordIdentifier: number,
     serviceIdentifier: number,
     serviceType: string,
+    serviceRequest: string,
   ): Promise<boolean> {
     const serviceReportEntity = mapServiceTypeToEntity.get(serviceType);
     if (!serviceReportEntity) {
@@ -364,6 +442,7 @@ export class RecordsService {
       requesterIdentifier,
       ...(performerIdentifier ? { performerIdentifier } : {}),
       ...(reporterIdentifier ? { reporterIdentifier } : {}),
+      request: serviceRequest,
     };
     const serviceReport = await this.reportsService.createDetailServiceReport(
       serviceReportEntity as new () => T,

@@ -19,7 +19,7 @@ export class LaboratoryReport {
   @JoinColumn({ name: 'identifier' })
   serviceReport: ServiceReport;
 
-  @Column({ default: '' })
+  @Column({ default: '', length: 10000 })
   interpretation: string;
 
   @OneToMany(() => Specimen, (specimen) => specimen.laboratoryReport)

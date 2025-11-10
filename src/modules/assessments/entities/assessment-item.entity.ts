@@ -10,7 +10,7 @@ import {
 } from 'typeorm';
 
 import { AssessmentResult } from './assessment-result.entity';
-import { MeasurementItems } from './measurement-item.entity';
+import { MeasurementItem } from './measurement-item.entity';
 
 @Entity('assessment_items')
 export class AssessmentItem {
@@ -21,10 +21,10 @@ export class AssessmentItem {
   name: string;
 
   @OneToOne(
-    () => MeasurementItems,
+    () => MeasurementItem,
     (measurementItem) => measurementItem.assessmentItem,
   )
-  measurementItem: MeasurementItems;
+  measurementItem: MeasurementItem;
 
   @Column({ name: 'service_identifier', nullable: true })
   serviceIdentifier: number;

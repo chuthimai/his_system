@@ -5,7 +5,15 @@ import { User } from '@modules/users/entities/user.entity';
 import { UsersService } from '@modules/users/users.service';
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import path from 'path';
 import { ERROR_MESSAGES } from 'src/common/constants/error-messages';
+import {
+  EXPORT_PATH,
+  PROCESS_PATH,
+  TEMPLATE_PATH,
+} from 'src/common/constants/others';
+import { convertDataForExportPrescription } from 'src/common/files/utils/converter';
+import { htmlToPdf } from 'src/common/files/utils/render';
 import { HttpExceptionWrapper } from 'src/common/helpers/http-exception-wrapper';
 import { Repository } from 'typeorm';
 
@@ -25,7 +33,9 @@ export class MedicinesService {
     private readonly prescriptionRepository: Repository<Prescription>,
     @InjectRepository(PrescribedMedication)
     private readonly prescribedMedicationRepository: Repository<PrescribedMedication>,
+    @Inject(forwardRef(() => RecordsService))
     private readonly recordsService: RecordsService,
+    @Inject(forwardRef(() => UsersService))
     private readonly usersService: UsersService,
     @Inject(forwardRef(() => BillingService))
     private readonly billingService: BillingService,
@@ -45,7 +55,13 @@ export class MedicinesService {
 
     const prescription = await this.prescriptionRepository.findOne({
       where: { identifier },
-      relations: ['prescribedMedications', 'prescribedMedications.medication'],
+      relations: [
+        'prescribedMedications',
+        'prescribedMedications.medication',
+        'patientRecord',
+        'patientRecord.patient',
+        'physician',
+      ],
     });
     prescription!.physician = (await this.usersService.findOnePhysician(
       prescription!.physicianIdentifier,
@@ -175,5 +191,31 @@ export class MedicinesService {
     );
 
     return updatedPatientRecord ? true : false;
+  }
+
+  async exportPrescription(identifier: number): Promise<string> {
+    const existedPrescription = await this.findOnePrescription(
+      identifier,
+      true,
+    );
+    if (!existedPrescription) {
+      throw new HttpExceptionWrapper(ERROR_MESSAGES.PRESCRIPTION_NOT_FOUND);
+    }
+
+    // console.dir(existedPrescription, { depth: null, colors: true });
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const data = convertDataForExportPrescription(existedPrescription);
+    const templatePath: string = path.resolve(
+      PROCESS_PATH,
+      `${TEMPLATE_PATH}prescription.ejs`,
+    );
+    const exportFilePath: string = path.resolve(
+      PROCESS_PATH,
+      `${EXPORT_PATH}prescription.pdf`,
+    );
+
+    await htmlToPdf(templatePath, exportFilePath, data);
+    return exportFilePath;
   }
 }
