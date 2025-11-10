@@ -54,4 +54,14 @@ export class CreateRecordDto {
   @IsString()
   @MinLength(8)
   password?: string;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsBoolean()
+  havingTransferForm?: boolean;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsBoolean()
+  havingHealthInsurance?: boolean;
 }

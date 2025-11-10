@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsNumber } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
 export class UpdateSpecialtyConsultationDto {
   @ApiProperty()
@@ -16,4 +16,9 @@ export class UpdateSpecialtyConsultationDto {
   @IsNotEmpty()
   @IsNumber()
   physicianIdentifier: number;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsString()
+  request: string;
 }

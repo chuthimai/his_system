@@ -27,6 +27,9 @@ export class ServiceReport {
   @Column({ default: '' })
   method: string;
 
+  @Column({ default: '' })
+  request: string;
+
   @Column({ type: 'boolean', default: false }) // true ~ completed
   status: boolean;
 

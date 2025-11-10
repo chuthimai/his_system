@@ -19,10 +19,27 @@ export class AssessmentsService {
     private readonly reportsService: ReportsService,
   ) {}
 
+  async findOneAssessmentItem(
+    identifier: number,
+  ): Promise<AssessmentItem | null> {
+    return await this.assessmentItemRepository.findOne({
+      where: { identifier },
+      relations: [
+        'parent',
+        'parent.parent',
+        'parent.parent.parent',
+        'measurementItem',
+        'parent.measurementItem',
+        'parent.parent.measurementItem',
+        'parent.parent.parent.measurementItem',
+      ],
+    });
+  }
+
   async findAllAssessmentItems(
     serviceIdentifier: number,
   ): Promise<AssessmentItem[]> {
-    return this.assessmentItemRepository.find({
+    return await this.assessmentItemRepository.find({
       where: { serviceIdentifier, parentIdentifier: IsNull() },
       relations: [
         'children',
@@ -39,10 +56,10 @@ export class AssessmentsService {
   async createAssessmentResults(
     createAssessmentResults: CreateAssessmentResultsDto,
   ): Promise<AssessmentResult[]> {
-    const serviceReport = await this.reportsService.findOne(
+    const existedServiceReport = await this.reportsService.findOne(
       createAssessmentResults.serviceReportIdentifier,
     );
-    if (!serviceReport) {
+    if (!existedServiceReport) {
       throw new Error(ERROR_MESSAGES.SERVICE_REPORT_NOT_FOUND);
     }
 
@@ -65,7 +82,6 @@ export class AssessmentsService {
           }
 
           targetAssessmentResult.value = assessmentResult.assessmentResultValue;
-
           return await this.assessmentResultRepository.save(
             targetAssessmentResult,
           );

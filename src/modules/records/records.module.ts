@@ -1,5 +1,6 @@
 import { AuthModule } from '@modules/auth/auth.module';
 import { ReportsModule } from '@modules/reports/reports.module';
+import { S3Module } from '@modules/s3/s3.module';
 import { SchedulesModule } from '@modules/schedules/schedules.module';
 import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -20,6 +21,8 @@ import { RecordsService } from './records.service';
     forwardRef(() => AuthModule),
     forwardRef(() => SchedulesModule),
     forwardRef(() => ReportsModule),
+    forwardRef(() => MedicinesModule),
+    S3Module,
   ],
   controllers: [RecordsController],
   providers: [RecordsService],

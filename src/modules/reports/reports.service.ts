@@ -1,19 +1,35 @@
 import { AssessmentsService } from '@modules/assessments/assessments.service';
+import { AssessmentItem } from '@modules/assessments/entities/assessment-item.entity';
 import { BillingService } from '@modules/billing/billing.service';
+import { MedicinesService } from '@modules/medicines/medicines.service';
 import {
   mapServiceTypeToEntity,
   RecordsService,
 } from '@modules/records/records.service';
 import { UpdateDiagnosisReportResultDto } from '@modules/reports/dto/update-diagnosis-report-result.dto';
 import { S3Service } from '@modules/s3/s3.service';
+import { Location } from '@modules/schedules/entities/location.entity';
 import { SchedulesService } from '@modules/schedules/schedules.service';
 import { Physician } from '@modules/users/entities/physician.entity';
 import { User } from '@modules/users/entities/user.entity';
 import { UsersService } from '@modules/users/users.service';
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import path from 'path';
 import { ERROR_MESSAGES } from 'src/common/constants/error-messages';
-import { SERVICE_TYPES } from 'src/common/constants/others';
+import {
+  EXPORT_PATH,
+  PROCESS_PATH,
+  SERVICE_TYPES,
+  TEMPLATE_PATH,
+} from 'src/common/constants/others';
+import {
+  convertDataForImagingReport,
+  convertDataForInitialReport,
+  convertDataForLaboratoryReport,
+  convertDataForSpecialReport,
+} from 'src/common/files/utils/converter';
+import { htmlToPdf } from 'src/common/files/utils/render';
 import { HttpExceptionWrapper } from 'src/common/helpers/http-exception-wrapper';
 import { Repository } from 'typeorm';
 
@@ -60,6 +76,9 @@ export class ReportsService {
     private readonly schedulesService: SchedulesService,
     @Inject(forwardRef(() => UsersService))
     private readonly usersService: UsersService,
+    @Inject(forwardRef(() => MedicinesService))
+    private readonly medicinesService: MedicinesService,
+    @Inject(forwardRef(() => S3Service))
     private readonly s3Service: S3Service,
   ) {
     this.mapEntityToRepository.set(
@@ -75,7 +94,7 @@ export class ReportsService {
 
   async findOne(identifier: number): Promise<T | null> {
     const serviceReport = await this.serviceReportRepository.findOne({
-      where: { identifier, status: false },
+      where: { identifier },
       relations: ['diagnosisReport', 'imagingReport', 'laboratoryReport'],
     });
 
@@ -94,14 +113,24 @@ export class ReportsService {
     if (!detailReportRepository) {
       throw new Error(ERROR_MESSAGES.ENTITY_NOT_FOUND);
     }
-
     const detailServiceReport = await detailReportRepository.findOne({
-      where: { identifier, serviceReport: { status: false } },
+      where: { identifier },
       relations: [
         'serviceReport',
         'serviceReport.service',
+        'serviceReport.assessmentResults',
+        'serviceReport.patientRecord',
+        'serviceReport.patientRecord.patient',
+        ...(entity === LaboratoryReport ? ['specimens'] : []),
         ...(entity === ImagingReport ? ['images'] : []),
       ],
+      order: {
+        serviceReport: {
+          assessmentResults: {
+            assessmentItemIdentifier: 'ASC',
+          },
+        },
+      },
     });
     if (!detailServiceReport) {
       throw new HttpExceptionWrapper(
@@ -109,10 +138,21 @@ export class ReportsService {
       );
     }
 
+    detailServiceReport.serviceReport.patientRecord.patient =
+      (await this.usersService.findOne(
+        detailServiceReport.serviceReport.patientRecord.patientIdentifier,
+        false,
+      )) as User;
+
+    detailServiceReport.serviceReport.service.location =
+      (await this.schedulesService.findOneLocation(
+        detailServiceReport.serviceReport.service.locationIdentifier,
+      )) as Location;
     detailServiceReport.serviceReport.service.assessmentItems =
       await this.assessmentsService.findAllAssessmentItems(
         detailServiceReport.serviceReport.service.identifier,
       );
+
     if (detailServiceReport?.serviceReport.performerIdentifier) {
       detailServiceReport.serviceReport.performer =
         (await this.usersService.findOnePhysician(
@@ -132,6 +172,7 @@ export class ReportsService {
           detailServiceReport?.serviceReport.requesterIdentifier,
         )) as Physician;
     }
+
     if (
       entity === ImagingReport &&
       (detailServiceReport as ImagingReport).images.length > 0
@@ -332,10 +373,10 @@ export class ReportsService {
     });
   }
 
-  async update(newDetailReport: ServiceReport): Promise<ServiceReport> {
-    return newDetailReport?.diagnosisReport
+  async update(newDetailReport: T): Promise<T> {
+    return (newDetailReport as DiagnosisReport).severity
       ? await this.diagnosisReportRepository.save(newDetailReport)
-      : newDetailReport?.laboratoryReport
+      : (newDetailReport as LaboratoryReport).specimens
         ? await this.laboratoryReportRepository.save(newDetailReport)
         : await this.imagingReportRepository.save(newDetailReport);
   }
@@ -381,11 +422,11 @@ export class ReportsService {
     const now = new Date();
     const dateFormatted = now.toISOString().split('T')[0];
 
-    const generalServiceInfo = (({ category, method }) => ({
+    const generalServiceInfo = (({ category, method, isClosed }) => ({
       category,
       method,
       recordedTime: dateFormatted,
-      status: true,
+      status: isClosed || false,
     }))(updateDetailReportResultDto);
     const detailServiceInfo =
       updateDetailReportResultDto instanceof UpdateDiagnosisReportResultDto
@@ -410,9 +451,7 @@ export class ReportsService {
       },
     };
 
-    const detailReportUpdated = await this.update(
-      detailReport as unknown as ServiceReport,
-    );
+    const detailReportUpdated = await this.update(detailReport);
     return detailReportUpdated ? true : false;
   }
 
@@ -433,9 +472,7 @@ export class ReportsService {
     else if (roleParticipant === 'reporter')
       detailReport.serviceReport.reporterIdentifier = currentUser.identifier;
 
-    const detailReportUpdated = await this.update(
-      detailReport as unknown as ServiceReport,
-    );
+    const detailReportUpdated = await this.update(detailReport);
     return detailReportUpdated ? true : false;
   }
 
@@ -473,6 +510,7 @@ export class ReportsService {
           identifier: createSpecimenDto.laboratoryReportIdentifier,
           serviceReport: { status: false },
         },
+        relations: ['serviceReport'],
       });
     if (!existedLaboratoryReport) {
       throw new HttpExceptionWrapper(
@@ -563,8 +601,8 @@ export class ReportsService {
     const existedImagingReport = await this.imagingReportRepository.findOne({
       where: {
         identifier: createImagesDto.imagingReportIdentifier,
-        serviceReport: { status: false },
       },
+      relations: ['serviceReport'],
     });
     if (!existedImagingReport) {
       throw new HttpExceptionWrapper(ERROR_MESSAGES.IMAGING_REPORT_NOT_FOUND);
@@ -592,5 +630,75 @@ export class ReportsService {
     );
 
     return createdImages;
+  }
+
+  async exportReport(identifier: number): Promise<string> {
+    const detailReport = await this.findOne(identifier);
+    if (!detailReport) {
+      throw new HttpExceptionWrapper(ERROR_MESSAGES.SERVICE_REPORT_NOT_FOUND);
+    }
+
+    detailReport.serviceReport.assessmentResults = await Promise.all(
+      detailReport.serviceReport.assessmentResults.map(
+        async (assessmentResult) => {
+          assessmentResult.assessmentItem =
+            (await this.assessmentsService.findOneAssessmentItem(
+              assessmentResult.assessmentItemIdentifier,
+            )) as AssessmentItem;
+          return assessmentResult;
+        },
+      ),
+    );
+
+    // console.dir(detailReport, { depth: null, colors: true });
+
+    let data: any = {},
+      templateName = '',
+      exportFilename = '';
+
+    switch (detailReport.serviceReport.service.type) {
+      case SERVICE_TYPES.GENERAL_CONSULTATION: {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        data = convertDataForInitialReport(detailReport as DiagnosisReport);
+        templateName = 'initial-report.ejs';
+        exportFilename = 'initial-diagnosis.pdf';
+        break;
+      }
+      case SERVICE_TYPES.SPECIALIST_CONSULTATION: {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        data = convertDataForSpecialReport(detailReport as DiagnosisReport);
+        templateName = 'special-report.ejs';
+        exportFilename = 'special-diagnosis.pdf';
+        break;
+      }
+      case SERVICE_TYPES.LABORATORY_TEST: {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        data = convertDataForLaboratoryReport(detailReport as LaboratoryReport);
+        templateName = 'laboratory-report.ejs';
+        exportFilename = 'laboratory-diagnosis.pdf';
+        break;
+      }
+      case SERVICE_TYPES.IMAGING_SCAN: {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        data = convertDataForImagingReport(detailReport as ImagingReport);
+        templateName = 'imaging-report.ejs';
+        exportFilename = 'imaging-diagnosis.pdf';
+        break;
+      }
+      default:
+        break;
+    }
+
+    const templatePath: string = path.resolve(
+      PROCESS_PATH,
+      `${TEMPLATE_PATH}${templateName}`,
+    );
+    const exportFilePath: string = path.resolve(
+      PROCESS_PATH,
+      `${EXPORT_PATH}${exportFilename}`,
+    );
+
+    await htmlToPdf(templatePath, exportFilePath, data);
+    return exportFilePath;
   }
 }

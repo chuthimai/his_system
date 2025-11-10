@@ -1,3 +1,4 @@
+import { MedicinesModule } from '@modules/medicines/medicines.module';
 import { RecordsModule } from '@modules/records/records.module';
 import { S3Module } from '@modules/s3/s3.module';
 import { SchedulesModule } from '@modules/schedules/schedules.module';
@@ -32,6 +33,7 @@ import { ReportsService } from './reports.service';
     forwardRef(() => RecordsModule),
     forwardRef(() => SchedulesModule),
     forwardRef(() => AssessmentsModule),
+    forwardRef(() => MedicinesModule),
     S3Module,
   ],
   controllers: [ReportsController],

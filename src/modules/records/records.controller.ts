@@ -64,4 +64,17 @@ export class RecordsController {
       currentUser,
     );
   }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(ROLES.PHYSICIAN)
+  @Post('/close/:recordIdentifier')
+  close(
+    @Param('recordIdentifier') recordIdentifier: number,
+    @CurrentUser() currentUser: User,
+  ) {
+    return this.recordsService.closePatientRecord(
+      recordIdentifier,
+      currentUser,
+    );
+  }
 }

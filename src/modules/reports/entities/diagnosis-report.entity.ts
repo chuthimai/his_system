@@ -14,6 +14,6 @@ export class DiagnosisReport {
   @Column({ default: '' })
   severity: string;
 
-  @Column({ default: '' })
+  @Column({ default: '', length: 10000 })
   conclusion: string;
 }

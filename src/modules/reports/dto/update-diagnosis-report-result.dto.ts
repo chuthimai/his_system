@@ -7,10 +7,10 @@ export class UpdateDiagnosisReportResultDto extends UpdateServiceReportResultDto
   @ApiProperty()
   @IsNotEmpty()
   @IsString()
-  severity: string;
+  severity: string = '';
 
   @ApiProperty()
   @IsNotEmpty()
   @IsString()
-  conclusion: string;
+  conclusion: string = '';
 }
