@@ -44,7 +44,7 @@ export class UsersService {
   async findOneByPatientRecordIdentifier(
     patientRecordIdentifier: number,
   ): Promise<User | null> {
-    const patientRecord = await this.recordsService.findOnePatientRecord(
+    const patientRecord = await this.recordsService.findOne(
       patientRecordIdentifier,
     );
     if (!patientRecord) {

@@ -1,3 +1,4 @@
+import { BillingModule } from '@modules/billing/billing.module';
 import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { RecordsModule } from 'src/modules/records/records.module';
@@ -14,6 +15,7 @@ import { MedicinesService } from './medicines.service';
     TypeOrmModule.forFeature([Medication, Prescription, PrescribedMedication]),
     forwardRef(() => UsersModule),
     forwardRef(() => RecordsModule),
+    forwardRef(() => BillingModule),
   ],
   controllers: [MedicinesController],
   providers: [MedicinesService],

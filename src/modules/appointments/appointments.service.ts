@@ -9,6 +9,7 @@ import { HttpExceptionWrapper } from 'src/common/helpers/http-exception-wrapper'
 import { Repository } from 'typeorm';
 
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
+import { DeleteAppointmentDto } from './dto/delete-appointment.dto';
 import { Appointment } from './entities/appointment.entity';
 
 @Injectable()
@@ -20,6 +21,13 @@ export class AppointmentsService {
     private readonly schedulesService: SchedulesService,
   ) {}
 
+  async findOne(identifier: number): Promise<Appointment | null> {
+    return await this.appointmentRepository.findOne({
+      where: { identifier, status: true },
+      relations: ['workSchedule'],
+    });
+  }
+
   async findAllByUserIdentifier(
     userIdentifier: number,
   ): Promise<Appointment[]> {
@@ -30,9 +38,12 @@ export class AppointmentsService {
 
     await Promise.all(
       appointments.map(async (appointment) => {
-        appointment.physician = (await this.usersService.findOnePhysician(
-          appointment.physicianIdentifier,
-        )) as unknown as Physician;
+        if (appointment.physicianIdentifier) {
+          appointment.physician = (await this.usersService.findOnePhysician(
+            appointment.physicianIdentifier,
+          )) as unknown as Physician;
+        }
+
         appointment.user = (await this.usersService.findOne(
           appointment.userIdentifier,
         )) as User;
@@ -103,5 +114,43 @@ export class AppointmentsService {
     )) as Physician;
 
     return targetAppointment;
+  }
+
+  async delete(
+    identifier: number,
+    deleteAppointmentDto: DeleteAppointmentDto,
+    currentUser: User,
+  ): Promise<boolean> {
+    let existedAppointment = await this.findOne(identifier);
+    if (!existedAppointment) {
+      throw new HttpExceptionWrapper(ERROR_MESSAGES.APPOINTMENT_NOT_FOUND);
+    }
+
+    if (
+      ![
+        existedAppointment.physicianIdentifier,
+        existedAppointment.userIdentifier,
+      ].includes(currentUser.identifier)
+    ) {
+      throw new HttpExceptionWrapper(ERROR_MESSAGES.PERMISSION_DENIED);
+    }
+
+    const now = new Date();
+    const formattedDate = now.toISOString().split('T')[0];
+
+    if (!(new Date(existedAppointment.workSchedule.date) > now)) {
+      throw new HttpExceptionWrapper(ERROR_MESSAGES.LATE_TO_CANCEL_APPOINTMENT);
+    }
+
+    existedAppointment = {
+      ...existedAppointment,
+      reason: deleteAppointmentDto.reason,
+      cancellationDate: formattedDate,
+      status: true,
+    };
+
+    const cancelAppointment =
+      await this.appointmentRepository.save(existedAppointment);
+    return cancelAppointment ? true : false;
   }
 }

@@ -1,7 +1,9 @@
+import { BillingService } from '@modules/billing/billing.service';
 import { RecordsService } from '@modules/records/records.service';
+import { Physician } from '@modules/users/entities/physician.entity';
 import { User } from '@modules/users/entities/user.entity';
 import { UsersService } from '@modules/users/users.service';
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ERROR_MESSAGES } from 'src/common/constants/error-messages';
 import { HttpExceptionWrapper } from 'src/common/helpers/http-exception-wrapper';
@@ -25,18 +27,61 @@ export class MedicinesService {
     private readonly prescribedMedicationRepository: Repository<PrescribedMedication>,
     private readonly recordsService: RecordsService,
     private readonly usersService: UsersService,
+    @Inject(forwardRef(() => BillingService))
+    private readonly billingService: BillingService,
   ) {}
-
-  async findAll(): Promise<Medication[]> {
-    return this.medicationRepository.find();
-  }
 
   async findOne(identifier: number): Promise<Medication | null> {
     return await this.medicationRepository.findOneBy({ identifier });
   }
 
-  async findOnePrescription(identifier: number): Promise<Prescription | null> {
-    return await this.prescriptionRepository.findOneBy({ identifier });
+  async findOnePrescription(
+    identifier: number,
+    isFull: boolean = false,
+  ): Promise<Prescription | null> {
+    if (!isFull) {
+      return await this.prescriptionRepository.findOneBy({ identifier });
+    }
+
+    const prescription = await this.prescriptionRepository.findOne({
+      where: { identifier },
+      relations: ['prescribedMedications', 'prescribedMedications.medication'],
+    });
+    prescription!.physician = (await this.usersService.findOnePhysician(
+      prescription!.physicianIdentifier,
+    )) as Physician;
+
+    return prescription;
+  }
+
+  async findAll(): Promise<Medication[]> {
+    return this.medicationRepository.find();
+  }
+
+  async findAllPrescriptionsOfCurrentUser(
+    currentUser: User,
+  ): Promise<Prescription[]> {
+    const prescriptions = await this.prescriptionRepository.find({
+      where: {
+        patientRecord: {
+          patientIdentifier: currentUser.identifier,
+        },
+      },
+      relations: ['patientRecord'],
+    });
+
+    await Promise.all(
+      prescriptions.map(async (prescription) => {
+        prescription.specialtyServiceName = (
+          await this.billingService.findOneSpecialtyServiceByPatientRecord(
+            prescription.patientRecord.identifier,
+          )
+        )?.name;
+        return prescription;
+      }),
+    );
+
+    return prescriptions;
   }
 
   async createPrescription(
@@ -87,10 +132,9 @@ export class MedicinesService {
     prescribedMedicineDto: PrescribeMedicineDto,
     currentUser: User,
   ): Promise<boolean> {
-    const existedPatientRecordIdentifier =
-      await this.recordsService.findOnePatientRecord(
-        prescribedMedicineDto.patientRecordIdentifier,
-      );
+    const existedPatientRecordIdentifier = await this.recordsService.findOne(
+      prescribedMedicineDto.patientRecordIdentifier,
+    );
     if (!existedPatientRecordIdentifier) {
       throw new HttpExceptionWrapper(ERROR_MESSAGES.PATIENT_RECORD_NOT_FOUND);
     }

@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsBoolean, IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsString } from 'class-validator';
 
 export class UpdateSpecimenDto {
   @ApiProperty()
@@ -16,9 +16,4 @@ export class UpdateSpecimenDto {
   @IsNotEmpty()
   @IsString()
   state: string;
-
-  @ApiProperty()
-  @IsNotEmpty()
-  @IsBoolean()
-  close: boolean;
 }

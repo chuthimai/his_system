@@ -14,7 +14,6 @@ export class S3Service {
   private bucket: string;
 
   constructor(private configService: ConfigService) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     this.s3 = new S3Client({
       region: this.configService.get<string>('AWS_REGION'),
       credentials: {
@@ -31,7 +30,6 @@ export class S3Service {
     file: Express.Multer.File,
     fileName: string,
   ): Promise<string> {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const putObjectCommand = new PutObjectCommand({
       Bucket: this.bucket,
       Key: fileName,
@@ -39,21 +37,19 @@ export class S3Service {
       ContentType: file.mimetype,
     });
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     await this.s3.send(putObjectCommand);
 
     return this.getSignedUrl(fileName);
   }
 
   async getSignedUrl(fileName: string): Promise<string> {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const getObjectCommand = new GetObjectCommand({
       Bucket: this.bucket,
       Key: fileName,
     });
 
-    return (await getSignedUrl(this.s3, getObjectCommand, {
+    return await getSignedUrl(this.s3, getObjectCommand, {
       expiresIn: 3600,
-    })) as string;
+    });
   }
 }

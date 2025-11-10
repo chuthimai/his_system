@@ -20,7 +20,7 @@ export class User {
   birthDate: string;
 
   @Column()
-  gender: string;
+  gender: boolean;
 
   @Column()
   address: string;

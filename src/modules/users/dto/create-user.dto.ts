@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
+  IsBoolean,
   IsDateString,
   IsNotEmpty,
   IsPhoneNumber,
@@ -27,7 +28,8 @@ export class CreateUserDto {
 
   @ApiProperty()
   @IsNotEmpty()
-  gender: string;
+  @IsBoolean()
+  gender: boolean;
 
   @ApiProperty()
   @IsNotEmpty()

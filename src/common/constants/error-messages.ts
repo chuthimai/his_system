@@ -22,6 +22,8 @@ export const ERROR_MESSAGES = {
   SPECIMEN_NOT_FOUND: 'Specimen not found',
   MEDICATION_NOT_FOUND: 'Medication not found',
   PRESCRIPTION_NOT_FOUND: 'Prescription not found',
+  APPOINTMENT_NOT_FOUND: 'Appointment not found',
+  IMAGING_REPORT_NOT_FOUND: 'Imaging report not found',
 
   CREATE_PATIENT_FAIL: 'Create patient fail',
   CREATE_INVOICE_FAIL: 'Create invoice fail',
@@ -41,6 +43,8 @@ export const ERROR_MESSAGES = {
   PERFORMER_PHYSICIAN_MUST_BE_SPECIFY: 'Performer physician must be specify',
   REQUESTER_PHYSICIAN_MUST_BE_SPECIFY: 'Requester physician must be specify',
   SPECIALTY_CONSULTATION_SPECIFIED: 'Specialty consultation specified',
+
+  LATE_TO_CANCEL_APPOINTMENT: 'Too late to cancel this appointment',
 
   UNEXPECTABLE_FAULT: 'Unexpectable fail',
   PERMISSION_DENIED: 'Permission denied',
