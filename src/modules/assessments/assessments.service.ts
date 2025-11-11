@@ -1,7 +1,9 @@
 import { ReportsService } from '@modules/reports/reports.service';
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Transactional } from '@nestjs-cls/transactional';
 import { ERROR_MESSAGES } from 'src/common/constants/error-messages';
+import { HttpExceptionWrapper } from 'src/common/helpers/http-exception-wrapper';
 import { IsNull, Repository } from 'typeorm';
 
 import { CreateAssessmentResultsDto } from './dto/create-assessment-results.dto';
@@ -53,40 +55,49 @@ export class AssessmentsService {
     });
   }
 
+  @Transactional()
   async createAssessmentResults(
     createAssessmentResults: CreateAssessmentResultsDto,
-  ): Promise<AssessmentResult[]> {
-    const existedServiceReport = await this.reportsService.findOne(
-      createAssessmentResults.serviceReportIdentifier,
-    );
-    if (!existedServiceReport) {
-      throw new Error(ERROR_MESSAGES.SERVICE_REPORT_NOT_FOUND);
+  ): Promise<void> {
+    try {
+      const existedServiceReport = await this.reportsService.findOne(
+        createAssessmentResults.serviceReportIdentifier,
+      );
+      if (!existedServiceReport)
+        throw new Error(ERROR_MESSAGES.SERVICE_REPORT_NOT_FOUND);
+
+      await Promise.all(
+        createAssessmentResults.assessmentResults.map(
+          async (assessmentResult) => {
+            const preCondition = {
+              assessmentItemIdentifier:
+                assessmentResult.assessmentItemIdentifier,
+              serviceReportIdentifier:
+                createAssessmentResults.serviceReportIdentifier,
+            };
+
+            let targetAssessmentResult =
+              await this.assessmentResultRepository.findOne({
+                where: preCondition,
+              });
+            if (!targetAssessmentResult) {
+              targetAssessmentResult =
+                this.assessmentResultRepository.create(preCondition);
+            }
+
+            targetAssessmentResult.value =
+              assessmentResult.assessmentResultValue;
+            return await this.assessmentResultRepository.save(
+              targetAssessmentResult,
+            );
+          },
+        ),
+      );
+    } catch (err) {
+      throw new HttpExceptionWrapper(
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        `${err.message}, ${ERROR_MESSAGES.CREATE_ASSESSMENT_RESULT_FAIL}`,
+      );
     }
-
-    return await Promise.all(
-      createAssessmentResults.assessmentResults.map(
-        async (assessmentResult) => {
-          const preCondition = {
-            assessmentItemIdentifier: assessmentResult.assessmentItemIdentifier,
-            serviceReportIdentifier:
-              createAssessmentResults.serviceReportIdentifier,
-          };
-
-          let targetAssessmentResult =
-            await this.assessmentResultRepository.findOne({
-              where: preCondition,
-            });
-          if (!targetAssessmentResult) {
-            targetAssessmentResult =
-              this.assessmentResultRepository.create(preCondition);
-          }
-
-          targetAssessmentResult.value = assessmentResult.assessmentResultValue;
-          return await this.assessmentResultRepository.save(
-            targetAssessmentResult,
-          );
-        },
-      ),
-    );
   }
 }

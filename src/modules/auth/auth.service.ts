@@ -34,9 +34,8 @@ export class AuthService {
       loginDto.password,
       user.password as string,
     );
-    if (!isValidPassword) {
+    if (!isValidPassword)
       throw new HttpExceptionWrapper(ERROR_MESSAGES.INVALID_PASSWORD);
-    }
 
     const payload = { id: user.identifier, role: user.role };
     const token = this.jwtService.sign(payload);

@@ -4,7 +4,9 @@ import { SchedulesService } from '@modules/schedules/schedules.service';
 import { User } from '@modules/users/entities/user.entity';
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Transactional } from '@nestjs-cls/transactional';
 import { ERROR_MESSAGES } from 'src/common/constants/error-messages';
+import { SERVICE_TYPES } from 'src/common/constants/others';
 import { HttpExceptionWrapper } from 'src/common/helpers/http-exception-wrapper';
 import { Repository } from 'typeorm';
 
@@ -42,15 +44,12 @@ export class BillingService {
   async findOneSpecialtyServiceByPatientRecord(
     patientRecordIdentifier: number,
   ): Promise<Service | null> {
-    return await this.serviceRepository
-      .createQueryBuilder('service')
-      .where('service.type = :type', { type: 'Chuyên khoa' })
-      .leftJoinAndSelect('service.invoiceServices', 'invoiceServices')
-      .leftJoinAndSelect('invoiceServices.invoice', 'invoice')
-      .andWhere('invoice.patientRecordIdentifier = :patientRecordIdentifier', {
-        patientRecordIdentifier,
-      })
-      .getOne();
+    return await this.serviceRepository.findOne({
+      where: {
+        type: SERVICE_TYPES.SPECIALIST_CONSULTATION,
+        invoiceServices: { invoice: { patientRecordIdentifier } },
+      },
+    });
   }
 
   async findOneInvoice(
@@ -82,21 +81,18 @@ export class BillingService {
   }
 
   async findAllServicesRequired(currentUser: User): Promise<Service[]> {
-    const patientRecord = await this.recordService.findLatestPatientRecord(
-      currentUser.identifier,
-    );
-    if (!patientRecord) {
+    const existedPatientRecord =
+      await this.recordService.findLatestPatientRecord(currentUser.identifier);
+    if (!existedPatientRecord)
       throw new HttpExceptionWrapper(ERROR_MESSAGES.PATIENT_RECORD_NOT_FOUND);
-    }
 
-    const services = await this.serviceRepository
-      .createQueryBuilder('service')
-      .leftJoin('service.invoiceServices', 'invoiceServices')
-      .leftJoin('invoiceServices.invoice', 'invoice')
-      .where('invoice.patientRecordIdentifier = :patientRecordIdentifier', {
-        patientRecordIdentifier: patientRecord.identifier,
-      })
-      .getMany();
+    const services = await this.serviceRepository.find({
+      where: {
+        invoiceServices: {
+          invoice: { patientRecordIdentifier: existedPatientRecord.identifier },
+        },
+      },
+    });
 
     return await Promise.all(
       services.map(async (service) => {
@@ -114,53 +110,66 @@ export class BillingService {
     });
   }
 
+  @Transactional()
   async createInvoice(createInvoiceDto: CreateInvoiceDto): Promise<Invoice> {
-    const existedPatientRecord = await this.recordService.findOne(
-      createInvoiceDto.patientRecordIdentifier,
-    );
-    if (!existedPatientRecord) {
-      throw new HttpExceptionWrapper(ERROR_MESSAGES.PATIENT_RECORD_NOT_FOUND);
-    }
+    try {
+      const existedPatientRecord = await this.recordService.findOne(
+        createInvoiceDto.patientRecordIdentifier,
+      );
+      if (!existedPatientRecord)
+        throw new HttpExceptionWrapper(ERROR_MESSAGES.PATIENT_RECORD_NOT_FOUND);
 
-    const newInvoice = this.invoiceRepository.create(createInvoiceDto);
-    return await this.invoiceRepository.save(newInvoice);
+      const newInvoice = this.invoiceRepository.create(createInvoiceDto);
+      return await this.invoiceRepository.save(newInvoice);
+    } catch (err) {
+      throw new HttpExceptionWrapper(
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        `${err.message}, ${ERROR_MESSAGES.CREATE_INVOICE_FAIL}`,
+      );
+    }
   }
 
+  @Transactional()
   async createInvoiceService(
     createInvoiceServiceDto: CreateInvoiceServiceDto,
-  ): Promise<InvoiceService | boolean> {
-    const existedInvoice = await this.findOneInvoice(
-      createInvoiceServiceDto.invoiceIdentifier,
-    );
-    if (!existedInvoice) {
-      throw new HttpExceptionWrapper(ERROR_MESSAGES.INVOICE_NOT_FOUND);
-    }
+  ): Promise<void> {
+    try {
+      const existedInvoice = await this.findOneInvoice(
+        createInvoiceServiceDto.invoiceIdentifier,
+      );
+      if (!existedInvoice)
+        throw new HttpExceptionWrapper(ERROR_MESSAGES.INVOICE_NOT_FOUND);
 
-    const existedService = await this.findOneService(
-      createInvoiceServiceDto.serviceIdentifier,
-    );
-    if (!existedService) {
-      throw new HttpExceptionWrapper(ERROR_MESSAGES.SERVICE_NOT_FOUND);
-    }
+      const existedService = await this.findOneService(
+        createInvoiceServiceDto.serviceIdentifier,
+      );
+      if (!existedService)
+        throw new HttpExceptionWrapper(ERROR_MESSAGES.SERVICE_NOT_FOUND);
 
-    const newInvoiceService = this.invoiceServiceRepository.create(
-      createInvoiceServiceDto,
-    );
-    return await this.invoiceServiceRepository.save(newInvoiceService);
+      const newInvoiceService = this.invoiceServiceRepository.create(
+        createInvoiceServiceDto,
+      );
+      await this.invoiceServiceRepository.save(newInvoiceService);
+    } catch (err) {
+      throw new HttpExceptionWrapper(
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        `${err.message}, ${ERROR_MESSAGES.CREATE_INVOICE_SERVICE_FAIL}`,
+      );
+    }
   }
 
   async checkServiceIsPaid(
     patientRecordIdentifier: number,
     serviceIdentifier: number,
   ): Promise<boolean> {
-    const invoice = await this.invoiceRepository.findOne({
+    return (await this.invoiceRepository.findOne({
       where: {
         patientRecordIdentifier,
         invoiceServices: { serviceIdentifier },
         status: true,
       },
-    });
-
-    return invoice ? true : false;
+    }))
+      ? true
+      : false;
   }
 }

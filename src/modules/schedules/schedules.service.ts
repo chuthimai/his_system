@@ -31,9 +31,7 @@ export class SchedulesService {
     const childLocation = await this.locationRepository.findOneBy({
       identifier,
     });
-    if (!childLocation) {
-      return null;
-    }
+    if (!childLocation) return null;
 
     let fullName = childLocation.name;
     let nextLocation: Location | null = { ...childLocation };
@@ -55,14 +53,6 @@ export class SchedulesService {
     });
   }
 
-  async findOneStaffWorkSchedule(
-    identifier: number,
-  ): Promise<StaffWorkSchedule | null> {
-    return await this.staffWorkScheduleRepository.findOne({
-      where: { identifier, active: true },
-    });
-  }
-
   async findOneStaffWorkScheduleByCondition(
     workScheduleIdentifier: number,
     staffIdentifier: number,
@@ -79,9 +69,8 @@ export class SchedulesService {
       const existedPhysician = await this.usersService.findOnePhysician(
         workScheduleConditionDto?.physicianIdentifier,
       );
-      if (!existedPhysician) {
+      if (!existedPhysician)
         throw new HttpExceptionWrapper(ERROR_MESSAGES.PHYSICIAN_NOT_FOUND);
-      }
     }
 
     const today = new Date();
@@ -140,9 +129,8 @@ export class SchedulesService {
   ): Promise<StaffWorkSchedule[]> {
     const existedPhysician =
       await this.usersService.findOnePhysician(physicianIdentifier);
-    if (!existedPhysician) {
+    if (!existedPhysician)
       throw new HttpExceptionWrapper(ERROR_MESSAGES.PHYSICIAN_NOT_FOUND);
-    }
 
     const now = new Date();
     const firstDayCurrentMonth = new Date(now.getFullYear(), now.getMonth());

@@ -4,60 +4,17 @@ import fs from 'fs';
 import { PDFDocument } from 'pdf-lib';
 import * as puppeteer from 'puppeteer';
 
-const SNOMEDCTFormCodes = {
-  '385055001': 'Viên nén',
-  '66076007': 'Viên nhai',
-  '385057009': 'Viên nang',
-  '385023001': 'Dung dịch uống',
-  '385024007': 'Hỗn dịch uống',
-  '385018001': 'Giọt uống',
-  '385219001': 'Dung dịch tiêm',
-  '385108007': 'Kem bôi',
-  '385100003': 'Thuốc mỡ',
-  '385133007': 'Bột hít',
-};
-
-export interface RenderItem {
+export interface MappedItem {
+  id?: number;
   name: string;
   value?: string;
-  children?: RenderItem[];
-  measurementItem?: MeasurementItem | null;
-}
-
-export function getDoseFormName(code: string): any {
-  return SNOMEDCTFormCodes[code] || 'Không xác định';
-}
-
-export function formatVnDateWithText(data: string) {
-  const date = new Date(data);
-
-  const day = date.getDate().toString().padStart(2, '0');
-  const month = (date.getMonth() + 1).toString().padStart(2, '0');
-  const year = date.getFullYear();
-
-  return `Ngày ${day} tháng ${month} năm ${year}`;
-}
-
-export function formatVnDateWithoutText(data: string) {
-  const date = new Date(data);
-  const day = date.getDate().toString().padStart(2, '0');
-  const month = (date.getMonth() + 1).toString().padStart(2, '0');
-  const year = date.getFullYear();
-  return `${day}/${month}/${year}`;
-}
-
-export function formatVnFullDateTime(data: string) {
-  const date = new Date(data);
-  const day = date.getDate().toString().padStart(2, '0');
-  const month = (date.getMonth() + 1).toString().padStart(2, '0');
-  const year = date.getFullYear();
-  const hour = date.getHours().toString().padStart(2, '0');
-  const minute = date.getMinutes().toString().padStart(2, '0');
-  return `${hour} giờ ${minute} phút, ngày ${day} tháng ${month} năm ${year}`;
+  measurementItem: MeasurementItem | null;
+  children?: MappedItem[];
+  _firstSeen?: number; // internal: order
 }
 
 export function renderAssessmentItemsHTML(
-  items: RenderItem[],
+  items: MappedItem[],
   level = 0,
 ): string {
   let html = '';

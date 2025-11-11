@@ -6,22 +6,33 @@ import { DiagnosisReport } from '@modules/reports/entities/diagnosis-report.enti
 import { ImagingReport } from '@modules/reports/entities/imaging-report.entity';
 import { LaboratoryReport } from '@modules/reports/entities/laboratory-report.entity';
 import { GENDER, METADATA, SERVICE_TYPES } from 'src/common/constants/others';
-import { ReturnDocument } from 'typeorm';
 
-import {
-  formatVnDateWithoutText,
-  formatVnDateWithText,
-  formatVnFullDateTime,
-  renderAssessmentItemsHTML,
-} from './render';
+import { MappedItem, renderAssessmentItemsHTML } from './render';
 
-interface MappedItem {
-  id?: number;
-  name: string;
-  value?: string;
-  measurementItem: MeasurementItem | null;
-  children?: MappedItem[];
-  _firstSeen?: number; // internal: order
+export function formatVnDateWithText(data: string) {
+  const date = new Date(data);
+  const day = date.getDate().toString().padStart(2, '0');
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const year = date.getFullYear();
+  return `Ngày ${day} tháng ${month} năm ${year}`;
+}
+
+export function formatVnDateWithoutText(data: string) {
+  const date = new Date(data);
+  const day = date.getDate().toString().padStart(2, '0');
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const year = date.getFullYear();
+  return `${day}/${month}/${year}`;
+}
+
+export function formatVnFullDateTime(data: string) {
+  const date = new Date(data);
+  const day = date.getDate().toString().padStart(2, '0');
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const year = date.getFullYear();
+  const hour = date.getHours().toString().padStart(2, '0');
+  const minute = date.getMinutes().toString().padStart(2, '0');
+  return `${hour} giờ ${minute} phút, ngày ${day} tháng ${month} năm ${year}`;
 }
 
 export function buildTree(data: AssessmentResult[]): MappedItem[] {
@@ -63,7 +74,7 @@ export function buildTree(data: AssessmentResult[]): MappedItem[] {
   }
 
   for (const node of nodes.values()) {
-    const parentId = parentLinks.get(node.id!) ?? null;
+    const parentId = parentLinks.get(node.id as number) ?? null;
     if (parentId !== null) {
       const parentNode = nodes.get(parentId)!;
       parentNode.children!.push(node);
@@ -71,7 +82,7 @@ export function buildTree(data: AssessmentResult[]): MappedItem[] {
   }
 
   const roots = Array.from(nodes.values()).filter(
-    (n) => parentLinks.get(n.id!) == null,
+    (n) => parentLinks.get(n.id as number) == null,
   );
 
   function sortChildrenRecursively(arr: MappedItem[]) {
