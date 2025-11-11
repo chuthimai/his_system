@@ -1528,6 +1528,11 @@
     "@emnapi/runtime" "^1.4.3"
     "@tybys/wasm-util" "^0.10.0"
 
+"@nestjs-cls/transactional@^3.1.0":
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/@nestjs-cls/transactional/-/transactional-3.1.0.tgz#68909efaced90e7f915d0fc6d0887cd022ae203e"
+  integrity sha512-HWtS73KWva1Z6Y8PEkVGjDd4dZDb7Qv4rhwCinpsmv5m2wSvxGxqbnG+oTSe7ZCB1EoLihOL9L08GyB6o6bLQA==
+
 "@nestjs/cli@^11.0.0":
   version "11.0.10"
   resolved "https://registry.yarnpkg.com/@nestjs/cli/-/cli-11.0.10.tgz#c5c3cb4c47d08fd8faead7bf0ddd3f82bec7ccee"
@@ -5670,6 +5675,11 @@ neo-async@^2.6.2:
   version "2.6.2"
   resolved "https://registry.yarnpkg.com/neo-async/-/neo-async-2.6.2.tgz#b4aafb93e3aeb2d8174ca53cf163ab7d7308305f"
   integrity sha512-Yd3UES5mWCSqR+qNT93S3UoYUkqAZ9lLg8a7g9rimsWmYGK8cVToA4/sF3RrshdyV3sAGMXVUmpMYOw+dLpOuw==
+
+nestjs-cls@^6.0.1:
+  version "6.0.1"
+  resolved "https://registry.yarnpkg.com/nestjs-cls/-/nestjs-cls-6.0.1.tgz#13b83cadb7db9885b4fb08cad487ba0605c41303"
+  integrity sha512-FnU8MI5/RKdbNvGmlUMD7nuFs7zUiueNzTjO+sxj7BJbsf7cUmosarppPLXRJ7C1WaZ/gLE9ZAcM6//0q1CQIA==
 
 netmask@^2.0.2:
   version "2.0.2"

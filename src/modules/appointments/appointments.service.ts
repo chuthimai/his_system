@@ -2,6 +2,7 @@ import { SchedulesService } from '@modules/schedules/schedules.service';
 import { Physician } from '@modules/users/entities/physician.entity';
 import { User } from '@modules/users/entities/user.entity';
 import { UsersService } from '@modules/users/users.service';
+import { Transactional } from '@nestjs-cls/transactional';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ERROR_MESSAGES } from 'src/common/constants/error-messages';
@@ -21,9 +22,12 @@ export class AppointmentsService {
     private readonly schedulesService: SchedulesService,
   ) {}
 
-  async findOne(identifier: number): Promise<Appointment | null> {
+  async findOne(
+    identifier: number,
+    isActive: boolean = false,
+  ): Promise<Appointment | null> {
     return await this.appointmentRepository.findOne({
-      where: { identifier, status: true },
+      where: { identifier, ...(isActive ? { status: true } : {}) },
       relations: ['workSchedule'],
     });
   }
@@ -41,7 +45,7 @@ export class AppointmentsService {
         if (appointment.physicianIdentifier) {
           appointment.physician = (await this.usersService.findOnePhysician(
             appointment.physicianIdentifier,
-          )) as unknown as Physician;
+          )) as Physician;
         }
 
         appointment.user = (await this.usersService.findOne(
@@ -53,62 +57,52 @@ export class AppointmentsService {
     return appointments;
   }
 
+  @Transactional()
   async create(
     createAppointmentDto: CreateAppointmentDto,
-  ): Promise<Appointment> {
+  ): Promise<Appointment | null> {
     const existedUser = await this.usersService.findOne(
       createAppointmentDto.userIdentifier,
     );
-    const existedWorkSchedule = await this.schedulesService.findOneWorkSchedule(
-      createAppointmentDto.workScheduleIdentifier,
-    );
-    if (!existedUser || !existedWorkSchedule) {
-      throw !existedUser
-        ? new HttpExceptionWrapper(ERROR_MESSAGES.USER_NOT_FOUND)
-        : new HttpExceptionWrapper(ERROR_MESSAGES.WORK_SCHEDULE_NOT_FOUND);
-    }
+    if (!existedUser)
+      throw new HttpExceptionWrapper(ERROR_MESSAGES.USER_NOT_FOUND);
 
     if (createAppointmentDto.physicianIdentifier) {
       if (
         createAppointmentDto.physicianIdentifier ==
         createAppointmentDto.userIdentifier
       ) {
-        throw new HttpExceptionWrapper(
-          ERROR_MESSAGES.APPOINTMENT_USER_CANNOT_BE_PHYSICIAN,
-        );
+        throw new HttpExceptionWrapper(ERROR_MESSAGES.USER_CANNOT_BE_PHYSICIAN);
       }
 
       const existedPhysician = await this.usersService.findOnePhysician(
         createAppointmentDto.physicianIdentifier,
       );
-      if (!existedPhysician) {
+      if (!existedPhysician)
         throw new HttpExceptionWrapper(ERROR_MESSAGES.PHYSICIAN_NOT_FOUND);
-      }
     }
+
+    const existedWorkSchedule = await this.schedulesService.findOneWorkSchedule(
+      createAppointmentDto.workScheduleIdentifier,
+    );
+    if (!existedWorkSchedule)
+      throw new HttpExceptionWrapper(ERROR_MESSAGES.WORK_SCHEDULE_NOT_FOUND);
 
     const newAppointment =
       this.appointmentRepository.create(createAppointmentDto);
     const savedAppointment =
       await this.appointmentRepository.save(newAppointment);
 
-    const targetAppointment = (await this.appointmentRepository
-      .createQueryBuilder('appointment')
-      .where('appointment.identifier = :identifier', {
-        identifier: savedAppointment.identifier,
-      })
-      .leftJoinAndSelect('appointment.workSchedule', 'workSchedule')
-      .leftJoinAndSelect('workSchedule.shift', 'shift')
-      .leftJoin('appointment.user', 'user')
-      .addSelect([
-        'user.identifier',
-        'user.name',
-        'user.telecom',
-        'user.birthDate',
-        'user.gender',
-        'user.address',
-      ])
-      .getOne()) as Appointment;
+    const targetAppointment = await this.appointmentRepository.findOne({
+      where: { identifier: savedAppointment.identifier },
+      relations: ['workSchedule', 'workSchedule.shift'],
+    });
+    if (!targetAppointment)
+      throw new HttpExceptionWrapper(ERROR_MESSAGES.CREATE_APPOINTMENT_FAIL);
 
+    targetAppointment.user = (await this.usersService.findOne(
+      targetAppointment.userIdentifier,
+    )) as User;
     targetAppointment.physician = (await this.usersService.findOnePhysician(
       targetAppointment.physicianIdentifier,
     )) as Physician;
@@ -116,15 +110,15 @@ export class AppointmentsService {
     return targetAppointment;
   }
 
+  @Transactional()
   async delete(
     identifier: number,
     deleteAppointmentDto: DeleteAppointmentDto,
     currentUser: User,
   ): Promise<boolean> {
     let existedAppointment = await this.findOne(identifier);
-    if (!existedAppointment) {
+    if (!existedAppointment)
       throw new HttpExceptionWrapper(ERROR_MESSAGES.APPOINTMENT_NOT_FOUND);
-    }
 
     if (
       ![
@@ -138,9 +132,8 @@ export class AppointmentsService {
     const now = new Date();
     const formattedDate = now.toISOString().split('T')[0];
 
-    if (!(new Date(existedAppointment.workSchedule.date) > now)) {
+    if (!(new Date(existedAppointment.workSchedule.date) > now))
       throw new HttpExceptionWrapper(ERROR_MESSAGES.LATE_TO_CANCEL_APPOINTMENT);
-    }
 
     existedAppointment = {
       ...existedAppointment,
@@ -149,8 +142,7 @@ export class AppointmentsService {
       status: true,
     };
 
-    const cancelAppointment =
-      await this.appointmentRepository.save(existedAppointment);
-    return cancelAppointment ? true : false;
+    await this.appointmentRepository.save(existedAppointment);
+    return true;
   }
 }

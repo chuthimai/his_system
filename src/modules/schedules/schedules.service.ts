@@ -50,9 +50,7 @@ export class SchedulesService {
   }
 
   async findOneWorkSchedule(identifier: number): Promise<WorkSchedule | null> {
-    return await this.workScheduleRepository.findOne({
-      where: { identifier },
-    });
+    return await this.workScheduleRepository.findOneBy({ identifier });
   }
 
   async findOneStaffWorkSchedule(

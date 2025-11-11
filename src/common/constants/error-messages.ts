@@ -25,6 +25,7 @@ export const ERROR_MESSAGES = {
   APPOINTMENT_NOT_FOUND: 'Appointment not found',
   IMAGING_REPORT_NOT_FOUND: 'Imaging report not found',
 
+  CREATE_APPOINTMENT_FAIL: 'Create appointment fail',
   CREATE_PATIENT_FAIL: 'Create patient fail',
   CREATE_INVOICE_FAIL: 'Create invoice fail',
   CREATE_INVOICE_SERVICE_FAIL: 'Create invoice service fail',
@@ -39,7 +40,7 @@ export const ERROR_MESSAGES = {
   INVALID_ROLE: 'Invalid role',
   INVALID_FILE_TYPE: 'Invalid file type',
   USER_ALREADY_EXISTS: 'User already exists',
-  APPOINTMENT_USER_CANNOT_BE_PHYSICIAN: 'Appointment user cannot be physician',
+  USER_CANNOT_BE_PHYSICIAN: 'Appointment user cannot be physician',
   PERFORMER_PHYSICIAN_MUST_BE_SPECIFY: 'Performer physician must be specify',
   REQUESTER_PHYSICIAN_MUST_BE_SPECIFY: 'Requester physician must be specify',
   SPECIALTY_CONSULTATION_SPECIFIED: 'Specialty consultation specified',

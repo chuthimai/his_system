@@ -57,18 +57,17 @@ export class UsersService {
   async findOnePhysician(
     identifier: number,
     isFull: boolean = false,
+    isActive: boolean = false,
   ): Promise<Physician | null> {
     const physician = await this.physicianRepository.findOne({
       where: {
         identifier,
-        staff: { active: true },
+        staff: isActive ? { active: true } : {},
       },
       relations: ['staff', 'staff.user', 'specialty', 'qualifications'],
     });
 
-    if (!physician) {
-      return null;
-    }
+    if (!physician) return null;
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { specialtyIdentifier, staff, ...physicianWithoutStaff } = physician;
