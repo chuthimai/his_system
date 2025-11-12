@@ -119,6 +119,7 @@ export class ReportsService {
       relations: [
         'serviceReport',
         'serviceReport.service',
+        'serviceReport.service.assessmentItems',
         'serviceReport.assessmentResults',
         'serviceReport.patientRecord',
         'serviceReport.patientRecord.patient',
@@ -148,10 +149,6 @@ export class ReportsService {
       (await this.schedulesService.findOneLocation(
         detailServiceReport.serviceReport.service.locationIdentifier,
       )) as Location;
-    detailServiceReport.serviceReport.service.assessmentItems =
-      await this.assessmentsService.findAllAssessmentItems(
-        detailServiceReport.serviceReport.service.identifier,
-      );
 
     if (detailServiceReport?.serviceReport.performerIdentifier) {
       detailServiceReport.serviceReport.performer =
@@ -277,7 +274,12 @@ export class ReportsService {
           status: false,
         },
       },
-      relations: ['serviceReport', 'images'],
+      relations: [
+        'serviceReport',
+        'serviceReport.service',
+        'serviceReport.service.assessmentItems',
+        'images',
+      ],
     });
 
     await Promise.all(
@@ -527,6 +529,7 @@ export class ReportsService {
   @Transactional()
   async createSpecimen(
     createSpecimenDto: CreateSpecimenDto,
+    currentUser: User,
   ): Promise<Specimen | null> {
     try {
       const existedLaboratoryReport =
@@ -542,10 +545,12 @@ export class ReportsService {
           ERROR_MESSAGES.LABORATORY_REPORT_NOT_FOUND,
         );
 
+      existedLaboratoryReport.serviceReport.performerIdentifier =
+        currentUser.identifier;
       existedLaboratoryReport.serviceReport.effectiveTime = new Date()
         .toISOString()
         .split('T')[0];
-      await this.serviceReportRepository.save(existedLaboratoryReport);
+      await this.laboratoryReportRepository.save(existedLaboratoryReport);
 
       const newSpecimen = this.specimenRepository.create({
         ...createSpecimenDto,
@@ -615,6 +620,7 @@ export class ReportsService {
   async createImages(
     createImagesDto: CreateImagesDto,
     images: Express.Multer.File[],
+    currentUser: User,
   ): Promise<Image[]> {
     try {
       const existedImagingReport = await this.imagingReportRepository.findOne({
@@ -627,10 +633,12 @@ export class ReportsService {
       if (!existedImagingReport)
         throw new HttpExceptionWrapper(ERROR_MESSAGES.IMAGING_REPORT_NOT_FOUND);
 
+      existedImagingReport.serviceReport.performerIdentifier =
+        currentUser.identifier;
       existedImagingReport.serviceReport.effectiveTime = new Date()
         .toISOString()
         .split('T')[0];
-      await this.serviceReportRepository.save(existedImagingReport);
+      await this.imagingReportRepository.save(existedImagingReport);
 
       const createdImages = await Promise.all(
         images.map(async (file, i) => {

@@ -23,7 +23,7 @@ export class RecordsController {
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(ROLES.PATIENT)
+  @Roles(ROLES.PHYSICIAN, ROLES.PATIENT)
   @Get('/:recordIdentifier')
   getOne(@Param('recordIdentifier') recordIdentifier: number) {
     return this.recordsService.findOneDetail(recordIdentifier);
