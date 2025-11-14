@@ -454,6 +454,45 @@ export class ReportsService {
     }
   }
 
+  async checkReportPaymentStatus(
+    patientRecordIdentifier: number,
+    currentUserIdentifier: number,
+  ): Promise<ServiceReport | null> {
+    const staffWorkSchedule =
+      await this.schedulesService.findCurrentStaffWorkSchedule(
+        currentUserIdentifier,
+      );
+    if (!staffWorkSchedule)
+      throw new HttpExceptionWrapper(
+        ERROR_MESSAGES.STAFF_WORK_SCHEDULE_NOT_FOUND,
+      );
+
+    const existedPatientRecord = await this.patientRecordService.findOne(
+      patientRecordIdentifier,
+    );
+    if (!existedPatientRecord)
+      throw new HttpExceptionWrapper(ERROR_MESSAGES.PATIENT_RECORD_NOT_FOUND);
+
+    const serviceReport = await this.serviceReportRepository.findOne({
+      where: {
+        patientRecordIdentifier,
+        service: {
+          locationIdentifier: staffWorkSchedule.locationIdentifier,
+        },
+        status: false,
+      },
+      relations: ['service'],
+    });
+    if (!serviceReport)
+      throw new HttpExceptionWrapper(ERROR_MESSAGES.SERVICE_REPORT_NOT_FOUND);
+
+    serviceReport.isPaid = await this.billingService.checkServiceIsPaid(
+      patientRecordIdentifier,
+      serviceReport.service.identifier,
+    );
+    return serviceReport;
+  }
+
   @Transactional()
   async createSpecimen(
     createSpecimenDto: CreateSpecimenDto,

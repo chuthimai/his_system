@@ -117,6 +117,21 @@ export class ReportsController {
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(ROLES.PHYSICIAN)
+  @Get(
+    '/check-payment-status/by-patient-record-identifier/:patientRecordIdentifier',
+  )
+  checkPaymentStatus(
+    @Param('patientRecordIdentifier') patientRecordIdentifier: number,
+    @CurrentUser() currentUser: User,
+  ) {
+    return this.reportService.checkReportPaymentStatus(
+      patientRecordIdentifier,
+      currentUser.identifier,
+    );
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(ROLES.PHYSICIAN)
   @Post('/update-diagnosis-report-result/:serviceReportIdentifier')
   updateDiagnosisReportResult(
     @Param('serviceReportIdentifier') serviceReportIdentifier: number,
