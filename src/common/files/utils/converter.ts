@@ -2,9 +2,7 @@ import { AssessmentItem } from '@modules/assessments/entities/assessment-item.en
 import { AssessmentResult } from '@modules/assessments/entities/assessment-result.entity';
 import { MeasurementItem } from '@modules/assessments/entities/measurement-item.entity';
 import { Prescription } from '@modules/medicines/entities/prescription.entity';
-import { DiagnosisReport } from '@modules/reports/entities/diagnosis-report.entity';
-import { ImagingReport } from '@modules/reports/entities/imaging-report.entity';
-import { LaboratoryReport } from '@modules/reports/entities/laboratory-report.entity';
+import { ServiceReport } from '@modules/reports/entities/service-report.entity';
 import { GENDER, METADATA, SERVICE_TYPES } from 'src/common/constants/others';
 
 import { MappedItem, renderAssessmentItemsHTML } from './render';
@@ -134,15 +132,14 @@ export function buildTree(data: AssessmentResult[]): MappedItem[] {
   return roots;
 }
 
-export function convertDataForInitialReport(data: DiagnosisReport): any {
+export function convertDataForInitialReport(data: ServiceReport): any {
   const {
-    serviceReport: {
-      service: { location, ...serviceRest },
-      assessmentResults,
-      performer,
-      patientRecord: { patient, ...restPatientRecord },
-      ...restServiceReport
-    },
+    service: { location, ...serviceRest },
+    assessmentResults,
+    performer,
+    patientRecord: { patient, ...restPatientRecord },
+    diagnosisReport: { conclusion },
+    ...restServiceReport
   } = data;
 
   return {
@@ -165,7 +162,7 @@ export function convertDataForInitialReport(data: DiagnosisReport): any {
     havingHealthInsurance: restPatientRecord.havingHealInsurance,
 
     reportContent: renderAssessmentItemsHTML(buildTree(assessmentResults)),
-    reportConclusion: data.conclusion,
+    reportConclusion: conclusion,
     reportCreatedTime: formatVnFullDateTime(restServiceReport.effectiveTime),
     reportResultTime: formatVnDateWithText(restServiceReport.recordedTime),
 
@@ -173,16 +170,15 @@ export function convertDataForInitialReport(data: DiagnosisReport): any {
   };
 }
 
-export function convertDataForSpecialReport(data: DiagnosisReport): any {
+export function convertDataForSpecialReport(data: ServiceReport): any {
   const {
-    serviceReport: {
-      service: { location, ...serviceRest },
-      // assessmentResults,
-      performer,
-      requester,
-      patientRecord: { patient },
-      ...restServiceReport
-    },
+    service: { location, ...serviceRest },
+    // assessmentResults,
+    performer,
+    requester,
+    patientRecord: { patient },
+    diagnosisReport: { severity, conclusion },
+    ...restServiceReport
   } = data;
 
   return {
@@ -204,25 +200,23 @@ export function convertDataForSpecialReport(data: DiagnosisReport): any {
     reportCreatedTime: formatVnFullDateTime(restServiceReport.effectiveTime),
     reportResultTime: formatVnDateWithText(restServiceReport.recordedTime),
 
-    severity: data.severity,
-    conclusion: data.conclusion,
+    severity: severity,
+    conclusion: conclusion,
 
     performDoctor: performer.name,
     specialDoctor: requester.name,
   };
 }
 
-export function convertDataForLaboratoryReport(data: LaboratoryReport): any {
+export function convertDataForLaboratoryReport(data: ServiceReport): any {
   const {
-    serviceReport: {
-      service: { location, ...restService },
-      assessmentResults,
-      performer,
-      requester,
-      patientRecord: { patient },
-      ...restServiceReport
-    },
-    interpretation,
+    service: { location, ...restService },
+    assessmentResults,
+    performer,
+    requester,
+    patientRecord: { patient },
+    laboratoryReport: { interpretation },
+    ...restServiceReport
   } = data;
 
   return {
@@ -254,17 +248,15 @@ export function convertDataForLaboratoryReport(data: LaboratoryReport): any {
   };
 }
 
-export function convertDataForImagingReport(data: ImagingReport): any {
+export function convertDataForImagingReport(data: ServiceReport): any {
   const {
-    serviceReport: {
-      service: { location, ...restService },
-      assessmentResults,
-      performer,
-      requester,
-      patientRecord: { patient },
-      ...restServiceReport
-    },
-    interpretation,
+    service: { location, ...restService },
+    assessmentResults,
+    performer,
+    requester,
+    patientRecord: { patient },
+    imagingReport: { interpretation, images },
+    ...restServiceReport
   } = data;
 
   return {
@@ -281,7 +273,7 @@ export function convertDataForImagingReport(data: ImagingReport): any {
     patientGender: patient.gender ? GENDER.MALE : GENDER.FEMALE,
     patientAddress: patient.address,
 
-    media: data.images.map((image) => image.endpoint),
+    media: images.map((image) => image.endpoint),
 
     request:
       restServiceReport.request !== ''

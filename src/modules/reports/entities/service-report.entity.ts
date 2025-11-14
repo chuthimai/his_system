@@ -109,16 +109,22 @@ export class ServiceReport {
   @OneToOne(
     () => DiagnosisReport,
     (diagnosisReport) => diagnosisReport.serviceReport,
+    { cascade: true },
   )
   diagnosisReport: DiagnosisReport;
 
   @OneToOne(
     () => LaboratoryReport,
     (laboratoryReport) => laboratoryReport.serviceReport,
+    { cascade: true },
   )
   laboratoryReport: LaboratoryReport;
 
-  @OneToOne(() => ImagingReport, (imagingReport) => imagingReport.serviceReport)
+  @OneToOne(
+    () => ImagingReport,
+    (imagingReport) => imagingReport.serviceReport,
+    { cascade: true },
+  )
   imagingReport: ImagingReport;
 
   isPaid?: boolean;

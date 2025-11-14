@@ -44,7 +44,8 @@ export class SchedulesService {
       fullName = `${fullName}, ${nextLocation.name}`;
     }
 
-    return { ...childLocation, name: fullName };
+    childLocation.name = fullName;
+    return childLocation;
   }
 
   async findOneWorkSchedule(identifier: number): Promise<WorkSchedule | null> {

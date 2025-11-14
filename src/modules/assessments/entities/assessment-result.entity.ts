@@ -4,7 +4,6 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
-  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
@@ -21,7 +20,7 @@ export class AssessmentResult {
   @Column({ name: 'assessment_item_identifier' })
   assessmentItemIdentifier: number;
 
-  @OneToMany(
+  @ManyToOne(
     () => AssessmentItem,
     (assessmentItem) => assessmentItem.assessmentResults,
   )

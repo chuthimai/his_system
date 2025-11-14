@@ -7,7 +7,7 @@ export class DiagnosisReport {
   @PrimaryColumn()
   identifier: number;
 
-  @OneToOne(() => ServiceReport, { cascade: true })
+  @OneToOne(() => ServiceReport)
   @JoinColumn({ name: 'identifier' })
   serviceReport: ServiceReport;
 

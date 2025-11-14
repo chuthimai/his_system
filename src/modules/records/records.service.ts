@@ -36,6 +36,7 @@ export const mapServiceTypeToEntity = new Map<string, Function>([
   [SERVICE_TYPES.LABORATORY_TEST, LaboratoryReport],
   [SERVICE_TYPES.IMAGING_SCAN, ImagingReport],
 ]);
+
 @Injectable()
 export class RecordsService {
   constructor(
@@ -104,21 +105,29 @@ export class RecordsService {
   async findOneUnclosed(identifier: number): Promise<PatientRecord | null> {
     const unclosedRecord = await this.patientRecordRepository.findOne({
       where: { identifier },
-      relations: [
-        'serviceReports',
-        'serviceReports.service',
-        'serviceReports.service.assessmentItems',
-        'serviceReports.assessmentResults',
-      ],
-      order: {
+      relations: {
         serviceReports: {
           service: {
-            identifier: 'ASC',
+            assessmentItems: {
+              measurementItem: true,
+            },
+          },
+          assessmentResults: true,
+          diagnosisReport: true,
+          laboratoryReport: {
+            specimens: true,
+          },
+          imagingReport: {
+            images: true,
           },
         },
       },
     });
     if (!unclosedRecord) return unclosedRecord;
+
+    unclosedRecord.patient = (await this.usersService.findOne(
+      unclosedRecord.patientIdentifier,
+    )) as User;
 
     unclosedRecord.serviceReports = await Promise.all(
       unclosedRecord.serviceReports.map(async (serviceReport) => {
@@ -129,6 +138,22 @@ export class RecordsService {
         serviceReport.reporter = (await this.usersService.findOnePhysician(
           serviceReport.reporterIdentifier,
         )) as Physician;
+
+        // serviceReport.service.location =
+        //   (await this.schedulesService.findOneLocation(
+        //     serviceReport.service.locationIdentifier,
+        //   )) as unknown as Location;
+
+        if (serviceReport.imagingReport) {
+          serviceReport.imagingReport.images = await Promise.all(
+            serviceReport?.imagingReport.images.map(async (image) => {
+              image.endpoint = await this.s3Service.getSignedUrl(
+                image.endpoint,
+              );
+              return image;
+            }),
+          );
+        }
 
         return serviceReport;
       }),
@@ -339,11 +364,13 @@ export class RecordsService {
           await this.reportsService.exportReport(serviceReport.identifier),
         );
       }
-      exportFilePaths.push(
-        await this.medicinesService.exportPrescription(
-          existedPatientRecord.prescriptionIdentifier,
-        ),
-      );
+      if (existedPatientRecord.prescriptionIdentifier) {
+        exportFilePaths.push(
+          await this.medicinesService.exportPrescription(
+            existedPatientRecord.prescriptionIdentifier,
+          ),
+        );
+      }
 
       const now = new Date();
       const yyyyMMdd = now.toISOString().slice(0, 10).replace(/-/g, '');
