@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <title>Đơn thuốc</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <style>
+        /* In A4-friendly layout */
+        @page { size: A4; margin: 24mm 18mm; }
+        body {
+            font-family: "Times New Roman", serif;
+            font-size: 14px;
+            margin: 0;
+            color: #000;
+            line-height: 1.45;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 16px;
+        }
+
+        .header {
+            display:flex;
+            justify-content:space-between;
+            align-items:flex-start;
+            margin-bottom: 6px;
+        }
+        .header .left {
+            width: 65%;
+        }
+        .header .right {
+            width: 35%;
+            text-align:right;
+            font-size:12px;
+        }
+        .header > div > p {
+            margin: 0;
+            margin-bottom: 1px;
+        }
+
+        .title {
+            text-align:center;
+            font-size:26px;
+            font-weight:700;
+            margin: 8px 0 12px 0;
+            letter-spacing: 1px;
+        }
+
+        .patient-info {
+            margin-bottom: 10px;
+            font-size:14px;
+        }
+        .patient-info table {
+            width:100%;
+            border-collapse: collapse;
+            font-size:14px;
+        }
+        .patient-info td {
+            vertical-align: top;
+            padding: 2px 6px;
+        }
+
+        .med-list {
+            margin-top: 6px;
+            margin-bottom: 8px;
+        }
+        .med-list table {
+            width:100%;
+            border-collapse: collapse;
+            font-size:14px;
+        }
+        .med-list th, .med-list td {
+            padding: 6px 8px;
+            border-bottom: 1px dotted #666;
+            text-align: left;
+            vertical-align: top;
+        }
+        .med-list th {
+            font-weight:700;
+            background: #fafafa;
+            font-size:13px;
+        }
+
+        .instructions {
+            margin-top:12px;
+            border-top:1px solid #000;
+            padding-top:8px;
+            font-size:13px;
+        }
+
+        .signature-row {
+            display:flex;
+            justify-content:space-between;
+            align-items:flex-start;
+            margin-top: 20px;
+            font-size:13px;
+
+            /* Ngăn chữ ký bị tách sang trang khác */
+            page-break-inside: avoid;
+            page-break-before: avoid;
+            break-inside: avoid;
+            break-before: avoid;
+        }
+        .sig-right {
+            text-align:center;
+            width:40%;
+        }
+        .signature-line {
+            margin-top:36px;
+            width: 80%;
+            margin-left: auto;
+        }
+
+        .small-note {
+            font-size:11px;
+            color:#444;
+            margin-top:8px;
+        }
+
+        /* dotted area for long text */
+        .dots {
+            white-space:nowrap;
+            overflow:hidden;
+        }
+
+        /* responsive for small screens */
+        @media print {
+            .container { padding: 0; }
+            .title { font-size:24px; }
+        }
+    </style>
+</head>
+
+<body>
+<div class="container">
+
+    <div class="header">
+        <div class="left">
+            <p>Sở Y tế: <%= departmentOfHealth %></p>
+            <p>BV: <%= hospitalName %></p>
+            <p>SĐT: <%= hospitalPhone %></p>
+        </div>
+        <div class="right">
+            <p>Mã đơn: <%= identifier%></p>
+            <div>Mã bệnh án: <%= recordNumber %></div>
+
+        </div>
+    </div>
+
+    <div class="title">ĐƠN THUỐC</div>
+
+    <div class="patient-info">
+        <table>
+            <tr style="display: flex; justify-content: space-between;">
+                <td>Họ và tên: <strong><%= patientName %></strong></td>
+                <td>Sinh ngày: <%= patientBirth %></td>
+                <td>Giới tính: <%= patientGender %></td>
+            </tr>
+            <tr>
+                <td>Địa chỉ liên hệ: <%= patientAddress %></td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="med-list">
+        <table>
+            <thead>
+            <tr>
+                <th style="width:6%; text-align:center;">#</th>
+                <th style="width:56%;">Tên thuốc & liều</th>
+                <th style="width:18%; text-align:center;">Số lượng</th>
+                <th style="width:20%; text-align:center;">Dạng</th>
+            </tr>
+            </thead>
+            <tbody>
+            <!-- Example static rows: thay thế bằng vòng lặp EJS khi dùng template -->
+
+
+             <% prescribedMedications.forEach((pm, idx) => { %>
+                <tr>
+                    <td style="text-align:center;"><%= idx + 1%></td>
+                    <td>
+                        <strong><%= pm.medication.name %></strong><br/>
+                        <%= pm.medication.name %> - <%= pm.dosageInstruction %>
+                    </td>
+                    <td style="text-align:center;">x <%= pm.quantity %></td>
+                    <td style="text-align:center;"><%= pm.medication.doseForm %></td>
+                </tr>
+             <% }) %>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="instructions" >
+        <div style="margin-top: 10px;">
+            <strong>Lời dặn bác sĩ:</strong>
+        </div>
+        <div>
+            <%= note %>
+        </div>
+        <div class="small-note"  style="white-space: pre-line;">
+            <em>Dùng đúng theo chỉ dẫn, nếu có bất thường đến bệnh viện khám lại ngay hoặc liên hệ số điện thoại trên đơn thuốc (từ 7h đến 22h).</em>
+            <div><em>Khám lại khi mang theo đơn này.</em></div>
+        </div>
+    </div>
+
+    <div class="signature-row">
+        <div class="small-note">
+        </div>
+        <div class="sig-right">
+            <p><%= issueDate %></p>
+            <div><strong>Bác sĩ khám bệnh</strong></div>
+            <div class="signature-line"></div>
+            <div><%= doctor %></div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

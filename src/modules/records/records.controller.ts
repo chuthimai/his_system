@@ -23,7 +23,7 @@ export class RecordsController {
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(ROLES.PATIENT)
+  @Roles(ROLES.PHYSICIAN, ROLES.PATIENT)
   @Get('/:recordIdentifier')
   getOne(@Param('recordIdentifier') recordIdentifier: number) {
     return this.recordsService.findOneDetail(recordIdentifier);
@@ -61,6 +61,19 @@ export class RecordsController {
   ) {
     return this.recordsService.updateLaboratoryAndImaging(
       updateRecord2Dto,
+      currentUser,
+    );
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(ROLES.PHYSICIAN)
+  @Post('/close/:recordIdentifier')
+  close(
+    @Param('recordIdentifier') recordIdentifier: number,
+    @CurrentUser() currentUser: User,
+  ) {
+    return this.recordsService.closePatientRecord(
+      recordIdentifier,
       currentUser,
     );
   }

@@ -1,7 +1,10 @@
 import { S3Module } from '@modules/s3/s3.module';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { getDataSourceToken, TypeOrmModule } from '@nestjs/typeorm';
+import { ClsPluginTransactional } from '@nestjs-cls/transactional';
+import { TransactionalAdapterTypeOrm } from '@nestjs-cls/transactional-adapter-typeorm';
+import { ClsModule } from 'nestjs-cls';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -20,6 +23,17 @@ import { UsersModule } from './modules/users/users.module';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+    }),
+    ClsModule.forRoot({
+      global: true,
+      plugins: [
+        new ClsPluginTransactional({
+          imports: [TypeOrmModule],
+          adapter: new TransactionalAdapterTypeOrm({
+            dataSourceToken: getDataSourceToken(),
+          }),
+        }),
+      ],
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],

@@ -7,13 +7,13 @@ import { AssessmentsController } from './assessments.controller';
 import { AssessmentsService } from './assessments.service';
 import { AssessmentItem } from './entities/assessment-item.entity';
 import { AssessmentResult } from './entities/assessment-result.entity';
-import { MeasurementItems } from './entities/measurement-item.entity';
+import { MeasurementItem } from './entities/measurement-item.entity';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([
       AssessmentItem,
-      MeasurementItems,
+      MeasurementItem,
       AssessmentResult,
     ]),
     forwardRef(() => BillingModule),

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Phiếu <%= serviceName %></title>
+  <style>
+    body {
+      font-family: "Times New Roman", serif;
+      font-size: 14px;
+      margin: 40px;
+      line-height: 1.5;
+    }
+    p {
+      margin: 0;
+    }
+    h2 {
+      text-align: center;
+      text-transform: uppercase;
+      font-size: 18px;
+      margin-bottom: 5px;
+    }
+
+    div {
+      margin-bottom: 8px;
+      margin-top: 8px;
+    }
+
+    div > div {
+      margin-top: 2px;
+      margin-bottom: 2px;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    .header .left {
+      width: 60%;
+    }
+    .header .right {
+      text-align: right;
+      width: 40%;
+    }
+    .section {
+      margin-top: 10px;
+    }
+    .section-title {
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+
+    .signature-row {
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      margin-top: 20px;
+      font-size:13px;
+      page-break-inside: avoid;
+      page-break-before: avoid;
+      break-inside: avoid;
+      break-before: avoid;
+    }
+    .sig-right {
+      text-align:center;
+      width:40%;
+    }
+    .signature-line {
+      margin-top:36px;
+      width: 80%;
+      margin-left: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    td {
+      vertical-align: top;
+      padding: 3px 0;
+    }
+
+  </style>
+</head>
+<body>
+<div class="header">
+  <div class="left">
+    <p>Sở Y tế: <%= departmentOfHealth%></p>
+    <p>BV: <%= hospitalName%></p>
+  </div>
+  <div class="right">
+    <p>Mã số: MS:29/BV-02</p>
+    <p>Số vào viện: <%= recordNumber%></p>
+  </div>
+</div>
+
+
+<h2>PHIẾU <%= serviceName.toUpperCase()%></h2>
+
+<p><strong>Nơi khám bệnh:</strong> <%= locationName %></p>
+
+<div class="section">
+  <div class="section-title">Hành chính:</div>
+  <table>
+    <tr>
+      <td>1. Họ và tên: <%= patientName.toUpperCase() %></td>
+      <td>2. Sinh ngày: <%= patientBirth %> - Tuổi: <%= new Date().getFullYear() - new Date(patientBirth).getFullYear() %></td>
+    </tr>
+    <tr>
+      <td>3. Giới tính: <%= patientGender %></td>
+      <td>4. Điện thoại: <%= patientTelecom %></td>
+    </tr>
+    <tr>
+      <td colspan="2">5. Địa chỉ: <%= patientAddress %></td>
+    </tr>
+    <tr>
+      <td>6. Đối tượng: <%= havingHealthInsurance ? '☑' : '☐' %> BHYT ☐ Khác</td>
+    </tr>
+    <tr>
+      <td colspan="2">7. Đến khám bệnh lúc <%= reportCreatedTime %></td>
+    </tr>
+  </table>
+</div>
+
+<div class="section">
+  <%- reportContent%>
+</div>
+
+<div class="signature-row">
+  <div></div>
+  <div class="sig-right">
+    <p><%= reportResultTime%></p>
+    <p><strong>Bác sĩ đa khoa</strong></p>
+    <div class="signature-line"></div>
+    <p><%= generalDoctor%></p>
+  </div>
+</div>
+
+</body>
+</html>

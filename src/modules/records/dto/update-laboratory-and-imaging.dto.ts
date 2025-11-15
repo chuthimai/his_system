@@ -1,5 +1,24 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsArray, IsNotEmpty, IsNumber } from 'class-validator';
+import { Type } from 'class-transformer';
+import {
+  IsArray,
+  IsNotEmpty,
+  IsNumber,
+  IsString,
+  ValidateNested,
+} from 'class-validator';
+
+export class ServiceInfoDto {
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsNumber()
+  serviceIdentifier: number;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsString()
+  serviceRequest: string;
+}
 
 export class UpdateLaboratoryAndImagingDto {
   @ApiProperty()
@@ -7,9 +26,10 @@ export class UpdateLaboratoryAndImagingDto {
   @IsNumber()
   patientRecordIdentifier: number;
 
-  @ApiProperty({ type: [Number] })
+  @ApiProperty({ type: [ServiceInfoDto] })
   @IsNotEmpty()
   @IsArray()
-  @IsNumber({}, { each: true })
-  serviceIdentifiers: number[];
+  @ValidateNested({ each: true })
+  @Type(() => ServiceInfoDto)
+  serviceInfo: ServiceInfoDto[];
 }

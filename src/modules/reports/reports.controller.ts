@@ -43,8 +43,11 @@ export class ReportsController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(ROLES.PHYSICIAN)
   @Post('/specimens')
-  createSpecimen(@Body() createSpecimenDto: CreateSpecimenDto) {
-    return this.reportService.createSpecimen(createSpecimenDto);
+  createSpecimen(
+    @Body() createSpecimenDto: CreateSpecimenDto,
+    @CurrentUser() currentUser: User,
+  ) {
+    return this.reportService.createSpecimen(createSpecimenDto, currentUser);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -67,8 +70,13 @@ export class ReportsController {
   createImage(
     @UploadedFiles() images: Express.Multer.File[],
     @Body() createImagesDto: CreateImagesDto,
+    @CurrentUser() currentUser: User,
   ) {
-    return this.reportService.createImages(createImagesDto, images);
+    return this.reportService.createImages(
+      createImagesDto,
+      images,
+      currentUser,
+    );
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)

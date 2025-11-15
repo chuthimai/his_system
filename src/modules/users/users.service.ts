@@ -1,11 +1,12 @@
 import { RecordsService } from '@modules/records/records.service';
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Transactional } from '@nestjs-cls/transactional';
 import * as bcrypt from 'bcrypt';
 import { ERROR_MESSAGES } from 'src/common/constants/error-messages';
 import { ROLES } from 'src/common/constants/others';
 import { HttpExceptionWrapper } from 'src/common/helpers/http-exception-wrapper';
-import { Repository } from 'typeorm';
+import { ILike, Repository } from 'typeorm';
 
 import { CreateUserDto } from './dto/create-user.dto';
 import { Physician } from './entities/physician.entity';
@@ -47,9 +48,8 @@ export class UsersService {
     const patientRecord = await this.recordsService.findOne(
       patientRecordIdentifier,
     );
-    if (!patientRecord) {
+    if (!patientRecord)
       throw new HttpExceptionWrapper(ERROR_MESSAGES.PATIENT_RECORD_NOT_FOUND);
-    }
 
     return await this.findOne(patientRecord.patientIdentifier);
   }
@@ -57,18 +57,17 @@ export class UsersService {
   async findOnePhysician(
     identifier: number,
     isFull: boolean = false,
+    checkActive: boolean = false,
   ): Promise<Physician | null> {
     const physician = await this.physicianRepository.findOne({
       where: {
         identifier,
-        staff: { active: true },
+        ...(checkActive ? { staff: { active: true } } : {}),
       },
       relations: ['staff', 'staff.user', 'specialty', 'qualifications'],
     });
 
-    if (!physician) {
-      return null;
-    }
+    if (!physician) return null;
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { specialtyIdentifier, staff, ...physicianWithoutStaff } = physician;
@@ -89,18 +88,19 @@ export class UsersService {
   }
 
   async findAllByName(name: string): Promise<User[]> {
-    return await this.userRepository
-      .createQueryBuilder('user')
-      .where('LOWER(user.name) LIKE LOWER(:name)', { name: `%${name}%` })
-      .select([
-        'user.identifier',
-        'user.name',
-        'user.telecom',
-        'user.birthDate',
-        'user.gender',
-        'user.address',
-      ])
-      .getMany();
+    return await this.userRepository.find({
+      where: {
+        name: ILike(`%${name}%`),
+      },
+      select: [
+        'identifier',
+        'name',
+        'telecom',
+        'birthDate',
+        'gender',
+        'address',
+      ],
+    });
   }
 
   async findAllPhysicianBySpecialty(
@@ -122,28 +122,33 @@ export class UsersService {
     });
   }
 
+  @Transactional()
   async create(
     createUserDto: CreateUserDto,
     reuseOnDuplicate: boolean = false,
   ): Promise<User> {
-    const existedUser = await this.userRepository.findOneBy({
-      telecom: createUserDto.telecom,
-    });
-    if (existedUser) {
-      if (reuseOnDuplicate) {
-        return existedUser;
-      } else {
-        throw new HttpExceptionWrapper(ERROR_MESSAGES.USER_ALREADY_EXISTS);
+    try {
+      const existedUser = await this.userRepository.findOneBy({
+        telecom: createUserDto.telecom,
+      });
+      if (existedUser) {
+        if (reuseOnDuplicate) return existedUser;
+        else throw new HttpExceptionWrapper(ERROR_MESSAGES.USER_ALREADY_EXISTS);
       }
+
+      createUserDto.password = bcrypt.hashSync(createUserDto.password, 10);
+
+      const newUser = this.userRepository.create({
+        identifier: Number('111' + (Date.now() % 1e7)),
+        ...createUserDto,
+        role: ROLES.PATIENT,
+      });
+      return await this.userRepository.save(newUser);
+    } catch (err) {
+      throw new HttpExceptionWrapper(
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        `${err.message}, ${ERROR_MESSAGES.CREATE_PATIENT_FAIL}`,
+      );
     }
-
-    createUserDto.password = bcrypt.hashSync(createUserDto.password, 10);
-    const newUser = this.userRepository.create({
-      identifier: Number('111' + (Date.now() % 1e7)),
-      ...createUserDto,
-      role: ROLES.PATIENT,
-    });
-
-    return await this.userRepository.save(newUser);
   }
 }

@@ -1,5 +1,5 @@
 import { AssessmentItem } from '@modules/assessments/entities/assessment-item.entity';
-import { MeasurementItems } from '@modules/assessments/entities/measurement-item.entity';
+import { MeasurementItem } from '@modules/assessments/entities/measurement-item.entity';
 import { Service } from '@modules/billing/entities/service.entity';
 import { Medication } from '@modules/medicines/entities/medication.entity';
 import { Location } from '@modules/schedules/entities/location.entity';
@@ -42,7 +42,7 @@ const entitiesAndData = [
   [WorkSchedule, WorkScheduleData],
   [StaffWorkSchedule, StaffWorkScheduleData],
   [AssessmentItem, AssessmentItemData],
-  [MeasurementItems, MeasurementItemData],
+  [MeasurementItem, MeasurementItemData],
   [Medication, MedicationData],
 ];
 

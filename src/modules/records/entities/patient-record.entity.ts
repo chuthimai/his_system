@@ -20,6 +20,15 @@ export class PatientRecord {
   @Column({ type: 'boolean', default: false }) // true ~ completed
   status: boolean;
 
+  @Column({ name: 'having_referral_letter', type: 'boolean', default: 0 })
+  havingTransferForm: boolean;
+
+  @Column({ name: 'having_heath_insurance', type: 'boolean', default: 0 })
+  havingHealInsurance: boolean;
+
+  @Column({ name: 'export_file_name', default: '' })
+  exportFileName: string;
+
   @Column({
     name: 'created_time',
     type: 'datetime',

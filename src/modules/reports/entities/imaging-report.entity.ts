@@ -22,7 +22,7 @@ export class ImagingReport {
   @Column({ default: '' })
   focus: string;
 
-  @Column({ default: '' })
+  @Column({ default: '', length: 10000 })
   interpretation: string;
 
   @OneToMany(() => Image, (image) => image.imagingReport)

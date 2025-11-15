@@ -19,6 +19,6 @@ import { MedicinesService } from './medicines.service';
   ],
   controllers: [MedicinesController],
   providers: [MedicinesService],
-  exports: [TypeOrmModule],
+  exports: [TypeOrmModule, MedicinesService],
 })
 export class MedicinesModule {}
