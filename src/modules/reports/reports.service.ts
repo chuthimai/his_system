@@ -2,10 +2,7 @@ import { AssessmentsService } from '@modules/assessments/assessments.service';
 import { AssessmentItem } from '@modules/assessments/entities/assessment-item.entity';
 import { BillingService } from '@modules/billing/billing.service';
 import { MedicinesService } from '@modules/medicines/medicines.service';
-import {
-  mapServiceTypeToEntity,
-  RecordsService,
-} from '@modules/records/records.service';
+import { RecordsService } from '@modules/records/records.service';
 import { UpdateDiagnosisReportResultDto } from '@modules/reports/dto/update-diagnosis-report-result.dto';
 import { S3Service } from '@modules/s3/s3.service';
 import { Location } from '@modules/schedules/entities/location.entity';
@@ -93,101 +90,72 @@ export class ReportsService {
     this.mapEntityToRepository.set(ImagingReport, this.imagingReportRepository);
   }
 
-  async findOne(identifier: number): Promise<T | null> {
+  async findOne(identifier: number): Promise<ServiceReport | null> {
     const serviceReport = await this.serviceReportRepository.findOne({
       where: { identifier },
-      relations: ['diagnosisReport', 'imagingReport', 'laboratoryReport'],
-    });
-
-    return serviceReport?.diagnosisReport
-      ? await this.findOneDetailServiceReport(DiagnosisReport, identifier)
-      : serviceReport?.laboratoryReport
-        ? await this.findOneDetailServiceReport(LaboratoryReport, identifier)
-        : await this.findOneDetailServiceReport(ImagingReport, identifier);
-  }
-
-  async findOneDetailServiceReport(
-    entity: new () => T,
-    identifier: number,
-  ): Promise<T | null> {
-    const detailReportRepository = this.mapEntityToRepository.get(entity);
-    if (!detailReportRepository)
-      throw new Error(ERROR_MESSAGES.ENTITY_NOT_FOUND);
-
-    const detailServiceReport = await detailReportRepository.findOne({
-      where: { identifier },
-      relations: [
-        'serviceReport',
-        'serviceReport.service',
-        'serviceReport.service.assessmentItems',
-        'serviceReport.assessmentResults',
-        'serviceReport.patientRecord',
-        'serviceReport.patientRecord.patient',
-        ...(entity === LaboratoryReport ? ['specimens'] : []),
-        ...(entity === ImagingReport ? ['images'] : []),
-      ],
-      order: {
-        serviceReport: {
-          assessmentResults: {
-            assessmentItemIdentifier: 'ASC',
+      relations: {
+        service: {
+          assessmentItems: {
+            measurementItem: true,
           },
         },
+        assessmentResults: true,
+        diagnosisReport: true,
+        laboratoryReport: {
+          specimens: true,
+        },
+        imagingReport: {
+          images: true,
+        },
+        patientRecord: true,
       },
     });
-    if (!detailServiceReport)
-      throw new HttpExceptionWrapper(
-        ERROR_MESSAGES.DETAIL_SERVICE_REPORT_NOT_FOUND,
-      );
 
-    detailServiceReport.serviceReport.patientRecord.patient =
-      (await this.usersService.findOne(
-        detailServiceReport.serviceReport.patientRecord.patientIdentifier,
+    if (serviceReport?.patientRecord.patientIdentifier) {
+      serviceReport.patientRecord.patient = (await this.usersService.findOne(
+        serviceReport.patientRecord.patientIdentifier,
         false,
       )) as User;
-
-    detailServiceReport.serviceReport.service.location =
-      (await this.schedulesService.findOneLocation(
-        detailServiceReport.serviceReport.service.locationIdentifier,
-      )) as Location;
-
-    if (detailServiceReport?.serviceReport.performerIdentifier) {
-      detailServiceReport.serviceReport.performer =
-        (await this.usersService.findOnePhysician(
-          detailServiceReport?.serviceReport.performerIdentifier,
-        )) as Physician;
-    }
-    if (detailServiceReport?.serviceReport.reporterIdentifier) {
-      detailServiceReport.serviceReport.reporter =
-        (await this.usersService.findOnePhysician(
-          detailServiceReport?.serviceReport.reporterIdentifier,
-          false,
-        )) as Physician;
-    }
-    if (detailServiceReport?.serviceReport.requesterIdentifier) {
-      detailServiceReport.serviceReport.requester =
-        (await this.usersService.findOnePhysician(
-          detailServiceReport?.serviceReport.requesterIdentifier,
-        )) as Physician;
     }
 
-    if (
-      entity === ImagingReport &&
-      (detailServiceReport as ImagingReport).images.length > 0
-    ) {
-      await Promise.all(
-        (detailServiceReport as ImagingReport).images.map(async (image) => {
+    if (serviceReport?.performerIdentifier) {
+      serviceReport.performer = (await this.usersService.findOnePhysician(
+        serviceReport.performerIdentifier,
+      )) as Physician;
+    }
+    if (serviceReport?.reporterIdentifier) {
+      serviceReport.reporter = (await this.usersService.findOnePhysician(
+        serviceReport.reporterIdentifier,
+      )) as Physician;
+    }
+    if (serviceReport?.requesterIdentifier) {
+      serviceReport.requester = (await this.usersService.findOnePhysician(
+        serviceReport.requesterIdentifier,
+      )) as Physician;
+    }
+
+    if (serviceReport?.service.locationIdentifier) {
+      serviceReport.service.location =
+        (await this.schedulesService.findOneLocation(
+          serviceReport.service.locationIdentifier,
+        )) as Location;
+    }
+    if (serviceReport?.imagingReport?.images) {
+      serviceReport.imagingReport.images = await Promise.all(
+        serviceReport?.imagingReport.images.map(async (image) => {
           image.endpoint = await this.s3Service.getSignedUrl(image.endpoint);
+          return image;
         }),
       );
     }
 
-    return detailServiceReport;
+    return serviceReport;
   }
 
   async findOneByPatientRecordIdentifier(
     patientRecordIdentifier: number,
     currentUserIdentifier: number,
-  ): Promise<T | null> {
+  ): Promise<ServiceReport | null> {
     const staffWorkSchedule =
       await this.schedulesService.findCurrentStaffWorkSchedule(
         currentUserIdentifier,
@@ -211,39 +179,21 @@ export class ReportsService {
         },
         status: false,
       },
-      relations: ['service'],
     });
     if (!serviceReport)
       throw new HttpExceptionWrapper(ERROR_MESSAGES.SERVICE_REPORT_NOT_FOUND);
 
-    const entity = mapServiceTypeToEntity.get(serviceReport.service.type);
-    if (!entity) throw new Error(ERROR_MESSAGES.ENTITY_NOT_FOUND);
-
-    const detailServiceReport = await this.findOneDetailServiceReport(
-      entity as new () => T,
-      serviceReport.identifier,
-    );
-
-    (detailServiceReport as unknown as ServiceReport).isPaid =
-      await this.billingService.checkServiceIsPaid(
-        serviceReport.patientRecordIdentifier,
-        serviceReport.serviceIdentifier,
-      );
-
-    return detailServiceReport;
+    return await this.findOne(serviceReport.identifier);
   }
 
   async findOneBySpecimenIdentifier(
     specimenIdentifier: number,
-  ): Promise<T | null> {
+  ): Promise<ServiceReport | null> {
     const specimen = await this.findOneSpecimen(specimenIdentifier);
     if (!specimen)
       throw new HttpExceptionWrapper(ERROR_MESSAGES.SPECIMEN_NOT_FOUND);
 
-    return this.findOneDetailServiceReport(
-      LaboratoryReport,
-      specimen.laboratoryReportIdentifier,
-    );
+    return this.findOne(specimen.laboratoryReportIdentifier);
   }
 
   async findOneSpecimen(identifier: number): Promise<Specimen | null> {
@@ -264,7 +214,7 @@ export class ReportsService {
 
   async findAllImagingReport(
     serviceIdentifier: number,
-  ): Promise<ImagingReport[]> {
+  ): Promise<ServiceReport[]> {
     const imagingReports = await this.imagingReportRepository.find({
       where: {
         serviceReport: {
@@ -274,24 +224,13 @@ export class ReportsService {
           status: false,
         },
       },
-      relations: [
-        'serviceReport',
-        'serviceReport.service',
-        'serviceReport.service.assessmentItems',
-        'images',
-      ],
     });
 
-    await Promise.all(
+    return await Promise.all(
       imagingReports.map(async (imagingReport) => {
-        imagingReport.serviceReport.performer =
-          (await this.usersService.findOnePhysician(
-            imagingReport.serviceReport.performerIdentifier,
-          )) as Physician;
+        return (await this.findOne(imagingReport.identifier)) as ServiceReport;
       }),
     );
-
-    return imagingReports;
   }
 
   @Transactional()
@@ -393,36 +332,22 @@ export class ReportsService {
         await detailReportRepository.save(newDetailReport);
 
       if (entity === DiagnosisReport) {
-        const createdDetailReport = await this.findOneDetailServiceReport(
-          DiagnosisReport,
+        const createdServiceReport = await this.findOne(
           savedDetailReport.identifier,
         );
 
-        (createdDetailReport as DiagnosisReport).serviceReport.effectiveTime =
-          new Date().toISOString().split('T')[0];
+        (createdServiceReport as ServiceReport).effectiveTime = new Date()
+          .toISOString()
+          .split('T')[0];
 
-        await detailReportRepository.save(createdDetailReport as unknown as T);
+        await this.serviceReportRepository.save(
+          createdServiceReport as ServiceReport,
+        );
       }
     } catch (err) {
       throw new HttpExceptionWrapper(
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         `${err.message}, ${ERROR_MESSAGES.CREATE_DETAIL_REPORT_FAIL}`,
-      );
-    }
-  }
-
-  @Transactional()
-  async update(newDetailReport: T): Promise<T> {
-    try {
-      return (newDetailReport as DiagnosisReport).severity
-        ? await this.diagnosisReportRepository.save(newDetailReport)
-        : (newDetailReport as LaboratoryReport).specimens
-          ? await this.laboratoryReportRepository.save(newDetailReport)
-          : await this.imagingReportRepository.save(newDetailReport);
-    } catch (err) {
-      throw new HttpExceptionWrapper(
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        `${err.message}, ${ERROR_MESSAGES.UPDATE_REPORT_FAIL}`,
       );
     }
   }
@@ -437,25 +362,23 @@ export class ReportsService {
     currentUser: User,
   ): Promise<void> {
     try {
-      let detailReport = await this.findOne(serviceReportIdentifier);
-      if (!detailReport)
+      let serviceReport = await this.findOne(serviceReportIdentifier);
+      if (!serviceReport)
         throw new HttpExceptionWrapper(
           ERROR_MESSAGES.DETAIL_SERVICE_REPORT_NOT_FOUND,
         );
 
-      if (
-        currentUser.identifier !== detailReport.serviceReport.reporterIdentifier
-      )
+      if (currentUser.identifier !== serviceReport.reporterIdentifier)
         throw new HttpExceptionWrapper(ERROR_MESSAGES.PERMISSION_DENIED);
 
       await this.closeAllSpecimenByLaboratoryReportIdentifier(
-        detailReport.identifier,
+        serviceReport.identifier,
       );
 
       // Chưa check đẩy đủ assessment results
 
       await this.assessmentsService.createAssessmentResults({
-        serviceReportIdentifier: detailReport.identifier,
+        serviceReportIdentifier: serviceReport.identifier,
         assessmentResults: updateDetailReportResultDto.assessmentResults,
       });
 
@@ -482,20 +405,25 @@ export class ReportsService {
                 : {}),
             };
 
-      detailReport = {
-        ...detailReport,
-        ...detailServiceInfo,
-        serviceReport: {
-          ...detailReport.serviceReport,
-          ...generalServiceInfo,
-        },
+      const mergeIfExist = (obj: ServiceReport, key: string) =>
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        obj[key] ? { [key]: { ...obj[key], ...detailServiceInfo } } : {};
+
+      serviceReport = {
+        ...serviceReport,
+        ...generalServiceInfo,
+        ...mergeIfExist(serviceReport, 'diagnosisReport'),
+        ...mergeIfExist(serviceReport, 'laboratoryReport'),
+        ...mergeIfExist(serviceReport, 'imagingReport'),
       };
-      await this.update(detailReport);
+
+      await this.serviceReportRepository.save(serviceReport);
     } catch (err) {
-      throw new HttpExceptionWrapper(
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        `${err.message}, ${ERROR_MESSAGES.UPDATE_DETAIL_REPORT_FAIL}`,
-      );
+      console.log(err);
+      // throw new HttpExceptionWrapper(
+      //   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      //   `${err.message}, ${ERROR_MESSAGES.UPDATE_DETAIL_REPORT_FAIL}`,
+      // );
     }
   }
 
@@ -506,24 +434,63 @@ export class ReportsService {
     currentUser: User,
   ): Promise<void> {
     try {
-      const detailReport = await this.findOne(serviceReportIdentifier);
-      if (!detailReport)
+      const serviceReport = await this.findOne(serviceReportIdentifier);
+      if (!serviceReport)
         throw new HttpExceptionWrapper(
           ERROR_MESSAGES.DETAIL_SERVICE_REPORT_NOT_FOUND,
         );
 
       if (roleParticipant === 'performer')
-        detailReport.serviceReport.performerIdentifier = currentUser.identifier;
+        serviceReport.performerIdentifier = currentUser.identifier;
       else if (roleParticipant === 'reporter')
-        detailReport.serviceReport.reporterIdentifier = currentUser.identifier;
+        serviceReport.reporterIdentifier = currentUser.identifier;
 
-      await this.update(detailReport);
+      await this.serviceReportRepository.save(serviceReport);
     } catch (err) {
       throw new HttpExceptionWrapper(
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         `${err.message}, ${ERROR_MESSAGES.UPDATE_REPORT_PARTICIPANT_FAIL}`,
       );
     }
+  }
+
+  async checkReportPaymentStatus(
+    patientRecordIdentifier: number,
+    currentUserIdentifier: number,
+  ): Promise<ServiceReport | null> {
+    const staffWorkSchedule =
+      await this.schedulesService.findCurrentStaffWorkSchedule(
+        currentUserIdentifier,
+      );
+    if (!staffWorkSchedule)
+      throw new HttpExceptionWrapper(
+        ERROR_MESSAGES.STAFF_WORK_SCHEDULE_NOT_FOUND,
+      );
+
+    const existedPatientRecord = await this.patientRecordService.findOne(
+      patientRecordIdentifier,
+    );
+    if (!existedPatientRecord)
+      throw new HttpExceptionWrapper(ERROR_MESSAGES.PATIENT_RECORD_NOT_FOUND);
+
+    const serviceReport = await this.serviceReportRepository.findOne({
+      where: {
+        patientRecordIdentifier,
+        service: {
+          locationIdentifier: staffWorkSchedule.locationIdentifier,
+        },
+        status: false,
+      },
+      relations: ['service'],
+    });
+    if (!serviceReport)
+      throw new HttpExceptionWrapper(ERROR_MESSAGES.SERVICE_REPORT_NOT_FOUND);
+
+    serviceReport.isPaid = await this.billingService.checkServiceIsPaid(
+      patientRecordIdentifier,
+      serviceReport.service.identifier,
+    );
+    return serviceReport;
   }
 
   @Transactional()
@@ -666,21 +633,19 @@ export class ReportsService {
   }
 
   async exportReport(identifier: number): Promise<string> {
-    const detailReport = await this.findOne(identifier);
-    if (!detailReport) {
+    const serviceReport = await this.findOne(identifier);
+    if (!serviceReport) {
       throw new HttpExceptionWrapper(ERROR_MESSAGES.SERVICE_REPORT_NOT_FOUND);
     }
 
-    detailReport.serviceReport.assessmentResults = await Promise.all(
-      detailReport.serviceReport.assessmentResults.map(
-        async (assessmentResult) => {
-          assessmentResult.assessmentItem =
-            (await this.assessmentsService.findOneAssessmentItem(
-              assessmentResult.assessmentItemIdentifier,
-            )) as AssessmentItem;
-          return assessmentResult;
-        },
-      ),
+    serviceReport.assessmentResults = await Promise.all(
+      serviceReport.assessmentResults.map(async (assessmentResult) => {
+        assessmentResult.assessmentItem =
+          (await this.assessmentsService.findOneAssessmentItem(
+            assessmentResult.assessmentItemIdentifier,
+          )) as AssessmentItem;
+        return assessmentResult;
+      }),
     );
 
     // console.dir(detailReport, { depth: null, colors: true });
@@ -689,31 +654,31 @@ export class ReportsService {
       templateName = '',
       exportFilename = '';
 
-    switch (detailReport.serviceReport.service.type) {
+    switch (serviceReport.service.type) {
       case SERVICE_TYPES.GENERAL_CONSULTATION: {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        data = convertDataForInitialReport(detailReport as DiagnosisReport);
+        data = convertDataForInitialReport(serviceReport);
         templateName = 'initial-report.ejs';
         exportFilename = 'initial-diagnosis.pdf';
         break;
       }
       case SERVICE_TYPES.SPECIALIST_CONSULTATION: {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        data = convertDataForSpecialReport(detailReport as DiagnosisReport);
+        data = convertDataForSpecialReport(serviceReport);
         templateName = 'special-report.ejs';
         exportFilename = 'special-diagnosis.pdf';
         break;
       }
       case SERVICE_TYPES.LABORATORY_TEST: {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        data = convertDataForLaboratoryReport(detailReport as LaboratoryReport);
+        data = convertDataForLaboratoryReport(serviceReport);
         templateName = 'laboratory-report.ejs';
         exportFilename = 'laboratory-diagnosis.pdf';
         break;
       }
       case SERVICE_TYPES.IMAGING_SCAN: {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        data = convertDataForImagingReport(detailReport as ImagingReport);
+        data = convertDataForImagingReport(serviceReport);
         templateName = 'imaging-report.ejs';
         exportFilename = 'imaging-diagnosis.pdf';
         break;

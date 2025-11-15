@@ -94,10 +94,11 @@ export class AssessmentsService {
         ),
       );
     } catch (err) {
-      throw new HttpExceptionWrapper(
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        `${err.message}, ${ERROR_MESSAGES.CREATE_ASSESSMENT_RESULT_FAIL}`,
-      );
+      console.log(err);
+      // throw new HttpExceptionWrapper(
+      //   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      //   `${err.message}, ${ERROR_MESSAGES.CREATE_ASSESSMENT_RESULT_FAIL}`,
+      // );
     }
   }
 }
