@@ -27,6 +27,9 @@ export class InvoiceService {
   @Column({ name: 'service_identifier' })
   serviceIdentifier: number;
 
+  @Column({ default: 0 })
+  price: number;
+
   @ManyToOne(() => Service, (service) => service.invoiceServices)
   @JoinColumn({
     name: 'service_identifier',

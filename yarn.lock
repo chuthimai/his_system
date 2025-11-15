@@ -1699,6 +1699,11 @@
   dependencies:
     "@noble/hashes" "^1.1.5"
 
+"@payos/node@^2.0.3":
+  version "2.0.3"
+  resolved "https://registry.yarnpkg.com/@payos/node/-/node-2.0.3.tgz#ba99ba798ab2922286d4efa92072b742041a30cd"
+  integrity sha512-VDQlpLIo22mfOyFvizBSxJO8tkwxnG8J7WryQMorFNSUi9T7QrUQRBIusdzPsGCG5/DxxURMGHJ8SPNFS4puPg==
+
 "@pdf-lib/standard-fonts@^1.0.0":
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/@pdf-lib/standard-fonts/-/standard-fonts-1.0.0.tgz#8ba691c4421f71662ed07c9a0294b44528af2d7f"

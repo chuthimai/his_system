@@ -1,3 +1,4 @@
+import { PaymentModule } from '@modules/payments/payments.module';
 import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AssessmentsModule } from 'src/modules/assessments/assessments.module';
@@ -18,6 +19,7 @@ import { Service } from './entities/service.entity';
     forwardRef(() => AssessmentsModule),
     forwardRef(() => RecordsModule),
     forwardRef(() => ReportsModule),
+    forwardRef(() => PaymentModule),
   ],
   controllers: [BillingController],
   providers: [BillingService],

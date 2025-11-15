@@ -24,12 +24,22 @@ export class Invoice {
   @Column({ type: 'boolean', default: false }) // true ~ completed
   status: boolean;
 
+  @Column({ name: 'payment_code' })
+  paymentCode: string;
+
   @Column({
     name: 'created_time',
     type: 'datetime',
     default: () => 'CURRENT_TIMESTAMP',
   })
-  createdTime: boolean;
+  createdTime: string;
+
+  @Column({
+    name: 'paid_time',
+    type: 'datetime',
+    default: () => 'CURRENT_TIMESTAMP',
+  })
+  paidTime: string;
 
   @OneToMany(() => InvoiceService, (invoiceService) => invoiceService.invoice)
   invoiceServices: InvoiceService[];

@@ -11,4 +11,9 @@ export class CreateInvoiceServiceDto {
   @IsNotEmpty()
   @IsNumber()
   serviceIdentifier: number;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsNumber()
+  price: number;
 }
