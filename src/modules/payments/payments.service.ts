@@ -5,7 +5,7 @@ import { CreatePaymentLinkResponse, PaymentLink, PayOS } from '@payos/node';
 
 @Injectable()
 export class PaymentService {
-  private readonly payosConfig: PayOS;
+  private readonly payos: PayOS;
   private paymentLinkIds: string[] = [];
   private isChecking = false;
   private isRunningTask = false;
@@ -15,7 +15,7 @@ export class PaymentService {
     private readonly configService: ConfigService,
     private readonly billingService: BillingService,
   ) {
-    this.payosConfig = new PayOS({
+    this.payos = new PayOS({
       clientId: configService.getOrThrow('PAYOS_CLIENT_ID'),
       apiKey: configService.getOrThrow('PAYOS_API_KEY'),
       checksumKey: configService.getOrThrow('PAYOS_CHECKSUM_KEY'),
@@ -58,7 +58,7 @@ export class PaymentService {
     description: string,
   ): Promise<CreatePaymentLinkResponse> {
     const orderCode = Math.floor(Math.random() * 1e7) + 1;
-    const paymentInfo = await this.payosConfig.paymentRequests.create({
+    const paymentInfo = await this.payos.paymentRequests.create({
       orderCode,
       amount,
       description,
@@ -75,9 +75,9 @@ export class PaymentService {
   async updatePayments(): Promise<void> {
     const checkResults = await Promise.all(
       this.paymentLinkIds.map(async (paymentLinkId) => {
-        const res = await this.payosConfig.paymentRequests.get(paymentLinkId);
+        const res = await this.payos.paymentRequests.get(paymentLinkId);
         if (res.status === 'PAID') {
-          await this.billingService.updateTransaction(paymentLinkId);
+          await this.billingService.updateTransaction(res);
         }
         return { id: paymentLinkId, status: res.status };
       }),
@@ -89,6 +89,6 @@ export class PaymentService {
   }
 
   async checkPayment(paymentLinkId: string): Promise<PaymentLink> {
-    return await this.payosConfig.paymentRequests.get(paymentLinkId);
+    return await this.payos.paymentRequests.get(paymentLinkId);
   }
 }

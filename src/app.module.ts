@@ -1,3 +1,4 @@
+import { MessageModule } from '@modules/messages/messages.module';
 import { S3Module } from '@modules/s3/s3.module';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -60,6 +61,7 @@ import { UsersModule } from './modules/users/users.module';
     AssessmentsModule,
     ReportsModule,
     AuthModule,
+    MessageModule,
     S3Module,
   ],
   controllers: [AppController],

@@ -1,6 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { IsIn, IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import {
+  IsIn,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 import { ERROR_MESSAGES } from 'src/common/constants/error-messages';
 import { ROLES } from 'src/common/constants/others';
 
@@ -22,4 +28,9 @@ export class LoginDto {
   @IsNotEmpty()
   @IsString()
   password: string;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsString()
+  deviceToken?: string;
 }

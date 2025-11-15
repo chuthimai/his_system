@@ -54,6 +54,8 @@ export const ERROR_MESSAGES = {
   CREATE_TRANSACTION_FAIL: 'Create transaction fail',
   UPDATE_TRANSACTION_FAIL: 'Update transaction fail',
   PAID_INVOICE: 'Paid invoice',
+  UPDATE_USER_FAIL: 'Update user fail',
+  LOGIN_USER_FAIL: 'Login user fail',
 
   INVALID_PASSWORD: 'Invalid password',
   INVALID_ROLE: 'Invalid role',

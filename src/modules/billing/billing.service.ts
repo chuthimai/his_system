@@ -1,3 +1,4 @@
+import { MessageService } from '@modules/messages/messages.service';
 import { PaymentService } from '@modules/payments/payments.service';
 import { RecordsService } from '@modules/records/records.service';
 import { Location } from '@modules/schedules/entities/location.entity';
@@ -6,7 +7,8 @@ import { User } from '@modules/users/entities/user.entity';
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Transactional } from '@nestjs-cls/transactional';
-import { CreatePaymentLinkResponse, PaymentLink } from '@payos/node';
+import * as node from '@payos/node';
+import { Notification } from 'firebase-admin/messaging';
 import { ERROR_MESSAGES } from 'src/common/constants/error-messages';
 import { SERVICE_TYPES } from 'src/common/constants/others';
 import { HttpExceptionWrapper } from 'src/common/helpers/http-exception-wrapper';
@@ -20,7 +22,7 @@ import { Service } from './entities/service.entity';
 
 @Injectable()
 export class BillingService {
-  private processingTransactions: CreatePaymentLinkResponse[] = [];
+  private processingTransactions: node.CreatePaymentLinkResponse[] = [];
 
   constructor(
     @InjectRepository(Service)
@@ -35,6 +37,8 @@ export class BillingService {
     private readonly scheduleService: SchedulesService,
     @Inject(forwardRef(() => PaymentService))
     private readonly paymentService: PaymentService,
+    @Inject(forwardRef(() => MessageService))
+    private readonly messageService: MessageService,
   ) {}
 
   async findOneService(serviceIdentifier: number): Promise<Service | null> {
@@ -189,7 +193,7 @@ export class BillingService {
   async createTransaction(
     recordIdentifier: number,
     currentUserIdentifier: number,
-  ): Promise<CreatePaymentLinkResponse> {
+  ): Promise<node.CreatePaymentLinkResponse> {
     try {
       const existedRecord = await this.recordService.findOne(recordIdentifier);
       if (!existedRecord) {
@@ -241,9 +245,12 @@ export class BillingService {
   }
 
   @Transactional()
-  async updateTransaction(paymentCode: string): Promise<void> {
+  async updateTransaction(paymentInfo: node.PaymentLink): Promise<void> {
     try {
-      let invoice = await this.invoiceRepository.findOneBy({ paymentCode });
+      let invoice = await this.invoiceRepository.findOne({
+        where: { paymentCode: paymentInfo.id },
+        relations: ['patientRecord', 'patientRecord.patient'],
+      });
       if (!invoice) {
         throw new HttpExceptionWrapper(ERROR_MESSAGES.INVOICE_NOT_FOUND);
       }
@@ -257,6 +264,13 @@ export class BillingService {
       this.processingTransactions = this.processingTransactions.filter(
         (transaction) => transaction.paymentLinkId !== invoice.paymentCode,
       );
+
+      if (invoice.patientRecord.patient.deviceToken) {
+        await this.messageService.sendToDevice(
+          invoice.patientRecord.patient.deviceToken,
+          this.makeNotification(invoice.identifier, paymentInfo),
+        );
+      }
     } catch (err) {
       throw new HttpExceptionWrapper(
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
@@ -265,7 +279,7 @@ export class BillingService {
     }
   }
 
-  async checkTransaction(recordIdentifier: number): Promise<PaymentLink> {
+  async checkTransaction(recordIdentifier: number): Promise<node.PaymentLink> {
     const existedRecord = await this.recordService.findOne(recordIdentifier);
     if (!existedRecord) {
       throw new HttpExceptionWrapper(ERROR_MESSAGES.PATIENT_RECORD_NOT_FOUND);
@@ -278,5 +292,17 @@ export class BillingService {
     }
 
     return await this.paymentService.checkPayment(invoice.paymentCode);
+  }
+
+  private makeNotification(
+    invoiceIdentifier: number,
+    paymentInfo: node.PaymentLink,
+  ): Notification {
+    const { amount, transactions } = paymentInfo;
+
+    return {
+      title: `Thanh toán viện phí thành công #${invoiceIdentifier}`,
+      body: `Hóa đơn #${invoiceIdentifier} đã được thanh toán ${amount} VND. Người chuyển: ${transactions[0].counterAccountName}. Mã GD: ${transactions[0].reference} lúc ${transactions[0].transactionDateTime}.`,
+    };
   }
 }
