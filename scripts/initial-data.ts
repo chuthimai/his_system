@@ -311,7 +311,7 @@ export const LocationData = [
 // 9 Bệnh nhân, 53 Bác sĩ các chuyên khoa (5 Bác sĩ chẩn đoán hình ảnh)
 export const UserData = [
   {
-    identifier: 1114829374,
+    identifier: 1,
     name: 'Nguyễn Văn Hùng',
     email: 'hung.nguyen1987@gmail.com',
     telecom: '0985123456',
@@ -434,7 +434,7 @@ export const UserData = [
 
   // Đa khoa
   {
-    identifier: 1120000001,
+    identifier: 2,
     name: 'Nguyễn Văn An',
     email: 'an.nguyen@his.vn',
     telecom: '0911000001',
@@ -472,7 +472,7 @@ export const UserData = [
 
   // Nội khoa
   {
-    identifier: 1134287195,
+    identifier: 3,
     name: 'Nguyễn Văn Minh',
     email: 'minh.nguyen@his.vn',
     telecom: '0912345678',
@@ -851,7 +851,7 @@ export const UserData = [
   },
   // Xét nghiệm hóa sinh
   {
-    identifier: 1140003001,
+    identifier: 4,
     name: 'Nguyễn Thị Hà',
     email: 'ha.nguyen@his.vn',
     telecom: '0905003001',
@@ -1040,7 +1040,7 @@ export const UserData = [
 
   // Chẩn đoán hình ảnh
   {
-    identifier: 1140008001,
+    identifier: 5,
     name: 'Lê Thị Hoa',
     email: 'hoa.le@his.vn',
     telecom: '0904002001',

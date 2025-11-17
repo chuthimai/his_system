@@ -346,7 +346,14 @@ export class RecordsService {
     identifier: number,
     currentUser: User,
   ): Promise<void> {
-    try {
+    const timeout = new Promise<never>((_, reject) =>
+      setTimeout(
+        () => reject(new Error('Close record request timeout after 5 minutes')),
+        300000,
+      ),
+    );
+
+    const task = (async () => {
       const existedPatientRecord = await this.findOne(identifier, true);
       if (!existedPatientRecord)
         throw new HttpExceptionWrapper(ERROR_MESSAGES.PATIENT_RECORD_NOT_FOUND);
@@ -391,6 +398,10 @@ export class RecordsService {
       existedPatientRecord.status = true;
       existedPatientRecord.exportFileName = exportFileName;
       await this.update(existedPatientRecord);
+    })();
+
+    try {
+      await Promise.race([task, timeout]);
     } catch (err) {
       throw new HttpExceptionWrapper(
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
