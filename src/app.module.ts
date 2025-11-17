@@ -1,3 +1,4 @@
+import { MessageModule } from '@modules/messages/messages.module';
 import { S3Module } from '@modules/s3/s3.module';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -40,11 +41,11 @@ import { UsersModule } from './modules/users/users.module';
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         type: 'mysql',
-        host: configService.get('DB_HOST'),
-        port: Number(configService.get('DB_PORT')),
-        username: configService.get('DB_USERNAME'),
-        password: configService.get('DB_PASSWORD'),
-        database: configService.get('DB_DATABASE'),
+        host: configService.getOrThrow('DB_HOST'),
+        port: Number(configService.getOrThrow('DB_PORT')),
+        username: configService.getOrThrow('DB_USERNAME'),
+        password: configService.getOrThrow('DB_PASSWORD'),
+        database: configService.getOrThrow('DB_DATABASE'),
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
         synchronize: false,
         migrationsRun: false,
@@ -60,6 +61,7 @@ import { UsersModule } from './modules/users/users.module';
     AssessmentsModule,
     ReportsModule,
     AuthModule,
+    MessageModule,
     S3Module,
   ],
   controllers: [AppController],

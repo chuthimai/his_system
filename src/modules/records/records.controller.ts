@@ -19,7 +19,7 @@ export class RecordsController {
   @Roles(ROLES.PATIENT)
   @Get('/')
   getAll(@CurrentUser() currentUser: User) {
-    return this.recordsService.findAll(currentUser);
+    return this.recordsService.findAll(currentUser.identifier);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -36,7 +36,7 @@ export class RecordsController {
     @Body() createRecordDto: CreateRecordDto,
     @CurrentUser() currentUser: User,
   ) {
-    return this.recordsService.create(createRecordDto, currentUser);
+    return this.recordsService.create(createRecordDto, currentUser.identifier);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -48,7 +48,7 @@ export class RecordsController {
   ) {
     return this.recordsService.updateSpecialtyConsultation(
       updateRecordDto,
-      currentUser,
+      currentUser.identifier,
     );
   }
 
@@ -61,7 +61,7 @@ export class RecordsController {
   ) {
     return this.recordsService.updateLaboratoryAndImaging(
       updateRecord2Dto,
-      currentUser,
+      currentUser.identifier,
     );
   }
 
@@ -74,7 +74,7 @@ export class RecordsController {
   ) {
     return this.recordsService.closePatientRecord(
       recordIdentifier,
-      currentUser,
+      currentUser.identifier,
     );
   }
 }

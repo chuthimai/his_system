@@ -34,6 +34,9 @@ export class User {
   @Column()
   role: string;
 
+  @Column({ name: 'device_token', default: '' })
+  deviceToken: string;
+
   @OneToMany(() => Appointment, (appointment) => appointment.user)
   appointments: Appointment[];
 

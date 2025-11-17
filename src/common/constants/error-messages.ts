@@ -51,6 +51,11 @@ export const ERROR_MESSAGES = {
   CLOSE_SPECIMEN_FAIL: 'Close specimen fail',
   CREATE_IMAGE_FAIL: 'Create image fail',
   CREATE_PATIENT_FAIL: 'Create patient fail',
+  CREATE_TRANSACTION_FAIL: 'Create transaction fail',
+  UPDATE_TRANSACTION_FAIL: 'Update transaction fail',
+  PAID_INVOICE: 'Paid invoice',
+  UPDATE_USER_FAIL: 'Update user fail',
+  LOGIN_USER_FAIL: 'Login user fail',
 
   INVALID_PASSWORD: 'Invalid password',
   INVALID_ROLE: 'Invalid role',

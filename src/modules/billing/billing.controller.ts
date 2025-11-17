@@ -39,4 +39,23 @@ export class BillingController {
   getOneInvoice(@Param('invoiceIdentifier') invoiceIdentifier: number) {
     return this.billingService.findOneInvoice(invoiceIdentifier, true);
   }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(ROLES.PATIENT)
+  @Get('/transaction/:recordIdentifier')
+  createTransaction(
+    @Param('recordIdentifier') recordIdentifier: number,
+    @CurrentUser() currentUser: User,
+  ) {
+    return this.billingService.createTransaction(
+      recordIdentifier,
+      currentUser.identifier,
+    );
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Get('/transaction/check/:recordIdentifier')
+  checkTransaction(@Param('recordIdentifier') recordIdentifier: number) {
+    return this.billingService.checkTransaction(recordIdentifier);
+  }
 }

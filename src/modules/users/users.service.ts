@@ -151,4 +151,25 @@ export class UsersService {
       );
     }
   }
+
+  @Transactional()
+  async updateDeviceToken(
+    userIdentifier: number,
+    deviceToken: string,
+  ): Promise<void> {
+    try {
+      const existedUser = await this.findOne(userIdentifier);
+      if (!existedUser) {
+        throw new HttpExceptionWrapper(ERROR_MESSAGES.USER_NOT_FOUND);
+      }
+
+      existedUser.deviceToken = deviceToken;
+      await this.userRepository.save(existedUser);
+    } catch (err) {
+      throw new HttpExceptionWrapper(
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        `${err.message}, ${ERROR_MESSAGES.UPDATE_USER_FAIL}`,
+      );
+    }
+  }
 }

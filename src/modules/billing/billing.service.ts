@@ -1,3 +1,5 @@
+import { MessageService } from '@modules/messages/messages.service';
+import { PaymentService } from '@modules/payments/payments.service';
 import { RecordsService } from '@modules/records/records.service';
 import { Location } from '@modules/schedules/entities/location.entity';
 import { SchedulesService } from '@modules/schedules/schedules.service';
@@ -5,6 +7,8 @@ import { User } from '@modules/users/entities/user.entity';
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Transactional } from '@nestjs-cls/transactional';
+import * as node from '@payos/node';
+import { Notification } from 'firebase-admin/messaging';
 import { ERROR_MESSAGES } from 'src/common/constants/error-messages';
 import { SERVICE_TYPES } from 'src/common/constants/others';
 import { HttpExceptionWrapper } from 'src/common/helpers/http-exception-wrapper';
@@ -18,6 +22,8 @@ import { Service } from './entities/service.entity';
 
 @Injectable()
 export class BillingService {
+  private processingTransactions: node.CreatePaymentLinkResponse[] = [];
+
   constructor(
     @InjectRepository(Service)
     private readonly serviceRepository: Repository<Service>,
@@ -29,6 +35,10 @@ export class BillingService {
     private readonly recordService: RecordsService,
     @Inject(forwardRef(() => SchedulesService))
     private readonly scheduleService: SchedulesService,
+    @Inject(forwardRef(() => PaymentService))
+    private readonly paymentService: PaymentService,
+    @Inject(forwardRef(() => MessageService))
+    private readonly messageService: MessageService,
   ) {}
 
   async findOneService(serviceIdentifier: number): Promise<Service | null> {
@@ -110,6 +120,12 @@ export class BillingService {
     });
   }
 
+  async findAllInvoiceServicesByInvoiceIdentifier(
+    invoiceIdentifier: number,
+  ): Promise<InvoiceService[]> {
+    return await this.invoiceServiceRepository.findBy({ invoiceIdentifier });
+  }
+
   @Transactional()
   async createInvoice(createInvoiceDto: CreateInvoiceDto): Promise<Invoice> {
     try {
@@ -171,5 +187,122 @@ export class BillingService {
     }))
       ? true
       : false;
+  }
+
+  @Transactional()
+  async createTransaction(
+    recordIdentifier: number,
+    currentUserIdentifier: number,
+  ): Promise<node.CreatePaymentLinkResponse> {
+    try {
+      const existedRecord = await this.recordService.findOne(recordIdentifier);
+      if (!existedRecord) {
+        throw new HttpExceptionWrapper(ERROR_MESSAGES.PATIENT_RECORD_NOT_FOUND);
+      }
+
+      if (currentUserIdentifier !== existedRecord.patientIdentifier) {
+        throw new HttpExceptionWrapper(ERROR_MESSAGES.PERMISSION_DENIED);
+      }
+
+      const invoice =
+        await this.findOneInvoiceByPatientRecordIdentifier(recordIdentifier);
+      if (!invoice) {
+        throw new HttpExceptionWrapper(ERROR_MESSAGES.INVOICE_NOT_FOUND);
+      } else if (invoice.status) {
+        throw new HttpExceptionWrapper(ERROR_MESSAGES.PAID_INVOICE);
+      }
+
+      const existedTransactions = this.processingTransactions.find(
+        (transaction) => transaction.paymentLinkId === invoice.paymentCode,
+      );
+      if (existedTransactions) return existedTransactions;
+
+      const invoiceServices =
+        await this.findAllInvoiceServicesByInvoiceIdentifier(
+          invoice.identifier,
+        );
+      invoice.total = invoiceServices.reduce(
+        (sum, invoiceService) => sum + invoiceService.price,
+        0,
+      );
+
+      const paymentInfo = await this.paymentService.createPayment(
+        invoice.total,
+        `Thanh toán viện phí #${invoice.identifier}`,
+      );
+
+      invoice.paymentCode = paymentInfo.paymentLinkId;
+      await this.invoiceRepository.save(invoice);
+
+      this.processingTransactions.push(paymentInfo);
+      return paymentInfo;
+    } catch (err) {
+      throw new HttpExceptionWrapper(
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        `${err.message}, ${ERROR_MESSAGES.CREATE_TRANSACTION_FAIL}`,
+      );
+    }
+  }
+
+  @Transactional()
+  async updateTransaction(paymentInfo: node.PaymentLink): Promise<void> {
+    try {
+      let invoice = await this.invoiceRepository.findOne({
+        where: { paymentCode: paymentInfo.id },
+        relations: ['patientRecord', 'patientRecord.patient'],
+      });
+      if (!invoice) {
+        throw new HttpExceptionWrapper(ERROR_MESSAGES.INVOICE_NOT_FOUND);
+      }
+
+      const now = new Date();
+      const dateFormatted = now.toISOString().split('T')[0];
+
+      invoice = { ...invoice, status: true, paidTime: dateFormatted };
+      await this.invoiceRepository.save(invoice);
+
+      this.processingTransactions = this.processingTransactions.filter(
+        (transaction) => transaction.paymentLinkId !== invoice.paymentCode,
+      );
+
+      if (invoice.patientRecord.patient.deviceToken) {
+        await this.messageService.sendToDevice(
+          invoice.patientRecord.patient.deviceToken,
+          this.makeNotification(invoice.identifier, paymentInfo),
+        );
+      }
+    } catch (err) {
+      throw new HttpExceptionWrapper(
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        `${err.message}, ${ERROR_MESSAGES.UPDATE_TRANSACTION_FAIL}`,
+      );
+    }
+  }
+
+  async checkTransaction(recordIdentifier: number): Promise<node.PaymentLink> {
+    const existedRecord = await this.recordService.findOne(recordIdentifier);
+    if (!existedRecord) {
+      throw new HttpExceptionWrapper(ERROR_MESSAGES.PATIENT_RECORD_NOT_FOUND);
+    }
+
+    const invoice =
+      await this.findOneInvoiceByPatientRecordIdentifier(recordIdentifier);
+    if (!invoice) {
+      throw new HttpExceptionWrapper(ERROR_MESSAGES.INVOICE_NOT_FOUND);
+    }
+
+    return await this.paymentService.checkPayment(invoice.paymentCode);
+  }
+
+  private makeNotification(
+    invoiceIdentifier: number,
+    paymentInfo: node.PaymentLink,
+  ): Notification {
+    const { amount, transactions } = paymentInfo;
+
+    return {
+      title: `Thanh toán viện phí thành công #${invoiceIdentifier}`,
+      body: `Hóa đơn #${invoiceIdentifier} đã được thanh toán ${amount} VND. Người chuyển: ${transactions[0].counterAccountName}. Mã GD: ${transactions[0].reference} lúc ${transactions[0].transactionDateTime}.`,
+    };
   }
 }

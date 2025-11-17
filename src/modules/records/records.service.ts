@@ -1,5 +1,6 @@
 import { BillingService } from '@modules/billing/billing.service';
 import { MedicinesService } from '@modules/medicines/medicines.service';
+import { PaymentService } from '@modules/payments/payments.service';
 import { DiagnosisReport } from '@modules/reports/entities/diagnosis-report.entity';
 import { ImagingReport } from '@modules/reports/entities/imaging-report.entity';
 import { LaboratoryReport } from '@modules/reports/entities/laboratory-report.entity';
@@ -52,6 +53,8 @@ export class RecordsService {
     private readonly usersService: UsersService,
     @Inject(forwardRef(() => MedicinesService))
     private readonly medicinesService: MedicinesService,
+    @Inject(forwardRef(() => PaymentService))
+    private readonly paymentService: PaymentService,
     @Inject(forwardRef(() => S3Service))
     private readonly s3Service: S3Service,
   ) {}
@@ -171,16 +174,16 @@ export class RecordsService {
     });
   }
 
-  async findAll(currentUser: User): Promise<PatientRecord[]> {
+  async findAll(currentUserIdentifier: number): Promise<PatientRecord[]> {
     return await this.patientRecordRepository.find({
-      where: { patientIdentifier: currentUser.identifier },
+      where: { patientIdentifier: currentUserIdentifier },
     });
   }
 
   @Transactional()
   async create(
     createRecordDto: CreateRecordDto,
-    currentUser: User,
+    currentUserIdentifier: number,
   ): Promise<PatientRecord | null> {
     try {
       let patient: User | null;
@@ -208,9 +211,9 @@ export class RecordsService {
         await this.patientRecordRepository.save(newPatientRecord);
 
       await this.createServiceForPatientRecord(
-        currentUser.identifier,
-        currentUser.identifier,
-        currentUser.identifier,
+        currentUserIdentifier,
+        currentUserIdentifier,
+        currentUserIdentifier,
         savedPatientRecord.identifier,
         { type: SERVICE_TYPES.GENERAL_CONSULTATION },
         '',
@@ -240,7 +243,7 @@ export class RecordsService {
   @Transactional()
   async updateSpecialtyConsultation(
     updateSpecialtyConsultationDto: UpdateSpecialtyConsultationDto,
-    currentUser: User,
+    currentUserIdentifier: number,
   ): Promise<PatientRecord | null> {
     try {
       const existedRecord = await this.findOne(
@@ -272,7 +275,7 @@ export class RecordsService {
       };
 
       await this.createServiceForPatientRecord(
-        currentUser.identifier,
+        currentUserIdentifier,
         existedStaffWorkSchedule.staffIdentifier,
         existedStaffWorkSchedule.staffIdentifier,
         updateSpecialtyConsultationDto.patientRecordIdentifier,
@@ -295,7 +298,7 @@ export class RecordsService {
   @Transactional()
   async updateLaboratoryAndImaging(
     updateLaboratoryAndImagingDto: UpdateLaboratoryAndImagingDto,
-    currentUser: User,
+    currentUserIdentifier: number,
   ): Promise<PatientRecord | null> {
     try {
       const existedRecord = await this.reportsService.findOne(
@@ -319,7 +322,7 @@ export class RecordsService {
       await Promise.all(
         services.map(async (service, index) => {
           await this.createServiceForPatientRecord(
-            currentUser.identifier,
+            currentUserIdentifier,
             null,
             null,
             updateLaboratoryAndImagingDto.patientRecordIdentifier,
@@ -344,7 +347,7 @@ export class RecordsService {
   @Transactional()
   async closePatientRecord(
     identifier: number,
-    currentUser: User,
+    currentUserIdentifier: number,
   ): Promise<void> {
     try {
       const existedPatientRecord = await this.findOne(identifier, true);
@@ -352,7 +355,7 @@ export class RecordsService {
         throw new HttpExceptionWrapper(ERROR_MESSAGES.PATIENT_RECORD_NOT_FOUND);
 
       if (
-        currentUser.identifier !==
+        currentUserIdentifier !==
         existedPatientRecord.serviceReports[1].performerIdentifier
       ) {
         throw new HttpExceptionWrapper(ERROR_MESSAGES.PERMISSION_DENIED);
@@ -427,6 +430,7 @@ export class RecordsService {
       await this.billingService.createInvoiceService({
         invoiceIdentifier: invoice.identifier,
         serviceIdentifier: service.identifier,
+        price: service.price,
       });
 
       await this.createServiceReportForPatientRecord(
