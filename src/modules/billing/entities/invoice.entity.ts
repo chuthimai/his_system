@@ -24,7 +24,7 @@ export class Invoice {
   @Column({ type: 'boolean', default: false }) // true ~ completed
   status: boolean;
 
-  @Column({ name: 'payment_code' })
+  @Column({ name: 'payment_code', default: '' })
   paymentCode: string;
 
   @Column({

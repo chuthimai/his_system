@@ -221,7 +221,9 @@ export class BillingService {
         await this.findAllInvoiceServicesByInvoiceIdentifier(
           invoice.identifier,
         );
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       invoice.total = invoiceServices.reduce(
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
         (sum, invoiceService) => sum + invoiceService.price,
         0,
       );

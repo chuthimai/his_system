@@ -1,7 +1,7 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class Migration1763086283744 implements MigrationInterface {
-  name = 'Migration1763086283744';
+export class Migration1763342196172 implements MigrationInterface {
+  name = 'Migration1763342196172';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
@@ -11,10 +11,10 @@ export class Migration1763086283744 implements MigrationInterface {
       `CREATE TABLE \`locations\` (\`identifier\` int NOT NULL AUTO_INCREMENT, \`type\` varchar(255) NOT NULL, \`name\` varchar(255) NOT NULL, \`parent_identifier\` int NULL, PRIMARY KEY (\`identifier\`)) ENGINE=InnoDB`,
     );
     await queryRunner.query(
-      `CREATE TABLE \`invoices\` (\`identifier\` int NOT NULL AUTO_INCREMENT, \`currency\` varchar(255) NOT NULL DEFAULT 'VND', \`total\` int NOT NULL DEFAULT '0', \`status\` tinyint NOT NULL DEFAULT 0, \`created_time\` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP, \`patient_record_identifier\` int NOT NULL, PRIMARY KEY (\`identifier\`)) ENGINE=InnoDB`,
+      `CREATE TABLE \`invoices\` (\`identifier\` int NOT NULL AUTO_INCREMENT, \`currency\` varchar(255) NOT NULL DEFAULT 'VND', \`total\` int NOT NULL DEFAULT '0', \`status\` tinyint NOT NULL DEFAULT 0, \`payment_code\` varchar(255) NOT NULL DEFAULT '', \`created_time\` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP, \`paid_time\` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP, \`patient_record_identifier\` int NOT NULL, PRIMARY KEY (\`identifier\`)) ENGINE=InnoDB`,
     );
     await queryRunner.query(
-      `CREATE TABLE \`invoice_services\` (\`identifier\` int NOT NULL AUTO_INCREMENT, \`invoice_identifier\` int NOT NULL, \`service_identifier\` int NOT NULL, PRIMARY KEY (\`identifier\`)) ENGINE=InnoDB`,
+      `CREATE TABLE \`invoice_services\` (\`identifier\` int NOT NULL AUTO_INCREMENT, \`invoice_identifier\` int NOT NULL, \`service_identifier\` int NOT NULL, \`price\` int NOT NULL DEFAULT '0', PRIMARY KEY (\`identifier\`)) ENGINE=InnoDB`,
     );
     await queryRunner.query(
       `CREATE TABLE \`services\` (\`identifier\` int NOT NULL AUTO_INCREMENT, \`type\` varchar(255) NOT NULL, \`name\` varchar(255) NOT NULL, \`detail_description\` varchar(255) NULL, \`price\` int NOT NULL, \`active\` tinyint NOT NULL DEFAULT 1, \`location_identifier\` int NOT NULL, PRIMARY KEY (\`identifier\`)) ENGINE=InnoDB`,
@@ -47,6 +47,9 @@ export class Migration1763086283744 implements MigrationInterface {
       `CREATE TABLE \`service_reports\` (\`identifier\` int NOT NULL AUTO_INCREMENT, \`category\` varchar(255) NOT NULL DEFAULT '', \`method\` varchar(255) NOT NULL DEFAULT '', \`request\` varchar(255) NOT NULL DEFAULT '', \`status\` tinyint NOT NULL DEFAULT 0, \`effective_time\` date NOT NULL DEFAULT '1000-01-01', \`record_time\` datetime NOT NULL DEFAULT '1000-01-01 00:00:00', \`patient_record_identifier\` int NOT NULL, \`service_identifier\` int NOT NULL, \`performer_identifier\` int NULL, \`reporter_identifier\` int NULL, \`requester_identifier\` int NULL, PRIMARY KEY (\`identifier\`)) ENGINE=InnoDB`,
     );
     await queryRunner.query(
+      `CREATE TABLE \`patient_records\` (\`identifier\` int NOT NULL AUTO_INCREMENT, \`status\` tinyint NOT NULL DEFAULT 0, \`having_referral_letter\` tinyint NOT NULL DEFAULT '0', \`having_heath_insurance\` tinyint NOT NULL DEFAULT '0', \`export_file_name\` varchar(255) NOT NULL DEFAULT '', \`created_time\` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP, \`prescription_identifier\` int NULL, \`patient_identifier\` int NOT NULL, UNIQUE INDEX \`REL_45755bf358c122397004dfc714\` (\`prescription_identifier\`), PRIMARY KEY (\`identifier\`)) ENGINE=InnoDB`,
+    );
+    await queryRunner.query(
       `CREATE TABLE \`medications\` (\`identifier\` int NOT NULL AUTO_INCREMENT, \`code\` varchar(255) NOT NULL, \`name\` varchar(255) NOT NULL, \`dose_form\` varchar(255) NOT NULL, PRIMARY KEY (\`identifier\`)) ENGINE=InnoDB`,
     );
     await queryRunner.query(
@@ -56,10 +59,13 @@ export class Migration1763086283744 implements MigrationInterface {
       `CREATE TABLE \`prescriptions\` (\`identifier\` int NOT NULL AUTO_INCREMENT, \`advice\` varchar(255) NOT NULL, \`create_time\` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP, \`physician_identifier\` int NOT NULL, PRIMARY KEY (\`identifier\`)) ENGINE=InnoDB`,
     );
     await queryRunner.query(
-      `CREATE TABLE \`patient_records\` (\`identifier\` int NOT NULL AUTO_INCREMENT, \`status\` tinyint NOT NULL DEFAULT 0, \`having_referral_letter\` tinyint NOT NULL DEFAULT '0', \`having_heath_insurance\` tinyint NOT NULL DEFAULT '0', \`export_file_name\` varchar(255) NOT NULL DEFAULT '', \`created_time\` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP, \`prescription_identifier\` int NULL, \`patient_identifier\` int NOT NULL, UNIQUE INDEX \`REL_45755bf358c122397004dfc714\` (\`prescription_identifier\`), PRIMARY KEY (\`identifier\`)) ENGINE=InnoDB`,
+      `CREATE TABLE \`qualifications\` (\`identifier\` int NOT NULL AUTO_INCREMENT, \`name\` varchar(255) NOT NULL, \`specialty\` varchar(255) NOT NULL, \`issuer\` varchar(255) NOT NULL, \`type\` varchar(255) NOT NULL, \`effective_date\` date NOT NULL, \`expired_date\` date NULL, \`physician_identifier\` int NOT NULL, PRIMARY KEY (\`identifier\`)) ENGINE=InnoDB`,
     );
     await queryRunner.query(
-      `CREATE TABLE \`users\` (\`identifier\` int NOT NULL AUTO_INCREMENT, \`name\` varchar(255) NOT NULL, \`email\` varchar(255) NULL, \`telecom\` varchar(255) NULL, \`birth_date\` date NOT NULL, \`gender\` tinyint NOT NULL, \`address\` varchar(255) NOT NULL, \`photo\` varchar(255) NULL, \`password\` varchar(255) NOT NULL, \`role\` varchar(255) NOT NULL, PRIMARY KEY (\`identifier\`)) ENGINE=InnoDB`,
+      `CREATE TABLE \`specialties\` (\`identifier\` int NOT NULL AUTO_INCREMENT, \`name\` varchar(255) NOT NULL, \`description\` varchar(255) NULL, \`contact\` varchar(255) NULL, PRIMARY KEY (\`identifier\`)) ENGINE=InnoDB`,
+    );
+    await queryRunner.query(
+      `CREATE TABLE \`physicians\` (\`identifier\` int NOT NULL, \`specialty_identifier\` int NULL, PRIMARY KEY (\`identifier\`)) ENGINE=InnoDB`,
     );
     await queryRunner.query(
       `CREATE TABLE \`staffs\` (\`identifier\` int NOT NULL, \`active\` tinyint NOT NULL DEFAULT 1, \`start_date\` date NOT NULL, \`end_date\` date NULL, PRIMARY KEY (\`identifier\`)) ENGINE=InnoDB`,
@@ -74,13 +80,7 @@ export class Migration1763086283744 implements MigrationInterface {
       `CREATE TABLE \`appointments\` (\`identifier\` int NOT NULL AUTO_INCREMENT, \`status\` tinyint NOT NULL DEFAULT 1, \`reason\` varchar(255) NULL, \`cancellation_date\` date NULL, \`work_schedule_identifier\` int NOT NULL, \`physician_identifier\` int NULL, \`user_identifier\` int NOT NULL, PRIMARY KEY (\`identifier\`)) ENGINE=InnoDB`,
     );
     await queryRunner.query(
-      `CREATE TABLE \`qualifications\` (\`identifier\` int NOT NULL AUTO_INCREMENT, \`name\` varchar(255) NOT NULL, \`specialty\` varchar(255) NOT NULL, \`issuer\` varchar(255) NOT NULL, \`type\` varchar(255) NOT NULL, \`effective_date\` date NOT NULL, \`expired_date\` date NULL, \`physician_identifier\` int NOT NULL, PRIMARY KEY (\`identifier\`)) ENGINE=InnoDB`,
-    );
-    await queryRunner.query(
-      `CREATE TABLE \`specialties\` (\`identifier\` int NOT NULL AUTO_INCREMENT, \`name\` varchar(255) NOT NULL, \`description\` varchar(255) NULL, \`contact\` varchar(255) NULL, PRIMARY KEY (\`identifier\`)) ENGINE=InnoDB`,
-    );
-    await queryRunner.query(
-      `CREATE TABLE \`physicians\` (\`identifier\` int NOT NULL, \`specialty_identifier\` int NULL, PRIMARY KEY (\`identifier\`)) ENGINE=InnoDB`,
+      `CREATE TABLE \`users\` (\`identifier\` int NOT NULL AUTO_INCREMENT, \`name\` varchar(255) NOT NULL, \`email\` varchar(255) NULL, \`telecom\` varchar(255) NULL, \`birth_date\` date NOT NULL, \`gender\` tinyint NOT NULL, \`address\` varchar(255) NOT NULL, \`photo\` varchar(255) NULL, \`password\` varchar(255) NOT NULL, \`role\` varchar(255) NOT NULL, \`device_token\` varchar(255) NOT NULL DEFAULT '', PRIMARY KEY (\`identifier\`)) ENGINE=InnoDB`,
     );
     await queryRunner.query(
       `ALTER TABLE \`locations\` ADD CONSTRAINT \`FK_402157d62724fef65e3264a0825\` FOREIGN KEY (\`parent_identifier\`) REFERENCES \`locations\`(\`identifier\`) ON DELETE NO ACTION ON UPDATE NO ACTION`,
@@ -143,6 +143,12 @@ export class Migration1763086283744 implements MigrationInterface {
       `ALTER TABLE \`service_reports\` ADD CONSTRAINT \`FK_a3e6983b912c644a6a0ce8ca0f8\` FOREIGN KEY (\`requester_identifier\`) REFERENCES \`physicians\`(\`identifier\`) ON DELETE NO ACTION ON UPDATE NO ACTION`,
     );
     await queryRunner.query(
+      `ALTER TABLE \`patient_records\` ADD CONSTRAINT \`FK_45755bf358c122397004dfc7143\` FOREIGN KEY (\`prescription_identifier\`) REFERENCES \`prescriptions\`(\`identifier\`) ON DELETE NO ACTION ON UPDATE NO ACTION`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE \`patient_records\` ADD CONSTRAINT \`FK_d1e43a4a3659fe9dd87379d4f62\` FOREIGN KEY (\`patient_identifier\`) REFERENCES \`users\`(\`identifier\`) ON DELETE NO ACTION ON UPDATE NO ACTION`,
+    );
+    await queryRunner.query(
       `ALTER TABLE \`prescribed_medications\` ADD CONSTRAINT \`FK_f58ea44867a0d82134b5a36192f\` FOREIGN KEY (\`medication_identifier\`) REFERENCES \`medications\`(\`identifier\`) ON DELETE NO ACTION ON UPDATE NO ACTION`,
     );
     await queryRunner.query(
@@ -152,10 +158,13 @@ export class Migration1763086283744 implements MigrationInterface {
       `ALTER TABLE \`prescriptions\` ADD CONSTRAINT \`FK_b3aa8be890b1189af3de52b1cd2\` FOREIGN KEY (\`physician_identifier\`) REFERENCES \`physicians\`(\`identifier\`) ON DELETE NO ACTION ON UPDATE NO ACTION`,
     );
     await queryRunner.query(
-      `ALTER TABLE \`patient_records\` ADD CONSTRAINT \`FK_45755bf358c122397004dfc7143\` FOREIGN KEY (\`prescription_identifier\`) REFERENCES \`prescriptions\`(\`identifier\`) ON DELETE NO ACTION ON UPDATE NO ACTION`,
+      `ALTER TABLE \`qualifications\` ADD CONSTRAINT \`identifier\` FOREIGN KEY (\`physician_identifier\`) REFERENCES \`physicians\`(\`identifier\`) ON DELETE NO ACTION ON UPDATE NO ACTION`,
     );
     await queryRunner.query(
-      `ALTER TABLE \`patient_records\` ADD CONSTRAINT \`FK_d1e43a4a3659fe9dd87379d4f62\` FOREIGN KEY (\`patient_identifier\`) REFERENCES \`users\`(\`identifier\`) ON DELETE NO ACTION ON UPDATE NO ACTION`,
+      `ALTER TABLE \`physicians\` ADD CONSTRAINT \`FK_4ad3f4ea04e9e78e87097d79198\` FOREIGN KEY (\`identifier\`) REFERENCES \`staffs\`(\`identifier\`) ON DELETE NO ACTION ON UPDATE NO ACTION`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE \`physicians\` ADD CONSTRAINT \`FK_61d4b65e1c463431eb038174e9f\` FOREIGN KEY (\`specialty_identifier\`) REFERENCES \`specialties\`(\`identifier\`) ON DELETE NO ACTION ON UPDATE NO ACTION`,
     );
     await queryRunner.query(
       `ALTER TABLE \`staffs\` ADD CONSTRAINT \`FK_1382303f5d3ee6de34c9d32bc9b\` FOREIGN KEY (\`identifier\`) REFERENCES \`users\`(\`identifier\`) ON DELETE NO ACTION ON UPDATE NO ACTION`,
@@ -181,27 +190,9 @@ export class Migration1763086283744 implements MigrationInterface {
     await queryRunner.query(
       `ALTER TABLE \`appointments\` ADD CONSTRAINT \`FK_11887440f4dd088549f4d4a2e4d\` FOREIGN KEY (\`user_identifier\`) REFERENCES \`users\`(\`identifier\`) ON DELETE NO ACTION ON UPDATE NO ACTION`,
     );
-    await queryRunner.query(
-      `ALTER TABLE \`qualifications\` ADD CONSTRAINT \`identifier\` FOREIGN KEY (\`physician_identifier\`) REFERENCES \`physicians\`(\`identifier\`) ON DELETE NO ACTION ON UPDATE NO ACTION`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE \`physicians\` ADD CONSTRAINT \`FK_4ad3f4ea04e9e78e87097d79198\` FOREIGN KEY (\`identifier\`) REFERENCES \`staffs\`(\`identifier\`) ON DELETE NO ACTION ON UPDATE NO ACTION`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE \`physicians\` ADD CONSTRAINT \`FK_61d4b65e1c463431eb038174e9f\` FOREIGN KEY (\`specialty_identifier\`) REFERENCES \`specialties\`(\`identifier\`) ON DELETE NO ACTION ON UPDATE NO ACTION`,
-    );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(
-      `ALTER TABLE \`physicians\` DROP FOREIGN KEY \`FK_61d4b65e1c463431eb038174e9f\``,
-    );
-    await queryRunner.query(
-      `ALTER TABLE \`physicians\` DROP FOREIGN KEY \`FK_4ad3f4ea04e9e78e87097d79198\``,
-    );
-    await queryRunner.query(
-      `ALTER TABLE \`qualifications\` DROP FOREIGN KEY \`identifier\``,
-    );
     await queryRunner.query(
       `ALTER TABLE \`appointments\` DROP FOREIGN KEY \`FK_11887440f4dd088549f4d4a2e4d\``,
     );
@@ -227,10 +218,13 @@ export class Migration1763086283744 implements MigrationInterface {
       `ALTER TABLE \`staffs\` DROP FOREIGN KEY \`FK_1382303f5d3ee6de34c9d32bc9b\``,
     );
     await queryRunner.query(
-      `ALTER TABLE \`patient_records\` DROP FOREIGN KEY \`FK_d1e43a4a3659fe9dd87379d4f62\``,
+      `ALTER TABLE \`physicians\` DROP FOREIGN KEY \`FK_61d4b65e1c463431eb038174e9f\``,
     );
     await queryRunner.query(
-      `ALTER TABLE \`patient_records\` DROP FOREIGN KEY \`FK_45755bf358c122397004dfc7143\``,
+      `ALTER TABLE \`physicians\` DROP FOREIGN KEY \`FK_4ad3f4ea04e9e78e87097d79198\``,
+    );
+    await queryRunner.query(
+      `ALTER TABLE \`qualifications\` DROP FOREIGN KEY \`identifier\``,
     );
     await queryRunner.query(
       `ALTER TABLE \`prescriptions\` DROP FOREIGN KEY \`FK_b3aa8be890b1189af3de52b1cd2\``,
@@ -240,6 +234,12 @@ export class Migration1763086283744 implements MigrationInterface {
     );
     await queryRunner.query(
       `ALTER TABLE \`prescribed_medications\` DROP FOREIGN KEY \`FK_f58ea44867a0d82134b5a36192f\``,
+    );
+    await queryRunner.query(
+      `ALTER TABLE \`patient_records\` DROP FOREIGN KEY \`FK_d1e43a4a3659fe9dd87379d4f62\``,
+    );
+    await queryRunner.query(
+      `ALTER TABLE \`patient_records\` DROP FOREIGN KEY \`FK_45755bf358c122397004dfc7143\``,
     );
     await queryRunner.query(
       `ALTER TABLE \`service_reports\` DROP FOREIGN KEY \`FK_a3e6983b912c644a6a0ce8ca0f8\``,
@@ -301,21 +301,21 @@ export class Migration1763086283744 implements MigrationInterface {
     await queryRunner.query(
       `ALTER TABLE \`locations\` DROP FOREIGN KEY \`FK_402157d62724fef65e3264a0825\``,
     );
-    await queryRunner.query(`DROP TABLE \`physicians\``);
-    await queryRunner.query(`DROP TABLE \`specialties\``);
-    await queryRunner.query(`DROP TABLE \`qualifications\``);
+    await queryRunner.query(`DROP TABLE \`users\``);
     await queryRunner.query(`DROP TABLE \`appointments\``);
     await queryRunner.query(`DROP TABLE \`work_schedules\``);
     await queryRunner.query(`DROP TABLE \`staff_work_schedules\``);
     await queryRunner.query(`DROP TABLE \`staffs\``);
-    await queryRunner.query(`DROP TABLE \`users\``);
+    await queryRunner.query(`DROP TABLE \`physicians\``);
+    await queryRunner.query(`DROP TABLE \`specialties\``);
+    await queryRunner.query(`DROP TABLE \`qualifications\``);
+    await queryRunner.query(`DROP TABLE \`prescriptions\``);
+    await queryRunner.query(`DROP TABLE \`prescribed_medications\``);
+    await queryRunner.query(`DROP TABLE \`medications\``);
     await queryRunner.query(
       `DROP INDEX \`REL_45755bf358c122397004dfc714\` ON \`patient_records\``,
     );
     await queryRunner.query(`DROP TABLE \`patient_records\``);
-    await queryRunner.query(`DROP TABLE \`prescriptions\``);
-    await queryRunner.query(`DROP TABLE \`prescribed_medications\``);
-    await queryRunner.query(`DROP TABLE \`medications\``);
     await queryRunner.query(`DROP TABLE \`service_reports\``);
     await queryRunner.query(`DROP TABLE \`laboratory_reports\``);
     await queryRunner.query(`DROP TABLE \`specimens\``);

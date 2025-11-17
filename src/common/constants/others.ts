@@ -5,9 +5,9 @@ export const ROLES = {
   IMAGE_PHYSICIAN: 'IMAGE_PHYSICIAN',
 };
 
-export const DUTIES = {
-  GENERAL_EXAMINATION: 'Khám sơ bộ',
-  SPECIALIST_EXAMINATION: 'Khám chuyên khoa',
+export const GENDER = {
+  MALE: 'Nam',
+  FEMALE: 'Nữ',
 };
 
 export const SERVICE_TYPES = {
@@ -22,11 +22,6 @@ export const METADATA = {
   HOSPITAL: 'Bệnh viện Thanh Mai',
   PHONE: '0987654321',
   RECORD_NUMBER: '12345',
-};
-
-export const GENDER = {
-  MALE: 'Nam',
-  FEMALE: 'Nữ',
 };
 
 export const TEMPLATE_PATH = 'src/common/files/forms/reports/';
