@@ -1,3 +1,4 @@
+import { EthersModule } from '@modules/ethers/ethers.module';
 import { S3Module } from '@modules/s3/s3.module';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -47,6 +48,7 @@ import { UsersModule } from './modules/users/users.module';
     ReportsModule,
     AuthModule,
     S3Module,
+    EthersModule,
   ],
   controllers: [AppController],
   providers: [AppService],
