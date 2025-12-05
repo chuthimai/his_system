@@ -1,11 +1,10 @@
-import { User } from '@modules/users/entities/user.entity';
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Transactional } from '@nestjs-cls/transactional';
 import * as bcrypt from 'bcrypt';
 import { ERROR_MESSAGES } from 'src/common/constants/error-messages';
 import { ROLES } from 'src/common/constants/others';
-import { HttpExceptionWrapper } from 'src/common/helpers/http-exception-wrapper';
+import { HttpExceptionWrapper } from 'src/common/helpers/wrapper';
 import { UsersService } from 'src/modules/users/users.service';
 
 import { LoginDto } from './dto/login.dto';

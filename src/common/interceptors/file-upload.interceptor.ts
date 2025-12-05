@@ -1,7 +1,8 @@
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 import { ERROR_MESSAGES } from 'src/common/constants/error-messages';
-import { HttpExceptionWrapper } from 'src/common/helpers/http-exception-wrapper';
+
+import { HttpExceptionWrapper } from '../helpers/wrapper';
 
 export function ImageUploadInterceptor(fieldName = 'images') {
   return FilesInterceptor(fieldName, undefined, {

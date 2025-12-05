@@ -26,9 +26,9 @@ import {
   convertDataForInitialReport,
   convertDataForLaboratoryReport,
   convertDataForSpecialReport,
-} from 'src/common/files/utils/converter';
-import { htmlToPdf } from 'src/common/files/utils/render';
-import { HttpExceptionWrapper } from 'src/common/helpers/http-exception-wrapper';
+} from 'src/common/helpers/converter';
+import { htmlToPdf } from 'src/common/helpers/render';
+import { HttpExceptionWrapper } from 'src/common/helpers/wrapper';
 import { Repository } from 'typeorm';
 
 import { CreateImagesDto } from './dto/create-images.dto';

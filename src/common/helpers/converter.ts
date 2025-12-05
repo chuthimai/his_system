@@ -7,7 +7,7 @@ import { GENDER, METADATA, SERVICE_TYPES } from 'src/common/constants/others';
 
 import { MappedItem, renderAssessmentItemsHTML } from './render';
 
-export function formatVnDateWithText(data: string) {
+export function formatVnDateWithText(data: string): string {
   const date = new Date(data);
   const day = date.getDate().toString().padStart(2, '0');
   const month = (date.getMonth() + 1).toString().padStart(2, '0');
@@ -15,7 +15,7 @@ export function formatVnDateWithText(data: string) {
   return `Ngày ${day} tháng ${month} năm ${year}`;
 }
 
-export function formatVnDateWithoutText(data: string) {
+export function formatVnDateWithoutText(data: string): string {
   const date = new Date(data);
   const day = date.getDate().toString().padStart(2, '0');
   const month = (date.getMonth() + 1).toString().padStart(2, '0');
@@ -23,7 +23,7 @@ export function formatVnDateWithoutText(data: string) {
   return `${day}/${month}/${year}`;
 }
 
-export function formatVnFullDateTime(data: string) {
+export function formatVnFullDateTime(data: string): string {
   const date = new Date(data);
   const day = date.getDate().toString().padStart(2, '0');
   const month = (date.getMonth() + 1).toString().padStart(2, '0');
@@ -33,103 +33,18 @@ export function formatVnFullDateTime(data: string) {
   return `${hour} giờ ${minute} phút, ngày ${day} tháng ${month} năm ${year}`;
 }
 
-export function buildTree(data: AssessmentResult[]): MappedItem[] {
-  const nodes = new Map<number, MappedItem>();
-  const parentLinks = new Map<number, number | null>();
+export function formatVnFullDateTime2(): string {
+  const now = new Date();
 
-  function ensureChain(item: AssessmentItem, firstSeenOrder: number) {
-    if (nodes.has(item.identifier)) return;
-    nodes.set(item.identifier, {
-      id: item.identifier,
-      name: item.name,
-      measurementItem: null,
-      children: [],
-      _firstSeen: firstSeenOrder,
-    });
-    parentLinks.set(item.identifier, item.parentIdentifier ?? null);
-    if (item.parent) ensureChain(item.parent, firstSeenOrder);
-  }
+  const yyyy = now.getFullYear();
+  const mm = String(now.getMonth() + 1).padStart(2, '0');
+  const dd = String(now.getDate()).padStart(2, '0');
 
-  let idx = 0;
-  for (const r of data) {
-    idx++;
-    ensureChain(r.assessmentItem, idx);
-    const node = nodes.get(r.assessmentItem.identifier)!;
-    node.value = r.value;
-    // Gắn thêm measurementItem nếu có
-    if (
-      r.assessmentItem.measurementItem?.unit ||
-      r.assessmentItem.measurementItem?.minimum ||
-      r.assessmentItem.measurementItem?.maximum
-    ) {
-      node.measurementItem = {
-        unit: r.assessmentItem.measurementItem?.unit ?? null,
-        minimum: r.assessmentItem.measurementItem?.minimum ?? null,
-        maximum: r.assessmentItem.measurementItem?.maximum ?? null,
-      } as MeasurementItem;
-    }
-    node._firstSeen = Math.min(node._firstSeen ?? idx, idx);
-  }
+  const hh = String(now.getHours()).padStart(2, '0');
+  const mi = String(now.getMinutes()).padStart(2, '0');
+  const ss = String(now.getSeconds()).padStart(2, '0');
 
-  for (const node of nodes.values()) {
-    const parentId = parentLinks.get(node.id as number) ?? null;
-    if (parentId !== null) {
-      const parentNode = nodes.get(parentId)!;
-      parentNode.children!.push(node);
-    }
-  }
-
-  const roots = Array.from(nodes.values()).filter(
-    (n) => parentLinks.get(n.id as number) == null,
-  );
-
-  function sortChildrenRecursively(arr: MappedItem[]) {
-    arr.sort((a, b) => (a._firstSeen ?? 0) - (b._firstSeen ?? 0));
-    for (const n of arr) {
-      if (n.children) sortChildrenRecursively(n.children);
-    }
-  }
-  sortChildrenRecursively(roots);
-
-  function toRoman(num: number): string {
-    const map: [number, string][] = [
-      [10, 'X'],
-      [9, 'IX'],
-      [5, 'V'],
-      [4, 'IV'],
-      [1, 'I'],
-    ];
-    let res = '',
-      n = num;
-    for (const [v, s] of map)
-      while (n >= v) {
-        res += s;
-        n -= v;
-      }
-    return res;
-  }
-
-  function cleanAndPrefix(nodesArr: MappedItem[], level = 1) {
-    for (let i = 0; i < nodesArr.length; i++) {
-      const node = nodesArr[i];
-      let prefix = '';
-      if (level === 1) prefix = `${toRoman(i + 1)}. `;
-      else if (level === 2) prefix = `${i + 1}. `;
-      else if (level === 3) prefix = '- ';
-      else prefix = '+ ';
-      node.name = prefix + node.name;
-      if (node.children && node.children.length > 0) {
-        cleanAndPrefix(node.children, level + 1);
-      } else {
-        delete node.children; // node lá giữ measurementItem và value
-      }
-      delete node._firstSeen;
-      delete node.id;
-    }
-  }
-
-  cleanAndPrefix(roots, 1);
-  return roots;
+  return `${yyyy}-${mm}-${dd}_${hh}-${mi}-${ss}`;
 }
 
 export function convertDataForInitialReport(data: ServiceReport): any {
@@ -314,4 +229,103 @@ export function convertDataForExportPrescription(data: Prescription): any {
     issueDate: formatVnDateWithText(restPrescription.createdTime),
     doctor: restPrescription.physician.name,
   };
+}
+
+export function buildTree(data: AssessmentResult[]): MappedItem[] {
+  const nodes = new Map<number, MappedItem>();
+  const parentLinks = new Map<number, number | null>();
+
+  function ensureChain(item: AssessmentItem, firstSeenOrder: number) {
+    if (nodes.has(item.identifier)) return;
+    nodes.set(item.identifier, {
+      id: item.identifier,
+      name: item.name,
+      measurementItem: null,
+      children: [],
+      _firstSeen: firstSeenOrder,
+    });
+    parentLinks.set(item.identifier, item.parentIdentifier ?? null);
+    if (item.parent) ensureChain(item.parent, firstSeenOrder);
+  }
+
+  let idx = 0;
+  for (const r of data) {
+    idx++;
+    ensureChain(r.assessmentItem, idx);
+    const node = nodes.get(r.assessmentItem.identifier)!;
+    node.value = r.value;
+    // Gắn thêm measurementItem nếu có
+    if (
+      r.assessmentItem.measurementItem?.unit ||
+      r.assessmentItem.measurementItem?.minimum ||
+      r.assessmentItem.measurementItem?.maximum
+    ) {
+      node.measurementItem = {
+        unit: r.assessmentItem.measurementItem?.unit ?? null,
+        minimum: r.assessmentItem.measurementItem?.minimum ?? null,
+        maximum: r.assessmentItem.measurementItem?.maximum ?? null,
+      } as MeasurementItem;
+    }
+    node._firstSeen = Math.min(node._firstSeen ?? idx, idx);
+  }
+
+  for (const node of nodes.values()) {
+    const parentId = parentLinks.get(node.id as number) ?? null;
+    if (parentId !== null) {
+      const parentNode = nodes.get(parentId)!;
+      parentNode.children!.push(node);
+    }
+  }
+
+  const roots = Array.from(nodes.values()).filter(
+    (n) => parentLinks.get(n.id as number) == null,
+  );
+
+  function sortChildrenRecursively(arr: MappedItem[]) {
+    arr.sort((a, b) => (a._firstSeen ?? 0) - (b._firstSeen ?? 0));
+    for (const n of arr) {
+      if (n.children) sortChildrenRecursively(n.children);
+    }
+  }
+  sortChildrenRecursively(roots);
+
+  function toRoman(num: number): string {
+    const map: [number, string][] = [
+      [10, 'X'],
+      [9, 'IX'],
+      [5, 'V'],
+      [4, 'IV'],
+      [1, 'I'],
+    ];
+    let res = '',
+      n = num;
+    for (const [v, s] of map)
+      while (n >= v) {
+        res += s;
+        n -= v;
+      }
+    return res;
+  }
+
+  function cleanAndPrefix(nodesArr: MappedItem[], level = 1) {
+    for (let i = 0; i < nodesArr.length; i++) {
+      const node = nodesArr[i];
+      let prefix = '';
+      if (level === 1) prefix = `${toRoman(i + 1)}. `;
+      else if (level === 2) prefix = `${i + 1}. `;
+      else if (level === 3) prefix = '- ';
+      else prefix = '+ ';
+      node.name = prefix + node.name;
+      if (node.children && node.children.length > 0) {
+        cleanAndPrefix(node.children, level + 1);
+      } else {
+        delete node.children; // node lá giữ measurementItem và value
+      }
+      delete node._firstSeen;
+      delete node.id;
+    }
+  }
+
+  cleanAndPrefix(roots, 1);
+  return roots;
 }

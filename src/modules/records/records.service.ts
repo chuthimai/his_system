@@ -21,8 +21,9 @@ import {
   PROCESS_PATH,
   SERVICE_TYPES,
 } from 'src/common/constants/others';
-import { deleteFiles, mergeFiles } from 'src/common/files/utils/render';
-import { HttpExceptionWrapper } from 'src/common/helpers/http-exception-wrapper';
+import { formatVnFullDateTime2 } from 'src/common/helpers/converter';
+import { deleteFiles, mergeFiles } from 'src/common/helpers/render';
+import { HttpExceptionWrapper } from 'src/common/helpers/wrapper';
 import { Repository } from 'typeorm';
 
 import { CreateRecordDto } from './dto/create-record.dto';
@@ -389,10 +390,7 @@ export class RecordsService {
         );
       }
 
-      const now = new Date();
-      const yyyyMMdd = now.toISOString().slice(0, 10).replace(/-/g, '');
-
-      const exportFileName = `record_${existedPatientRecord.identifier}_${yyyyMMdd}.pdf`;
+      const exportFileName = `record_${existedPatientRecord.identifier}_${formatVnFullDateTime2()}.pdf`;
       const exportFilePath: string = path.resolve(
         PROCESS_PATH,
         `${EXPORT_PATH}${exportFileName}`,
