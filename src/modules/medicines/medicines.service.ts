@@ -90,11 +90,9 @@ export class MedicinesService {
 
     return await Promise.all(
       prescriptions.map(async (prescription) => {
-        prescription.specialtyServiceName = (
-          await this.billingService.findOneSpecialtyServiceByPatientRecord(
-            prescription.patientRecord.identifier,
-          )
-        )?.name;
+        prescription.physician = (await this.usersService.findOnePhysician(
+          prescription.physicianIdentifier,
+        )) as Physician;
         return prescription;
       }),
     );
@@ -221,7 +219,7 @@ export class MedicinesService {
     );
     const exportFilePath: string = path.resolve(
       PROCESS_PATH,
-      `${EXPORT_PATH}prescription.pdf`,
+      `${EXPORT_PATH}${existedPrescription.identifier}.pdf`,
     );
 
     await htmlToPdf(templatePath, exportFilePath, data);

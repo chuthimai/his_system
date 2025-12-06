@@ -45,6 +45,4 @@ export class Prescription {
 
   @OneToOne(() => PatientRecord, (patientRecord) => patientRecord.prescription)
   patientRecord: PatientRecord;
-
-  specialtyServiceName?: string;
 }

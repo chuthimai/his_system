@@ -1,6 +1,7 @@
 import { MeasurementItem } from '@modules/assessments/entities/measurement-item.entity';
 import ejs from 'ejs';
 import fs from 'fs';
+import { unlink } from 'fs/promises';
 import { PDFDocument } from 'pdf-lib';
 import * as puppeteer from 'puppeteer';
 
@@ -129,10 +130,10 @@ export async function htmlToPdf(
   await browser.close();
 }
 
-export async function mergePdfs(pdfPaths: string[], targetPdfPath: string) {
+export async function mergeFiles(paths: string[], targetPath: string) {
   const mergedPdf = await PDFDocument.create();
 
-  for (const path of pdfPaths) {
+  for (const path of paths) {
     const pdfBytes = fs.readFileSync(path);
     const pdf = await PDFDocument.load(pdfBytes);
     const copiedPages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
@@ -141,5 +142,15 @@ export async function mergePdfs(pdfPaths: string[], targetPdfPath: string) {
 
   const mergedPdfBytes = await mergedPdf.save();
 
-  fs.writeFileSync(targetPdfPath, mergedPdfBytes);
+  fs.writeFileSync(targetPath, mergedPdfBytes);
+}
+
+export async function deleteFiles(paths: string[]): Promise<void> {
+  for (const filePath of paths) {
+    try {
+      await unlink(filePath);
+    } catch (err) {
+      console.error(`Failed to delete ${filePath}:`, err);
+    }
+  }
 }

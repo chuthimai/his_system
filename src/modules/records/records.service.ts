@@ -21,7 +21,7 @@ import {
   PROCESS_PATH,
   SERVICE_TYPES,
 } from 'src/common/constants/others';
-import { mergePdfs } from 'src/common/files/utils/render';
+import { deleteFiles, mergeFiles } from 'src/common/files/utils/render';
 import { HttpExceptionWrapper } from 'src/common/helpers/http-exception-wrapper';
 import { Repository } from 'typeorm';
 
@@ -390,13 +390,16 @@ export class RecordsService {
         PROCESS_PATH,
         `${EXPORT_PATH}${exportFileName}`,
       );
+      await mergeFiles(exportFilePaths, exportFilePath);
 
-      await mergePdfs(exportFilePaths, exportFilePath);
       await this.s3Service.uploadFile(
         exportFilePath,
         exportFileName,
         'application/pdf',
       );
+
+      exportFilePaths.push(exportFilePath);
+      await deleteFiles(exportFilePaths);
 
       existedPatientRecord.status = true;
       existedPatientRecord.exportFileName = exportFileName;

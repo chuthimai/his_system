@@ -4,7 +4,6 @@ import { UsersService } from '@modules/users/users.service';
 import { forwardRef, Inject } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ERROR_MESSAGES } from 'src/common/constants/error-messages';
-import { DUTIES } from 'src/common/constants/others';
 import { HttpExceptionWrapper } from 'src/common/helpers/http-exception-wrapper';
 import { LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
 
@@ -88,9 +87,8 @@ export class SchedulesService {
       .innerJoin(
         'workSchedule.staffWorkSchedules',
         'staffWorkSchedule',
-        'staffWorkSchedule.duty = :duty ' +
-          'AND staffWorkSchedule.active = :active',
-        { duty: DUTIES.SPECIALIST_EXAMINATION, active: true },
+        'staffWorkSchedule.active = :active',
+        { active: true },
       )
       .innerJoin(
         'staffWorkSchedule.staff',

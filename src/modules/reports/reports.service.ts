@@ -371,19 +371,11 @@ export class ReportsService {
       if (currentUser.identifier !== serviceReport.reporterIdentifier)
         throw new HttpExceptionWrapper(ERROR_MESSAGES.PERMISSION_DENIED);
 
-      await this.closeAllSpecimenByLaboratoryReportIdentifier(
-        serviceReport.identifier,
-      );
-
-      // Chưa check đẩy đủ assessment results
-
-      await this.assessmentsService.createAssessmentResults({
-        serviceReportIdentifier: serviceReport.identifier,
-        assessmentResults: updateDetailReportResultDto.assessmentResults,
-      });
-
       const now = new Date();
-      const dateFormatted = now.toISOString().split('T')[0];
+      const dateFormatted = now
+        .toISOString()
+        .replace('T', ' ')
+        .substring(0, 19);
 
       const generalServiceInfo = (({ category, method, isClosed }) => ({
         category,
@@ -418,6 +410,16 @@ export class ReportsService {
       };
 
       await this.serviceReportRepository.save(serviceReport);
+
+      // Chưa check đẩy đủ assessment results
+      await this.assessmentsService.createAssessmentResults({
+        serviceReportIdentifier: serviceReport.identifier,
+        assessmentResults: updateDetailReportResultDto.assessmentResults,
+      });
+
+      await this.closeAllSpecimenByLaboratoryReportIdentifier(
+        serviceReport.identifier,
+      );
     } catch (err) {
       console.log(err);
       // throw new HttpExceptionWrapper(
@@ -499,25 +501,22 @@ export class ReportsService {
     currentUser: User,
   ): Promise<Specimen | null> {
     try {
-      const existedLaboratoryReport =
-        await this.laboratoryReportRepository.findOne({
-          where: {
-            identifier: createSpecimenDto.laboratoryReportIdentifier,
-            serviceReport: { status: false },
-          },
-          relations: ['serviceReport'],
-        });
-      if (!existedLaboratoryReport)
+      const existedServiceReport = await this.serviceReportRepository.findOne({
+        where: {
+          identifier: createSpecimenDto.laboratoryReportIdentifier,
+          status: false,
+        },
+      });
+      if (!existedServiceReport)
         throw new HttpExceptionWrapper(
           ERROR_MESSAGES.LABORATORY_REPORT_NOT_FOUND,
         );
 
-      existedLaboratoryReport.serviceReport.performerIdentifier =
-        currentUser.identifier;
-      existedLaboratoryReport.serviceReport.effectiveTime = new Date()
+      existedServiceReport.performerIdentifier = currentUser.identifier;
+      existedServiceReport.effectiveTime = new Date()
         .toISOString()
         .split('T')[0];
-      await this.laboratoryReportRepository.save(existedLaboratoryReport);
+      await this.serviceReportRepository.save(existedServiceReport);
 
       const newSpecimen = this.specimenRepository.create({
         ...createSpecimenDto,
@@ -590,22 +589,20 @@ export class ReportsService {
     currentUser: User,
   ): Promise<Image[]> {
     try {
-      const existedImagingReport = await this.imagingReportRepository.findOne({
+      const existedServiceReport = await this.serviceReportRepository.findOne({
         where: {
           identifier: createImagesDto.imagingReportIdentifier,
-          serviceReport: { status: false },
+          status: false,
         },
-        relations: ['serviceReport'],
       });
-      if (!existedImagingReport)
+      if (!existedServiceReport)
         throw new HttpExceptionWrapper(ERROR_MESSAGES.IMAGING_REPORT_NOT_FOUND);
 
-      existedImagingReport.serviceReport.performerIdentifier =
-        currentUser.identifier;
-      existedImagingReport.serviceReport.effectiveTime = new Date()
+      existedServiceReport.performerIdentifier = currentUser.identifier;
+      existedServiceReport.effectiveTime = new Date()
         .toISOString()
         .split('T')[0];
-      await this.imagingReportRepository.save(existedImagingReport);
+      await this.serviceReportRepository.save(existedServiceReport);
 
       const createdImages = await Promise.all(
         images.map(async (file, i) => {
@@ -659,33 +656,31 @@ export class ReportsService {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         data = convertDataForInitialReport(serviceReport);
         templateName = 'initial-report.ejs';
-        exportFilename = 'initial-diagnosis.pdf';
         break;
       }
       case SERVICE_TYPES.SPECIALIST_CONSULTATION: {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         data = convertDataForSpecialReport(serviceReport);
         templateName = 'special-report.ejs';
-        exportFilename = 'special-diagnosis.pdf';
         break;
       }
       case SERVICE_TYPES.LABORATORY_TEST: {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         data = convertDataForLaboratoryReport(serviceReport);
         templateName = 'laboratory-report.ejs';
-        exportFilename = 'laboratory-diagnosis.pdf';
         break;
       }
       case SERVICE_TYPES.IMAGING_SCAN: {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         data = convertDataForImagingReport(serviceReport);
         templateName = 'imaging-report.ejs';
-        exportFilename = 'imaging-diagnosis.pdf';
         break;
       }
       default:
         break;
     }
+
+    exportFilename = `${serviceReport.identifier}.pdf`;
 
     const templatePath: string = path.resolve(
       PROCESS_PATH,
