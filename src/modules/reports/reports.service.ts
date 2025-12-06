@@ -26,6 +26,7 @@ import {
   convertDataForInitialReport,
   convertDataForLaboratoryReport,
   convertDataForSpecialReport,
+  getCurrentDateTime,
 } from 'src/common/helpers/converter';
 import { htmlToPdf } from 'src/common/helpers/render';
 import { HttpExceptionWrapper } from 'src/common/helpers/wrapper';
@@ -644,8 +645,6 @@ export class ReportsService {
       }),
     );
 
-    // console.dir(detailReport, { depth: null, colors: true });
-
     let data: any = {},
       templateName = '',
       exportFilename = '';
@@ -655,24 +654,28 @@ export class ReportsService {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         data = convertDataForInitialReport(serviceReport);
         templateName = 'initial-report.ejs';
+        exportFilename = `initial-report_${getCurrentDateTime()}.pdf`;
         break;
       }
       case SERVICE_TYPES.SPECIALIST_CONSULTATION: {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         data = convertDataForSpecialReport(serviceReport);
         templateName = 'special-report.ejs';
+        exportFilename = `special-report_${getCurrentDateTime()}.pdf`;
         break;
       }
       case SERVICE_TYPES.LABORATORY_TEST: {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         data = convertDataForLaboratoryReport(serviceReport);
         templateName = 'laboratory-report.ejs';
+        exportFilename = `laboratory-report_${getCurrentDateTime()}.pdf`;
         break;
       }
       case SERVICE_TYPES.IMAGING_SCAN: {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         data = convertDataForImagingReport(serviceReport);
         templateName = 'imaging-report.ejs';
+        exportFilename = `imaging-report_${getCurrentDateTime()}.pdf`;
         break;
       }
       default:

@@ -44,8 +44,8 @@
     "date-fns": "^4.1.0",
     "dotenv": "^17.2.1",
     "ejs": "^3.1.10",
-    "firebase-admin": "^13.6.0",
     "ethers": "^6.15.0",
+    "firebase-admin": "^13.6.0",
     "multer": "^2.0.2",
     "mysql2": "^3.14.3",
     "nestjs-cls": "^6.0.1",
@@ -56,6 +56,7 @@
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
     "swagger-ui-express": "^5.0.1",
+    "undici": "^7.16.0",
     "web3": "^4.16.0"
   },
   "devDependencies": {

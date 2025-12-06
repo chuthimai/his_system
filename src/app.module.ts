@@ -1,3 +1,5 @@
+import { EthersModule } from '@modules/ethers/ethers.module';
+import { HieModule } from '@modules/hie/hie.module';
 import { MessageModule } from '@modules/messages/messages.module';
 import { S3Module } from '@modules/s3/s3.module';
 import { Module } from '@nestjs/common';
@@ -63,6 +65,8 @@ import { UsersModule } from './modules/users/users.module';
     AuthModule,
     MessageModule,
     S3Module,
+    EthersModule,
+    HieModule,
   ],
   controllers: [AppController],
   providers: [AppService],

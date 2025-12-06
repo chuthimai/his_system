@@ -33,7 +33,7 @@ export function formatVnFullDateTime(data: string): string {
   return `${hour} giờ ${minute} phút, ngày ${day} tháng ${month} năm ${year}`;
 }
 
-export function formatVnFullDateTime2(): string {
+export function getCurrentDateTime(): string {
   const now = new Date();
 
   const yyyy = now.getFullYear();

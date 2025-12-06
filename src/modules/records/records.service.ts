@@ -1,4 +1,6 @@
 import { BillingService } from '@modules/billing/billing.service';
+import { EthersService } from '@modules/ethers/ethers.service';
+import { HieService } from '@modules/hie/hie.service';
 import { MedicinesService } from '@modules/medicines/medicines.service';
 import { PaymentService } from '@modules/payments/payments.service';
 import { DiagnosisReport } from '@modules/reports/entities/diagnosis-report.entity';
@@ -12,6 +14,7 @@ import { Physician } from '@modules/users/entities/physician.entity';
 import { User } from '@modules/users/entities/user.entity';
 import { UsersService } from '@modules/users/users.service';
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Transactional } from '@nestjs-cls/transactional';
 import path from 'path';
@@ -21,8 +24,9 @@ import {
   PROCESS_PATH,
   SERVICE_TYPES,
 } from 'src/common/constants/others';
-import { formatVnFullDateTime2 } from 'src/common/helpers/converter';
+import { getCurrentDateTime } from 'src/common/helpers/converter';
 import { deleteFiles, mergeFiles } from 'src/common/helpers/render';
+import { extractFileBuffer } from 'src/common/helpers/render';
 import { HttpExceptionWrapper } from 'src/common/helpers/wrapper';
 import { Repository } from 'typeorm';
 
@@ -42,6 +46,7 @@ export const mapServiceTypeToEntity = new Map<string, Function>([
 @Injectable()
 export class RecordsService {
   constructor(
+    private readonly configService: ConfigService,
     @InjectRepository(PatientRecord)
     private readonly patientRecordRepository: Repository<PatientRecord>,
     @Inject(forwardRef(() => BillingService))
@@ -58,6 +63,8 @@ export class RecordsService {
     private readonly paymentService: PaymentService,
     @Inject(forwardRef(() => S3Service))
     private readonly s3Service: S3Service,
+    private readonly hieService: HieService,
+    private readonly ethersService: EthersService,
   ) {}
 
   async findOne(
@@ -390,7 +397,7 @@ export class RecordsService {
         );
       }
 
-      const exportFileName = `record_${existedPatientRecord.identifier}_${formatVnFullDateTime2()}.pdf`;
+      const exportFileName = `record_${existedPatientRecord.identifier}_${getCurrentDateTime()}.pdf`;
       const exportFilePath: string = path.resolve(
         PROCESS_PATH,
         `${EXPORT_PATH}${exportFileName}`,
@@ -409,6 +416,21 @@ export class RecordsService {
       existedPatientRecord.status = true;
       existedPatientRecord.exportFileName = exportFileName;
       await this.update(existedPatientRecord);
+
+      const exportFileBuffer = await extractFileBuffer(exportFilePath);
+      const hieFileInfo = await this.hieService.pushRecord(
+        {
+          hospitalIdentifier: this.configService.getOrThrow(
+            'HOSPITAL_IDENTIFIER',
+          ),
+          patientIdentifier: existedPatientRecord.patientIdentifier,
+        },
+        exportFileBuffer,
+      );
+      await this.ethersService.sendTransaction(
+        hieFileInfo!.fileId,
+        hieFileInfo!.fileHash,
+      );
     })();
 
     try {
