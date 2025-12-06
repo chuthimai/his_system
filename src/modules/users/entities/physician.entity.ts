@@ -17,7 +17,7 @@ import { Staff } from './staff.entity';
 
 @Entity('physicians')
 export class Physician {
-  @PrimaryColumn()
+  @PrimaryColumn({ type: 'bigint', unsigned: true })
   identifier: number;
 
   @OneToOne(() => Staff, { cascade: true })

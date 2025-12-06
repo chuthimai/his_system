@@ -34,7 +34,7 @@ export class StaffWorkSchedule {
   })
   workSchedule: WorkSchedule;
 
-  @Column({ name: 'staff_identifier' })
+  @Column({ name: 'staff_identifier', type: 'bigint', unsigned: true })
   staffIdentifier: number;
 
   @ManyToOne(() => Staff, (staff) => staff.staffWorkSchedules)
