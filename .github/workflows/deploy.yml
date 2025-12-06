@@ -59,7 +59,7 @@ jobs:
               --env=DB_PASSWORD='${{ secrets.DB_PASSWORD }}' \
               --env=DB_DATABASE=${{ secrets.DB_DATABASE }} \
               --env=JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }} \
-              --env=JWT_EXPIRATION_TIME=1h \
+              --env=JWT_EXPIRATION_TIME=3600 \
               --env=SOURCE_URL=http://${{ secrets.EC2_HOST }}:3000 \
               --env=ORIGIN_URL=${{ secrets.FONTEND_URL }} \
               --env=AVAILABLE_METHODS=GET,HEAD,PUT,PATCH,POST,DELETE \
