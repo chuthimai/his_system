@@ -191,8 +191,15 @@ export class RecordsService {
         patient = await this.usersService.findOne(
           createRecordDto.patientIdentifier,
         );
-        if (!patient)
-          throw new HttpExceptionWrapper(ERROR_MESSAGES.PATIENT_NOT_FOUND);
+        if (!patient) {
+          patient = await this.usersService.create(
+              {
+                identifier: createRecordDto.patientIdentifier,
+                ...createRecordDto,
+              } as CreateUserDto,
+              true,
+          );
+        }
       } else {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { patientIdentifier, ...userData } = createRecordDto;
