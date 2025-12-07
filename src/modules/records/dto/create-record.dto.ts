@@ -9,10 +9,12 @@ import {
   MinLength,
   ValidateIf,
 } from 'class-validator';
+import {Transform} from "class-transformer";
 
 export class CreateRecordDto {
   @ApiProperty()
   @IsOptional()
+  @Transform(({value}) => Number(value))
   @IsNumber()
   patientIdentifier?: number;
 

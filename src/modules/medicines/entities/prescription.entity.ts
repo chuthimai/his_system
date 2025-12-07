@@ -33,7 +33,7 @@ export class Prescription {
   )
   prescribedMedications: PrescribedMedication[];
 
-  @Column({ name: 'physician_identifier' })
+  @Column({ name: 'physician_identifier', type: 'bigint', unsigned: true })
   physicianIdentifier: number;
 
   @ManyToOne(() => Physician, (physician) => physician.prescriptions)

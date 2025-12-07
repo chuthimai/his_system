@@ -21,6 +21,7 @@ export class LoginDto {
 
   @ApiProperty()
   @IsNotEmpty()
+  @Transform(({value}) => Number(value))
   @IsNumber()
   identifier: number;
 
