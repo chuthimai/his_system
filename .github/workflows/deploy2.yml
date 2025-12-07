@@ -63,6 +63,12 @@ jobs:
               --env=SOURCE_URL=http://${{ secrets.EC2_HOST }}:3333 \
               --env=ORIGIN_URL=${{ secrets.FONTEND_URL_2 }} \
               --env=AVAILABLE_METHODS=GET,HEAD,PUT,PATCH,POST,DELETE \
+              --env=PAYOS_CLIENT_ID=${{ secrets.PAYOS_CLIENT_ID }} \
+              --env=PAYOS_API_KEY=${{ secrets.PAYOS_API_KEY }} \
+              --env=PAYOS_CHECKSUM_KEY=${{ secrets.PAYOS_CHECKSUM_KEY }} \
+              --env=FIREBASE_PROJECT_ID=${{ secrets.FIREBASE_PROJECT_ID }} \
+              --env=FIREBASE_CLIENT_ID=${{ secrets.FIREBASE_CLIENT_ID }} \
+              --env=FIREBASE_PRIVATE_KEY=${{ secrets.FIREBASE_PRIVATE_KEY }} \
               --network=bridge \
               --restart=no \
               ${{ secrets.DOCKER_USERNAME }}/nestjs-his-2:latest
