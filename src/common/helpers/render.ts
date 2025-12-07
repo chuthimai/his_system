@@ -2,7 +2,6 @@ import { MeasurementItem } from '@modules/assessments/entities/measurement-item.
 import ejs from 'ejs';
 import fs from 'fs';
 import { unlink } from 'fs/promises';
-import path from 'path';
 import { PDFDocument } from 'pdf-lib';
 import * as puppeteer from 'puppeteer';
 
@@ -156,21 +155,6 @@ export async function deleteFiles(paths: string[]): Promise<void> {
   }
 }
 
-export async function extractFileBuffer(
-  filePath: string,
-): Promise<Express.Multer.File> {
-  const fileBuffer = await fs.promises.readFile(filePath);
-
-  return {
-    buffer: fileBuffer,
-    size: fileBuffer.length,
-    originalname: path.basename(filePath),
-    mimetype: 'application/pdf',
-    fieldname: 'record',
-    encoding: '7bit',
-    destination: '',
-    filename: '',
-    path: '',
-    stream: undefined,
-  } as unknown as Express.Multer.File;
+export async function extractFileBuffer(filePath: string): Promise<Buffer> {
+  return await fs.promises.readFile(filePath);
 }

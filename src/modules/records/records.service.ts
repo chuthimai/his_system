@@ -188,6 +188,13 @@ export class RecordsService {
     });
   }
 
+  async findAllFromHie(patientIdentifier: number): Promise<any> {
+    return await this.hieService.getAllRecords({
+      hospitalIdentifier: this.configService.getOrThrow('HOSPITAL_IDENTIFIER'),
+      patientIdentifier,
+    });
+  }
+
   @Transactional()
   async create(
     createRecordDto: CreateRecordDto,
@@ -201,11 +208,11 @@ export class RecordsService {
         );
         if (!patient) {
           patient = await this.usersService.create(
-              {
-                identifier: createRecordDto.patientIdentifier,
-                ...createRecordDto,
-              } as CreateUserDto,
-              true,
+            {
+              identifier: createRecordDto.patientIdentifier,
+              ...createRecordDto,
+            } as CreateUserDto,
+            true,
           );
         }
       } else {
@@ -410,9 +417,6 @@ export class RecordsService {
         'application/pdf',
       );
 
-      exportFilePaths.push(exportFilePath);
-      await deleteFiles(exportFilePaths);
-
       existedPatientRecord.status = true;
       existedPatientRecord.exportFileName = exportFileName;
       await this.update(existedPatientRecord);
@@ -427,10 +431,18 @@ export class RecordsService {
         },
         exportFileBuffer,
       );
+      if (!hieFileInfo)
+        throw new HttpExceptionWrapper(
+          ERROR_MESSAGES.UPLOAD_RECORD_TO_CENTER_SYSTEM_FAIL,
+        );
+
       await this.ethersService.sendTransaction(
-        hieFileInfo!.fileId,
-        hieFileInfo!.fileHash,
+        hieFileInfo.fileId,
+        hieFileInfo.fileHash,
       );
+
+      exportFilePaths.push(exportFilePath);
+      await deleteFiles(exportFilePaths);
     })();
 
     try {
