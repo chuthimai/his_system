@@ -10,7 +10,7 @@ export class MessageService {
       credential: firebase.credential.cert({
         projectId: configService.getOrThrow('FIREBASE_PROJECT_ID'),
         clientEmail: configService.getOrThrow('FIREBASE_CLIENT_ID'),
-        privateKey: configService.getOrThrow('FIREBASE_PRIVATE_KEY'),
+        privateKey: configService.getOrThrow('FIREBASE_PRIVATE_KEY').replace(/\\n/g, '\n'),
       }),
     });
   }
