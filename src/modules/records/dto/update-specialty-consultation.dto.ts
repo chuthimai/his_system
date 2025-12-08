@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import {Transform} from "class-transformer";
 
 export class UpdateSpecialtyConsultationDto {
   @ApiProperty()
@@ -14,6 +15,7 @@ export class UpdateSpecialtyConsultationDto {
 
   @ApiProperty()
   @IsNotEmpty()
+  @Transform(({value}) => Number(value))
   @IsNumber()
   physicianIdentifier: number;
 

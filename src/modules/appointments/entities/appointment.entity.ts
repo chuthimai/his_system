@@ -33,7 +33,7 @@ export class Appointment {
   })
   workSchedule: WorkSchedule;
 
-  @Column({ name: 'physician_identifier', nullable: true })
+  @Column({ name: 'physician_identifier', type: 'bigint', unsigned: true, nullable: true })
   physicianIdentifier: number;
 
   @ManyToOne(() => Physician, (physician) => physician.appointments)
@@ -43,7 +43,7 @@ export class Appointment {
   })
   physician: Physician;
 
-  @Column({ name: 'user_identifier' })
+  @Column({ name: 'user_identifier', type: 'bigint', unsigned: true })
   userIdentifier: number;
 
   @ManyToOne(() => User, (user) => user.appointments)
