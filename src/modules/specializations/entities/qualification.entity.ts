@@ -30,13 +30,13 @@ export class Qualification {
   @Column({ name: 'expired_date', type: 'date', nullable: true })
   expiredDate: string;
 
-  @Column({ name: 'physician_identifier' })
+  @Column({ name: 'physician_identifier', type: 'bigint', unsigned: true })
   physicianIdentifier: number;
 
   @ManyToOne(() => Physician, (physician) => physician.qualifications)
   @JoinColumn({
     name: 'physician_identifier',
-    foreignKeyConstraintName: 'identifier',
+    referencedColumnName: 'identifier',
   })
   physician: Physician;
 }

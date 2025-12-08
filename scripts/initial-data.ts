@@ -1,36 +1,4 @@
-export const QualificationData = [
-  {
-    identifier: 1,
-    name: 'Bằng tốt nghiệp Đại học Y - Đa khoa',
-    specialty: 'Đa khoa',
-    issuer: 'Bộ Y tế',
-    type: 'Bằng cấp',
-    effectiveDate: '2008-06-15',
-    expiredDate: undefined,
-    physicianIdentifier: 1120000001,
-  },
-  {
-    identifier: 2,
-    name: 'Chứng chỉ hành nghề Bác sĩ - Đa khoa',
-    specialty: 'Đa khoa',
-    issuer: 'Bộ Y tế',
-    type: 'Chứng chỉ',
-    effectiveDate: '2011-03-22',
-    expiredDate: undefined,
-    physicianIdentifier: 1120000001,
-  },
-  {
-    identifier: 3,
-    name: 'Chứng chỉ chuyên khoa Đa khoa - Nâng cao',
-    specialty: 'Đa khoa',
-    issuer: 'Bộ Y tế',
-    type: 'Chứng chỉ',
-    effectiveDate: '2014-10-05',
-    expiredDate: undefined,
-    physicianIdentifier: 1120000001,
-  },
-];
-
+// TODO: Dữ liệu chuyên khoa
 export const SpecialtyData = [
   { identifier: 1, name: 'Đa khoa', description: '', contact: '' },
   { identifier: 2, name: 'Nội khoa', description: '', contact: '' },
@@ -53,263 +21,243 @@ export const SpecialtyData = [
   { identifier: 17, name: 'Chẩn đoán hình ảnh', description: '', contact: '' },
 ];
 
+// TODO: Dữ liệu vị trí, địa điểm
 // 5 Phòng xét nghiệm, 5 Phòng chẩn đoán hình ảnh
 export const LocationData = [
+  // --- Tòa nhà ---
   {
-    identifier: 1001,
+    identifier: 1,
     type: 'Tòa nhà',
     name: 'Tòa A',
     parentIdentifier: null as unknown as number,
   },
   {
-    identifier: 1002,
+    identifier: 2,
     type: 'Tòa nhà',
     name: 'Tòa B',
     parentIdentifier: null as unknown as number,
   },
 
+  // --- Tầng - Tòa A ---
+  { identifier: 3, type: 'Tầng', name: 'Tầng 1', parentIdentifier: 1 },
+  { identifier: 4, type: 'Tầng', name: 'Tầng 2', parentIdentifier: 1 },
+  { identifier: 5, type: 'Tầng', name: 'Tầng 3', parentIdentifier: 1 },
+
+  // --- Tầng - Tòa B ---
+  { identifier: 6, type: 'Tầng', name: 'Tầng 1', parentIdentifier: 2 },
+  { identifier: 7, type: 'Tầng', name: 'Tầng 2', parentIdentifier: 2 },
+  { identifier: 8, type: 'Tầng', name: 'Tầng 3', parentIdentifier: 2 },
+
+  // --- Phòng thuộc tầng 1 của Tòa A ---
   {
-    identifier: 2001,
-    type: 'Tầng',
-    name: 'Tầng 1',
-    parentIdentifier: 1001,
+    identifier: 9,
+    type: 'Phòng',
+    name: 'Vị trí 1 sảnh A',
+    parentIdentifier: 3,
   },
   {
-    identifier: 2002,
-    type: 'Tầng',
-    name: 'Tầng 2',
-    parentIdentifier: 1001,
-  },
-  {
-    identifier: 2003,
-    type: 'Tầng',
-    name: 'Tầng 3',
-    parentIdentifier: 1001,
-  },
-  {
-    identifier: 2004,
-    type: 'Tầng',
-    name: 'Tầng 1',
-    parentIdentifier: 1002,
-  },
-  {
-    identifier: 2005,
-    type: 'Tầng',
-    name: 'Tầng 2',
-    parentIdentifier: 1002,
-  },
-  {
-    identifier: 2006,
-    type: 'Tầng',
-    name: 'Tầng 3',
-    parentIdentifier: 1002,
-  },
-  {
-    identifier: 3001,
+    identifier: 10,
     type: 'Phòng',
     name: 'Phòng Đa khoa 1',
-    parentIdentifier: 2001,
+    parentIdentifier: 3,
   },
   {
-    identifier: 3002,
-    type: 'Phòng',
-    name: 'Phòng Đa khoa 2',
-    parentIdentifier: 2001,
-  },
-  {
-    identifier: 3003,
+    identifier: 11,
     type: 'Phòng',
     name: 'Phòng Nội khoa 1',
-    parentIdentifier: 2001,
+    parentIdentifier: 3,
   },
   {
-    identifier: 3004,
+    identifier: 12,
     type: 'Phòng',
     name: 'Phòng Nội khoa 2',
-    parentIdentifier: 2001,
+    parentIdentifier: 3,
   },
 
+  // --- Phòng thuộc tầng 2 của Tòa A ---
   {
-    identifier: 3005,
+    identifier: 13,
     type: 'Phòng',
     name: 'Phòng Ngoại khoa 1',
-    parentIdentifier: 2002,
+    parentIdentifier: 4,
   },
   {
-    identifier: 3006,
+    identifier: 14,
     type: 'Phòng',
     name: 'Phòng Ngoại khoa 2',
-    parentIdentifier: 2002,
+    parentIdentifier: 4,
   },
 
+  // --- Phòng thuộc tầng 3 của Tòa A ---
   {
-    identifier: 3007,
+    identifier: 15,
     type: 'Phòng',
     name: 'Phòng Sản phụ khoa 1',
-    parentIdentifier: 2003,
+    parentIdentifier: 5,
   },
   {
-    identifier: 3008,
+    identifier: 16,
     type: 'Phòng',
     name: 'Phòng Sản phụ khoa 2',
-    parentIdentifier: 2003,
+    parentIdentifier: 5,
   },
 
+  // --- Phòng thuộc tầng 1 của Tòa B ---
   {
-    identifier: 3009,
+    identifier: 17,
     type: 'Phòng',
     name: 'Phòng Nhi khoa 1',
-    parentIdentifier: 2004,
+    parentIdentifier: 6,
   },
   {
-    identifier: 3010,
+    identifier: 18,
     type: 'Phòng',
     name: 'Phòng Nhi khoa 2',
-    parentIdentifier: 2004,
+    parentIdentifier: 6,
   },
 
+  // --- Phòng thuộc tầng 2 của Tòa B ---
   {
-    identifier: 3011,
+    identifier: 19,
     type: 'Phòng',
     name: 'Phòng Tai Mũi Họng 1',
-    parentIdentifier: 2005,
+    parentIdentifier: 7,
   },
   {
-    identifier: 3012,
+    identifier: 20,
     type: 'Phòng',
     name: 'Phòng Tai Mũi Họng 2',
-    parentIdentifier: 2005,
+    parentIdentifier: 7,
   },
 
-  {
-    identifier: 3013,
-    type: 'Phòng',
-    name: 'Phòng Mắt 1',
-    parentIdentifier: 2006,
-  },
-  {
-    identifier: 3014,
-    type: 'Phòng',
-    name: 'Phòng Mắt 2',
-    parentIdentifier: 2006,
-  },
+  // --- Phòng thuộc tầng 3 của Tòa B ---
+  { identifier: 21, type: 'Phòng', name: 'Phòng Mắt 1', parentIdentifier: 8 },
+  { identifier: 22, type: 'Phòng', name: 'Phòng Mắt 2', parentIdentifier: 8 },
 
+  // --- Phòng bổ sung thuộc tầng 1 của Tòa A ---
   {
-    identifier: 3015,
+    identifier: 23,
     type: 'Phòng',
     name: 'Phòng Răng Hàm Mặt 1',
-    parentIdentifier: 2001,
+    parentIdentifier: 3,
   },
   {
-    identifier: 3016,
+    identifier: 24,
     type: 'Phòng',
     name: 'Phòng Răng Hàm Mặt 2',
-    parentIdentifier: 2001,
+    parentIdentifier: 3,
   },
 
+  // --- Phòng bổ sung thuộc tầng 2 của Tòa A ---
   {
-    identifier: 3017,
+    identifier: 25,
     type: 'Phòng',
     name: 'Phòng Da liễu 1',
-    parentIdentifier: 2002,
+    parentIdentifier: 4,
   },
   {
-    identifier: 3018,
+    identifier: 26,
     type: 'Phòng',
     name: 'Phòng Da liễu 2',
-    parentIdentifier: 2002,
+    parentIdentifier: 4,
   },
 
+  // --- Phòng bổ sung thuộc tầng 3 của Tòa A ---
   {
-    identifier: 3019,
+    identifier: 27,
     type: 'Phòng',
     name: 'Phòng Thần kinh 1',
-    parentIdentifier: 2003,
+    parentIdentifier: 5,
   },
   {
-    identifier: 3020,
+    identifier: 28,
     type: 'Phòng',
     name: 'Phòng Thần kinh 2',
-    parentIdentifier: 2003,
+    parentIdentifier: 5,
   },
 
+  // --- Phòng bổ sung thuộc tầng 1 của Tòa B ---
   {
-    identifier: 3021,
+    identifier: 29,
     type: 'Phòng',
     name: 'Phòng Tim mạch 1',
-    parentIdentifier: 2004,
+    parentIdentifier: 6,
   },
   {
-    identifier: 3022,
+    identifier: 30,
     type: 'Phòng',
     name: 'Phòng Tim mạch 2',
-    parentIdentifier: 2004,
+    parentIdentifier: 6,
   },
 
+  // --- Phòng Xét nghiệm thuộc tầng 2 của Tòa B ---
   {
-    identifier: 3023,
+    identifier: 31,
     type: 'Phòng',
     name: 'Phòng Xét nghiệm 1',
-    parentIdentifier: 2005,
+    parentIdentifier: 7,
   },
   {
-    identifier: 3024,
+    identifier: 32,
     type: 'Phòng',
     name: 'Phòng Xét nghiệm 2',
-    parentIdentifier: 2005,
+    parentIdentifier: 7,
   },
   {
-    identifier: 3025,
+    identifier: 33,
     type: 'Phòng',
     name: 'Phòng Xét nghiệm 3',
-    parentIdentifier: 2005,
+    parentIdentifier: 7,
   },
   {
-    identifier: 3026,
+    identifier: 34,
     type: 'Phòng',
     name: 'Phòng Xét nghiệm 4',
-    parentIdentifier: 2005,
+    parentIdentifier: 7,
   },
   {
-    identifier: 3027,
+    identifier: 35,
     type: 'Phòng',
     name: 'Phòng Xét nghiệm 5',
-    parentIdentifier: 2005,
+    parentIdentifier: 7,
   },
+
+  // --- Phòng Chẩn đoán hình ảnh thuộc tầng 3 của Tòa B ---
   {
-    identifier: 3028,
+    identifier: 36,
     type: 'Phòng',
     name: 'Phòng Chẩn đoán hình ảnh 1',
-    parentIdentifier: 2006,
+    parentIdentifier: 8,
   },
   {
-    identifier: 3029,
+    identifier: 37,
     type: 'Phòng',
     name: 'Phòng Chẩn đoán hình ảnh 2',
-    parentIdentifier: 2006,
+    parentIdentifier: 8,
   },
   {
-    identifier: 3030,
+    identifier: 38,
     type: 'Phòng',
     name: 'Phòng Chẩn đoán hình ảnh 3',
-    parentIdentifier: 2006,
+    parentIdentifier: 8,
   },
   {
-    identifier: 3031,
+    identifier: 39,
     type: 'Phòng',
     name: 'Phòng Chẩn đoán hình ảnh 4',
-    parentIdentifier: 2006,
+    parentIdentifier: 8,
   },
   {
-    identifier: 3032,
+    identifier: 40,
     type: 'Phòng',
     name: 'Phòng Chẩn đoán hình ảnh 5',
-    parentIdentifier: 2006,
+    parentIdentifier: 8,
   },
 ];
 
-// 9 Bệnh nhân, 53 Bác sĩ các chuyên khoa (5 Bác sĩ chẩn đoán hình ảnh)
+// TODO: Dữ liệu người dùng
 export const UserData = [
+  // ----------------------Bệnh nhân------------------------------
   {
     identifier: 1,
     name: 'Nguyễn Văn Hùng',
@@ -323,7 +271,7 @@ export const UserData = [
     role: 'PATIENT',
   },
   {
-    identifier: 1119375248,
+    identifier: 1000000001,
     name: 'Trần Thị Lan',
     email: 'tran.lan98@gmail.com',
     telecom: '0912345678',
@@ -335,7 +283,7 @@ export const UserData = [
     role: 'PATIENT',
   },
   {
-    identifier: 1115639482,
+    identifier: 1000000002,
     name: 'Phạm Đức Minh',
     email: 'minh.pham78@gmail.com',
     telecom: '0978654321',
@@ -347,7 +295,7 @@ export const UserData = [
     role: 'PATIENT',
   },
   {
-    identifier: 1118293647,
+    identifier: 1000000003,
     name: 'Lê Thị Hương',
     email: 'le.huong92@gmail.com',
     telecom: '0903456789',
@@ -359,7 +307,7 @@ export const UserData = [
     role: 'PATIENT',
   },
   {
-    identifier: 1112469358,
+    identifier: 1000000004,
     name: 'Đỗ Văn Quân',
     email: 'do.quan04@gmail.com',
     telecom: '0934567890',
@@ -371,7 +319,7 @@ export const UserData = [
     role: 'PATIENT',
   },
   {
-    identifier: 1113958274,
+    identifier: 1000000005,
     name: 'Ngô Thị Mai',
     email: 'mai.ngo85@gmail.com',
     telecom: '0987564321',
@@ -383,7 +331,7 @@ export const UserData = [
     role: 'PATIENT',
   },
   {
-    identifier: 1116284937,
+    identifier: 1000000006,
     name: 'Vũ Văn Long',
     email: 'long.vu91@gmail.com',
     telecom: '0912789456',
@@ -395,7 +343,7 @@ export const UserData = [
     role: 'PATIENT',
   },
   {
-    identifier: 1119472638,
+    identifier: 1000000007,
     name: 'Phan Thị Hòa',
     email: 'hoa.phan99@gmail.com',
     telecom: '0965234789',
@@ -407,7 +355,7 @@ export const UserData = [
     role: 'PATIENT',
   },
   {
-    identifier: 1112849673,
+    identifier: 1000000008,
     name: 'Đặng Quang Vinh',
     email: 'vinh.dang80@gmail.com',
     telecom: '0906123987',
@@ -420,7 +368,7 @@ export const UserData = [
     role: 'PATIENT',
   },
   {
-    identifier: 1117532891,
+    identifier: 1000000009,
     name: 'Trịnh Thu Trang',
     email: 'trang.trinh95@gmail.com',
     telecom: '0938542761',
@@ -432,7 +380,7 @@ export const UserData = [
     role: 'PATIENT',
   },
 
-  // Đa khoa
+  // ----------------------BS. Đa khoa------------------------------
   {
     identifier: 2,
     name: 'Nguyễn Văn An',
@@ -446,7 +394,7 @@ export const UserData = [
     role: 'GENERAL_PHYSICIAN',
   },
   {
-    identifier: 1120000002,
+    identifier: 2000000001,
     name: 'Trần Thị Bình',
     email: 'binh.tran@his.vn',
     telecom: '0911000002',
@@ -457,20 +405,8 @@ export const UserData = [
     password: '$2b$10$5lK7R1eg.s/NV1Aw6BPkh.DDxOnX0LFbMDM4ZLMbb8ovnyyytGEYu',
     role: 'GENERAL_PHYSICIAN',
   },
-  {
-    identifier: 1120000003,
-    name: 'Lê Văn Cường',
-    email: 'cuong.le@his.vn',
-    telecom: '0911000003',
-    birthDate: '1985-03-03',
-    gender: true,
-    address: '14 Lê Lợi, Hà Nội',
-    photo: '',
-    password: '$2b$10$5lK7R1eg.s/NV1Aw6BPkh.DDxOnX0LFbMDM4ZLMbb8ovnyyytGEYu',
-    role: 'GENERAL_PHYSICIAN',
-  },
 
-  // Nội khoa
+  // ----------------------BS. Nội khoa------------------------------
   {
     identifier: 3,
     name: 'Nguyễn Văn Minh',
@@ -484,7 +420,7 @@ export const UserData = [
     role: 'INTERNAL_PHYSICIAN',
   },
   {
-    identifier: 1134287196,
+    identifier: 3000000001,
     name: 'Trần Thị Lan',
     email: 'lan.tran@his.vn',
     telecom: '0912345679',
@@ -495,22 +431,10 @@ export const UserData = [
     password: '$2b$10$5lK7R1eg.s/NV1Aw6BPkh.DDxOnX0LFbMDM4ZLMbb8ovnyyytGEYu',
     role: 'INTERNAL_PHYSICIAN',
   },
-  {
-    identifier: 1134287197,
-    name: 'Lê Văn Nam',
-    email: 'nam.le@his.vn',
-    telecom: '0912345680',
-    birthDate: '1981-06-10',
-    gender: true,
-    address: '18 Lý Thường Kiệt, Hoàn Kiếm, Hà Nội',
-    photo: '',
-    password: '$2b$10$5lK7R1eg.s/NV1Aw6BPkh.DDxOnX0LFbMDM4ZLMbb8ovnyyytGEYu',
-    role: 'INTERNAL_PHYSICIAN',
-  },
 
-  // Ngoại khoa
+  // ----------------------BS. Ngoại khoa------------------------------
   {
-    identifier: 1139751608,
+    identifier: 3000000002,
     name: 'Trần Hữu Phát',
     email: 'phat.tran@his.vn',
     telecom: '0905123456',
@@ -522,7 +446,7 @@ export const UserData = [
     role: 'SURGICAL_PHYSICIAN',
   },
   {
-    identifier: 1139751609,
+    identifier: 3000000003,
     name: 'Lê Văn Hưng',
     email: 'hung.le@his.vn',
     telecom: '0905123457',
@@ -533,22 +457,10 @@ export const UserData = [
     password: '$2b$10$5lK7R1eg.s/NV1Aw6BPkh.DDxOnX0LFbMDM4ZLMbb8ovnyyytGEYu',
     role: 'SURGICAL_PHYSICIAN',
   },
-  {
-    identifier: 1139751610,
-    name: 'Nguyễn Thị Hạnh',
-    email: 'hanh.nguyen@his.vn',
-    telecom: '0905123458',
-    birthDate: '1980-05-20',
-    gender: false,
-    address: '49 Nguyễn Trãi, Thanh Xuân, Hà Nội',
-    photo: '',
-    password: '$2b$10$5lK7R1eg.s/NV1Aw6BPkh.DDxOnX0LFbMDM4ZLMbb8ovnyyytGEYu',
-    role: 'SURGICAL_PHYSICIAN',
-  },
 
-  // Sản phụ khoa
+  // ----------------------BS. Sản phụ khoa------------------------------
   {
-    identifier: 1131847632,
+    identifier: 3000000004,
     name: 'Lê Thị Thu Hà',
     email: 'ha.le@his.vn',
     telecom: '0978456123',
@@ -559,34 +471,10 @@ export const UserData = [
     password: '$2b$10$5lK7R1eg.s/NV1Aw6BPkh.DDxOnX0LFbMDM4ZLMbb8ovnyyytGEYu',
     role: 'OBSTETRIC_PHYSICIAN',
   },
-  {
-    identifier: 1131847633,
-    name: 'Nguyễn Thị Mai',
-    email: 'mai.nguyen@his.vn',
-    telecom: '0978456124',
-    birthDate: '1986-02-20',
-    gender: false,
-    address: '25 Hai Bà Trưng, Quận 1, TP.HCM',
-    photo: '',
-    password: '$2b$10$5lK7R1eg.s/NV1Aw6BPkh.DDxOnX0LFbMDM4ZLMbb8ovnyyytGEYu',
-    role: 'OBSTETRIC_PHYSICIAN',
-  },
-  {
-    identifier: 1131847634,
-    name: 'Trần Thị Hồng',
-    email: 'hong.tran@his.vn',
-    telecom: '0978456125',
-    birthDate: '1984-09-10',
-    gender: false,
-    address: '27 Hai Bà Trưng, Quận 1, TP.HCM',
-    photo: '',
-    password: '$2b$10$5lK7R1eg.s/NV1Aw6BPkh.DDxOnX0LFbMDM4ZLMbb8ovnyyytGEYu',
-    role: 'OBSTETRIC_PHYSICIAN',
-  },
 
-  // Nhi khoa
+  // ----------------------BS. Nhi khoa------------------------------
   {
-    identifier: 1136014297,
+    identifier: 3000000005,
     name: 'Phạm Anh Dũng',
     email: 'dung.pham@his.vn',
     telecom: '0909789123',
@@ -597,34 +485,10 @@ export const UserData = [
     password: '$2b$10$5lK7R1eg.s/NV1Aw6BPkh.DDxOnX0LFbMDM4ZLMbb8ovnyyytGEYu',
     role: 'PEDIATRIC_PHYSICIAN',
   },
-  {
-    identifier: 1136014298,
-    name: 'Lê Hoàng Anh',
-    email: 'anh.le@his.vn',
-    telecom: '0909789124',
-    birthDate: '1984-03-10',
-    gender: true,
-    address: '58 Trần Hưng Đạo, Quận 5, TP.HCM',
-    photo: '',
-    password: '$2b$10$5lK7R1eg.s/NV1Aw6BPkh.DDxOnX0LFbMDM4ZLMbb8ovnyyytGEYu',
-    role: 'PEDIATRIC_PHYSICIAN',
-  },
-  {
-    identifier: 1136014299,
-    name: 'Nguyễn Thanh Bình',
-    email: 'binh.nguyen@his.vn',
-    telecom: '0909789125',
-    birthDate: '1985-07-22',
-    gender: true,
-    address: '60 Trần Hưng Đạo, Quận 5, TP.HCM',
-    photo: '',
-    password: '$2b$10$5lK7R1eg.s/NV1Aw6BPkh.DDxOnX0LFbMDM4ZLMbb8ovnyyytGEYu',
-    role: 'PEDIATRIC_PHYSICIAN',
-  },
 
-  // Tai Mũi Họng
+  // ----------------------BS. Tai Mũi Họng------------------------------
   {
-    identifier: 1135178420,
+    identifier: 3000000006,
     name: 'Nguyễn Thanh Tùng',
     email: 'tung.nguyen@his.vn',
     telecom: '0932346789',
@@ -635,34 +499,10 @@ export const UserData = [
     password: '$2b$10$5lK7R1eg.s/NV1Aw6BPkh.DDxOnX0LFbMDM4ZLMbb8ovnyyytGEYu',
     role: 'ENT_PHYSICIAN',
   },
-  {
-    identifier: 1135178421,
-    name: 'Trần Thị Hương',
-    email: 'huong.tran@his.vn',
-    telecom: '0932346790',
-    birthDate: '1982-08-15',
-    gender: false,
-    address: '91 Nguyễn Văn Linh, Đà Nẵng',
-    photo: '',
-    password: '$2b$10$5lK7R1eg.s/NV1Aw6BPkh.DDxOnX0LFbMDM4ZLMbb8ovnyyytGEYu',
-    role: 'ENT_PHYSICIAN',
-  },
-  {
-    identifier: 1135178422,
-    name: 'Lê Văn Duy',
-    email: 'duy.le@his.vn',
-    telecom: '0932346791',
-    birthDate: '1983-02-28',
-    gender: true,
-    address: '93 Nguyễn Văn Linh, Đà Nẵng',
-    photo: '',
-    password: '$2b$10$5lK7R1eg.s/NV1Aw6BPkh.DDxOnX0LFbMDM4ZLMbb8ovnyyytGEYu',
-    role: 'ENT_PHYSICIAN',
-  },
 
-  // Mắt
+  // ----------------------BS. Mắt------------------------------
   {
-    identifier: 1132946715,
+    identifier: 3000000007,
     name: 'Đỗ Thị Mai',
     email: 'mai.do@his.vn',
     telecom: '0945345678',
@@ -673,34 +513,10 @@ export const UserData = [
     password: '$2b$10$5lK7R1eg.s/NV1Aw6BPkh.DDxOnX0LFbMDM4ZLMbb8ovnyyytGEYu',
     role: 'OPHTHALMOLOGY_PHYSICIAN',
   },
-  {
-    identifier: 1132946716,
-    name: 'Lê Thị Bích',
-    email: 'bich.le@his.vn',
-    telecom: '0945345679',
-    birthDate: '1987-06-15',
-    gender: false,
-    address: '103 Cách Mạng Tháng 8, Quận 3, TP.HCM',
-    photo: '',
-    password: '$2b$10$5lK7R1eg.s/NV1Aw6BPkh.DDxOnX0LFbMDM4ZLMbb8ovnyyytGEYu',
-    role: 'OPHTHALMOLOGY_PHYSICIAN',
-  },
-  {
-    identifier: 1132946717,
-    name: 'Nguyễn Văn Hòa',
-    email: 'hoa.nguyen@his.vn',
-    telecom: '0945345680',
-    birthDate: '1985-12-20',
-    gender: true,
-    address: '105 Cách Mạng Tháng 8, Quận 3, TP.HCM',
-    photo: '',
-    password: '$2b$10$5lK7R1eg.s/NV1Aw6BPkh.DDxOnX0LFbMDM4ZLMbb8ovnyyytGEYu',
-    role: 'OPHTHALMOLOGY_PHYSICIAN',
-  },
 
-  // Răng Hàm Mặt
+  // ----------------------BS. Răng Hàm Mặt------------------------------
   {
-    identifier: 1138309452,
+    identifier: 3000000008,
     name: 'Lê Hoàng Nam',
     email: 'nam.le@his.vn',
     telecom: '0923456123',
@@ -711,34 +527,10 @@ export const UserData = [
     password: '$2b$10$5lK7R1eg.s/NV1Aw6BPkh.DDxOnX0LFbMDM4ZLMbb8ovnyyytGEYu',
     role: 'DENTAL_PHYSICIAN',
   },
-  {
-    identifier: 1138309453,
-    name: 'Nguyễn Thị Thanh',
-    email: 'thanh.nguyen@his.vn',
-    telecom: '0923456124',
-    birthDate: '1985-05-21',
-    gender: false,
-    address: '36 Pasteur, Quận 1, TP.HCM',
-    photo: '',
-    password: '$2b$10$5lK7R1eg.s/NV1Aw6BPkh.DDxOnX0LFbMDM4ZLMbb8ovnyyytGEYu',
-    role: 'DENTAL_PHYSICIAN',
-  },
-  {
-    identifier: 1138309454,
-    name: 'Trần Văn Khoa',
-    email: 'khoa.tran@his.vn',
-    telecom: '0923456125',
-    birthDate: '1983-11-09',
-    gender: true,
-    address: '38 Pasteur, Quận 1, TP.HCM',
-    photo: '',
-    password: '$2b$10$5lK7R1eg.s/NV1Aw6BPkh.DDxOnX0LFbMDM4ZLMbb8ovnyyytGEYu',
-    role: 'DENTAL_PHYSICIAN',
-  },
 
-  // Da liễu
+  // ----------------------BS. Da liễu------------------------------
   {
-    identifier: 1137684029,
+    identifier: 3000000009,
     name: 'Vũ Ngọc Hương',
     email: 'huong.vu@his.vn',
     telecom: '0968234567',
@@ -749,34 +541,10 @@ export const UserData = [
     password: '$2b$10$5lK7R1eg.s/NV1Aw6BPkh.DDxOnX0LFbMDM4ZLMbb8ovnyyytGEYu',
     role: 'DERMATOLOGY_PHYSICIAN',
   },
-  {
-    identifier: 1137684030,
-    name: 'Nguyễn Thị Lan',
-    email: 'lan.nguyen@his.vn',
-    telecom: '0968234568',
-    birthDate: '1988-07-15',
-    gender: false,
-    address: '80 Lạch Tray, Ngô Quyền, Hải Phòng',
-    photo: '',
-    password: '$2b$10$5lK7R1eg.s/NV1Aw6BPkh.DDxOnX0LFbMDM4ZLMbb8ovnyyytGEYu',
-    role: 'DERMATOLOGY_PHYSICIAN',
-  },
-  {
-    identifier: 1137684031,
-    name: 'Trần Văn Sơn',
-    email: 'son.tran@his.vn',
-    telecom: '0968234569',
-    birthDate: '1986-03-10',
-    gender: true,
-    address: '82 Lạch Tray, Ngô Quyền, Hải Phòng',
-    photo: '',
-    password: '$2b$10$5lK7R1eg.s/NV1Aw6BPkh.DDxOnX0LFbMDM4ZLMbb8ovnyyytGEYu',
-    role: 'DERMATOLOGY_PHYSICIAN',
-  },
 
-  // Thần kinh
+  // ----------------------BS. Thần kinh------------------------------
   {
-    identifier: 1139461750,
+    identifier: 3000000010,
     name: 'Trịnh Văn Quang',
     email: 'quang.trinh@his.vn',
     telecom: '0907654321',
@@ -787,8 +555,10 @@ export const UserData = [
     password: '$2b$10$5lK7R1eg.s/NV1Aw6BPkh.DDxOnX0LFbMDM4ZLMbb8ovnyyytGEYu',
     role: 'NEUROLOGY_PHYSICIAN',
   },
+
+  // ----------------------BS. Tim mạch------------------------------
   {
-    identifier: 1139461751,
+    identifier: 3000000011,
     name: 'Hoàng Thị Lan',
     email: 'lan.hoang@his.vn',
     telecom: '0987456321',
@@ -797,59 +567,10 @@ export const UserData = [
     address: '90 Nguyễn Huệ, Quận 1, TP.HCM',
     photo: '',
     password: '$2b$10$5lK7R1eg.s/NV1Aw6BPkh.DDxOnX0LFbMDM4ZLMbb8ovnyyytGEYu',
-    role: 'NEUROLOGY_PHYSICIAN',
-  },
-  {
-    identifier: 1139461752,
-    name: 'Phan Đức Toàn',
-    email: 'toan.phan@his.vn',
-    telecom: '0911223344',
-    birthDate: '1982-08-22',
-    gender: true,
-    address: '12 Tôn Thất Tùng, Đống Đa, Hà Nội',
-    photo: '',
-    password: '$2b$10$5lK7R1eg.s/NV1Aw6BPkh.DDxOnX0LFbMDM4ZLMbb8ovnyyytGEYu',
-    role: 'NEUROLOGY_PHYSICIAN',
+    role: 'CARDIOLOGY_PHYSICIAN',
   },
 
-  // Tim mạch
-  {
-    identifier: 1134126953,
-    name: 'Hoàng Thị Lan',
-    email: 'lan.hoang@his.vn',
-    telecom: '0987456321',
-    birthDate: '1988-12-03',
-    gender: false,
-    address: '90 Nguyễn Huệ, Quận 1, TP.HCM',
-    photo: '',
-    password: '$2b$10$5lK7R1eg.s/NV1Aw6BPkh.DDxOnX0LFbMDM4ZLMbb8ovnyyytGEYu',
-    role: 'CARDIOLOGY_PHYSICIAN',
-  },
-  {
-    identifier: 1134126954,
-    name: 'Nguyễn Văn Hòa',
-    email: 'hoa.nguyen@his.vn',
-    telecom: '0987456322',
-    birthDate: '1985-05-10',
-    gender: true,
-    address: '92 Nguyễn Huệ, Quận 1, TP.HCM',
-    photo: '',
-    password: '$2b$10$5lK7R1eg.s/NV1Aw6BPkh.DDxOnX0LFbMDM4ZLMbb8ovnyyytGEYu',
-    role: 'CARDIOLOGY_PHYSICIAN',
-  },
-  {
-    identifier: 1134126955,
-    name: 'Lê Thị Thu',
-    email: 'thu.le@his.vn',
-    telecom: '0987456323',
-    birthDate: '1987-11-18',
-    gender: false,
-    address: '94 Nguyễn Huệ, Quận 1, TP.HCM',
-    photo: '',
-    password: '$2b$10$5lK7R1eg.s/NV1Aw6BPkh.DDxOnX0LFbMDM4ZLMbb8ovnyyytGEYu',
-    role: 'CARDIOLOGY_PHYSICIAN',
-  },
-  // Xét nghiệm hóa sinh
+  // ----------------------BS. Xét nghiệm hóa sinh------------------------------
   {
     identifier: 4,
     name: 'Nguyễn Thị Hà',
@@ -863,7 +584,7 @@ export const UserData = [
     role: 'BIOCHEMISTRY_PHYSICIAN', // Hóa sinh
   },
   {
-    identifier: 1140003002,
+    identifier: 4000000001,
     name: 'Phạm Văn Nam',
     email: 'nam.pham@his.vn',
     telecom: '0905003002',
@@ -874,22 +595,10 @@ export const UserData = [
     password: '$2b$10$5lK7R1eg.s/NV1Aw6BPkh.DDxOnX0LFbMDM4ZLMbb8ovnyyytGEYu',
     role: 'BIOCHEMISTRY_PHYSICIAN',
   },
-  {
-    identifier: 1140003003,
-    name: 'Trần Thị Kim Oanh',
-    email: 'oanh.tran@his.vn',
-    telecom: '0905003003',
-    birthDate: '1987-10-18',
-    gender: false,
-    address: '15 Nguyễn Du, Hà Nội',
-    photo: '',
-    password: '$2b$10$5lK7R1eg.s/NV1Aw6BPkh.DDxOnX0LFbMDM4ZLMbb8ovnyyytGEYu',
-    role: 'BIOCHEMISTRY_PHYSICIAN',
-  },
 
-  // Xét nghiệm huyết học
+  // ----------------------BS. Xét nghiệm huyết học------------------------------
   {
-    identifier: 1140004001,
+    identifier: 4000000002,
     name: 'Lê Minh Tuấn',
     email: 'tuan.le@his.vn',
     telecom: '0905004001',
@@ -900,34 +609,10 @@ export const UserData = [
     password: '$2b$10$5lK7R1eg.s/NV1Aw6BPkh.DDxOnX0LFbMDM4ZLMbb8ovnyyytGEYu',
     role: 'HEMATOLOGY_PHYSICIAN',
   },
-  {
-    identifier: 1140004002,
-    name: 'Nguyễn Thị Hồng',
-    email: 'hong.nguyen@his.vn',
-    telecom: '0905004002',
-    birthDate: '1986-04-15',
-    gender: false,
-    address: '42 Hai Bà Trưng, Hà Nội',
-    photo: '',
-    password: '$2b$10$5lK7R1eg.s/NV1Aw6BPkh.DDxOnX0LFbMDM4ZLMbb8ovnyyytGEYu',
-    role: 'HEMATOLOGY_PHYSICIAN',
-  },
-  {
-    identifier: 1140004003,
-    name: 'Phạm Quốc Huy',
-    email: 'huy.pham@his.vn',
-    telecom: '0905004003',
-    birthDate: '1981-12-22',
-    gender: true,
-    address: '60 Nguyễn Văn Cừ, Hà Nội',
-    photo: '',
-    password: '$2b$10$5lK7R1eg.s/NV1Aw6BPkh.DDxOnX0LFbMDM4ZLMbb8ovnyyytGEYu',
-    role: 'HEMATOLOGY_PHYSICIAN',
-  },
 
-  // Xét nghiệm huyết học lâm sàng
+  // ----------------------BS. Xét nghiệm huyết học lâm sàng------------------------------
   {
-    identifier: 1140005001,
+    identifier: 4000000003,
     name: 'Đặng Thị Lan',
     email: 'lan.dang@his.vn',
     telecom: '0905005001',
@@ -938,121 +623,10 @@ export const UserData = [
     password: '$2b$10$5lK7R1eg.s/NV1Aw6BPkh.DDxOnX0LFbMDM4ZLMbb8ovnyyytGEYu',
     role: 'CLINICAL_HEMATOLOGY_PHYSICIAN',
   },
-  {
-    identifier: 1140005002,
-    name: 'Trương Văn Hải',
-    email: 'hai.truong@his.vn',
-    telecom: '0905005002',
-    birthDate: '1980-08-10',
-    gender: true,
-    address: '80 Nguyễn Trãi, Hà Nội',
-    photo: '',
-    password: '$2b$10$5lK7R1eg.s/NV1Aw6BPkh.DDxOnX0LFbMDM4ZLMbb8ovnyyytGEYu',
-    role: 'CLINICAL_HEMATOLOGY_PHYSICIAN',
-  },
-  {
-    identifier: 1140005003,
-    name: 'Phan Thị Dung',
-    email: 'dung.phan@his.vn',
-    telecom: '0905005003',
-    birthDate: '1987-02-14',
-    gender: false,
-    address: '82 Lý Thường Kiệt, Hà Nội',
-    photo: '',
-    password: '$2b$10$5lK7R1eg.s/NV1Aw6BPkh.DDxOnX0LFbMDM4ZLMbb8ovnyyytGEYu',
-    role: 'CLINICAL_HEMATOLOGY_PHYSICIAN',
-  },
-  // Sinh lý thần kinh
-  {
-    identifier: 1140006001,
-    name: 'Nguyễn Văn Trí',
-    email: 'tri.nguyen@his.vn',
-    telecom: '0905003001',
-    birthDate: '1985-02-11',
-    gender: true,
-    address: '15 Tôn Thất Tùng, Đống Đa, Hà Nội',
-    photo: '',
-    password: '$2b$10$5lK7R1eg.s/NV1Aw6BPkh.DDxOnX0LFbMDM4ZLMbb8ovnyyytGEYu',
-    role: 'NEURO_PHYSIOLOGY_PHYSICIAN',
-  },
-  {
-    identifier: 1140006002,
-    name: 'Trần Thị Kim Oanh',
-    email: 'oanh.tran@his.vn',
-    telecom: '0905003002',
-    birthDate: '1986-06-20',
-    gender: false,
-    address: '22 Nguyễn Lương Bằng, Đống Đa, Hà Nội',
-    photo: '',
-    password: '$2b$10$5lK7R1eg.s/NV1Aw6BPkh.DDxOnX0LFbMDM4ZLMbb8ovnyyytGEYu',
-    role: 'NEURO_PHYSIOLOGY_PHYSICIAN',
-  },
-  {
-    identifier: 1140006003,
-    name: 'Phạm Đức Long',
-    email: 'long.pham@his.vn',
-    telecom: '0905003003',
-    birthDate: '1983-09-18',
-    gender: true,
-    address: '27 Trần Hưng Đạo, Hải Phòng',
-    photo: '',
-    password: '$2b$10$5lK7R1eg.s/NV1Aw6BPkh.DDxOnX0LFbMDM4ZLMbb8ovnyyytGEYu',
-    role: 'NEURO_PHYSIOLOGY_PHYSICIAN',
-  },
 
-  // Sinh lý hô hấp
-  {
-    identifier: 1140007001,
-    name: 'Vũ Thị Hằng',
-    email: 'hang.vu@his.vn',
-    telecom: '0905004001',
-    birthDate: '1987-04-07',
-    gender: false,
-    address: '30 Láng Hạ, Ba Đình, Hà Nội',
-    photo: '',
-    password: '$2b$10$5lK7R1eg.s/NV1Aw6BPkh.DDxOnX0LFbMDM4ZLMbb8ovnyyytGEYu',
-    role: 'RESPIRATORY_PHYSIOLOGY_PHYSICIAN',
-  },
-  {
-    identifier: 1140007002,
-    name: 'Nguyễn Hữu Dũng',
-    email: 'dung.nguyen@his.vn',
-    telecom: '0905004002',
-    birthDate: '1984-11-02',
-    gender: true,
-    address: '42 Trần Phú, Quận 5, TP.HCM',
-    photo: '',
-    password: '$2b$10$5lK7R1eg.s/NV1Aw6BPkh.DDxOnX0LFbMDM4ZLMbb8ovnyyytGEYu',
-    role: 'RESPIRATORY_PHYSIOLOGY_PHYSICIAN',
-  },
-  {
-    identifier: 1140007003,
-    name: 'Lê Minh Tâm',
-    email: 'tam.le@his.vn',
-    telecom: '0905004003',
-    birthDate: '1985-12-15',
-    gender: true,
-    address: '50 Nguyễn Văn Linh, Đà Nẵng',
-    photo: '',
-    password: '$2b$10$5lK7R1eg.s/NV1Aw6BPkh.DDxOnX0LFbMDM4ZLMbb8ovnyyytGEYu',
-    role: 'RESPIRATORY_PHYSIOLOGY_PHYSICIAN',
-  },
-
-  // Chẩn đoán hình ảnh
+  // ----------------------BS. Chẩn đoán hình ảnh------------------------------
   {
     identifier: 5,
-    name: 'Lê Thị Hoa',
-    email: 'hoa.le@his.vn',
-    telecom: '0904002001',
-    birthDate: '1981-08-19',
-    gender: false,
-    address: '12 Lê Lợi, Đống Đa, Hà Nội',
-    photo: '',
-    password: '$2b$10$5lK7R1eg.s/NV1Aw6BPkh.DDxOnX0LFbMDM4ZLMbb8ovnyyytGEYu',
-    role: 'RADIOLOGY_PHYSICIAN',
-  },
-  {
-    identifier: 1140008002,
     name: 'Nguyễn Văn Tâm',
     email: 'tam.nguyen@his.vn',
     telecom: '0904002002',
@@ -1064,37 +638,13 @@ export const UserData = [
     role: 'RADIOLOGY_PHYSICIAN',
   },
   {
-    identifier: 1140008003,
+    identifier: 5000000001,
     name: 'Trần Hữu Đức',
     email: 'duc.tran@his.vn',
     telecom: '0904002003',
     birthDate: '1982-02-25',
     gender: true,
     address: '98 Pasteur, Quận 3, TP.HCM',
-    photo: '',
-    password: '$2b$10$5lK7R1eg.s/NV1Aw6BPkh.DDxOnX0LFbMDM4ZLMbb8ovnyyytGEYu',
-    role: 'RADIOLOGY_PHYSICIAN',
-  },
-  {
-    identifier: 1140008004,
-    name: 'Phạm Thị Ngọc',
-    email: 'ngoc.pham@his.vn',
-    telecom: '0904002004',
-    birthDate: '1986-06-30',
-    gender: false,
-    address: '21 Trần Khánh Dư, Hà Nội',
-    photo: '',
-    password: '$2b$10$5lK7R1eg.s/NV1Aw6BPkh.DDxOnX0LFbMDM4ZLMbb8ovnyyytGEYu',
-    role: 'RADIOLOGY_PHYSICIAN',
-  },
-  {
-    identifier: 1140008005,
-    name: 'Đặng Văn Hải',
-    email: 'hai.dang@his.vn',
-    telecom: '0904002005',
-    birthDate: '1980-09-08',
-    gender: true,
-    address: '75 Hai Bà Trưng, Hà Nội',
     photo: '',
     password: '$2b$10$5lK7R1eg.s/NV1Aw6BPkh.DDxOnX0LFbMDM4ZLMbb8ovnyyytGEYu',
     role: 'RADIOLOGY_PHYSICIAN',
@@ -1110,194 +660,485 @@ export const StaffData = UserData.filter((user) => user.role !== 'PATIENT').map(
   }),
 );
 
+// TODO: Dữ liệu bác sĩ
+const ROLE_TO_SPECIALTY_MAP: Record<string, number> = {
+  GENERAL_PHYSICIAN: 1,
+  INTERNAL_PHYSICIAN: 2,
+  SURGICAL_PHYSICIAN: 3,
+  OBSTETRIC_PHYSICIAN: 4,
+  PEDIATRIC_PHYSICIAN: 5,
+  ENT_PHYSICIAN: 6,
+  OPHTHALMOLOGY_PHYSICIAN: 7,
+  DENTAL_PHYSICIAN: 8,
+  DERMATOLOGY_PHYSICIAN: 9,
+  NEUROLOGY_PHYSICIAN: 10,
+  CARDIOLOGY_PHYSICIAN: 11,
+  BIOCHEMISTRY_PHYSICIAN: 12,
+  HEMATOLOGY_PHYSICIAN: 13,
+  CLINICAL_HEMATOLOGY_PHYSICIAN: 14,
+  RADIOLOGY_PHYSICIAN: 17,
+};
 export const PhysicianData = UserData.filter(
   (user) => user.role !== 'PATIENT',
-).map((user, index) =>
-  index < 16 * 3
-    ? {
-        identifier: user.identifier,
-        specialtyIdentifier: Math.floor(index / 3) + 1,
-      }
-    : {
-        identifier: user.identifier,
-        specialtyIdentifier: 17,
-      },
-);
+).map((user) => ({
+  identifier: user.identifier,
+  specialtyIdentifier: ROLE_TO_SPECIALTY_MAP[user.role] ?? null,
+}));
 
+// TODO: Dữ liệu bằng cấp
+export const QualificationData = [
+  // Đa khoa
+  {
+    identifier: 1,
+    name: 'Bằng tốt nghiệp Đại học Y - Đa khoa',
+    specialty: 'Đa khoa',
+    issuer: 'Bộ Y tế',
+    type: 'Bằng cấp',
+    effectiveDate: '2008-06-15',
+    expiredDate: undefined,
+    physicianIdentifier: 2,
+  },
+  {
+    identifier: 2,
+    name: 'Chứng chỉ chuyên khoa - Đa khoa',
+    specialty: 'Đa khoa',
+    issuer: 'Bộ Y tế',
+    type: 'Chứng chỉ',
+    effectiveDate: '2012-05-10',
+    expiredDate: undefined,
+    physicianIdentifier: 2,
+  },
+
+  {
+    identifier: 3,
+    name: 'Bằng tốt nghiệp Đại học Y - Đa khoa',
+    specialty: 'Đa khoa',
+    issuer: 'Bộ Y tế',
+    type: 'Bằng cấp',
+    effectiveDate: '2008-06-15',
+    expiredDate: undefined,
+    physicianIdentifier: 2000000001,
+  },
+
+  // Nội khoa
+  {
+    identifier: 4,
+    name: 'Bằng tốt nghiệp Đại học Y - Nội khoa',
+    specialty: 'Nội khoa',
+    issuer: 'Bộ Y tế',
+    type: 'Bằng cấp',
+    effectiveDate: '2009-07-20',
+    expiredDate: undefined,
+    physicianIdentifier: 3,
+  },
+  {
+    identifier: 5,
+    name: 'Chứng chỉ chuyên khoa Nội',
+    specialty: 'Nội khoa',
+    issuer: 'Bộ Y tế',
+    type: 'Chứng chỉ',
+    effectiveDate: '2013-09-11',
+    expiredDate: undefined,
+    physicianIdentifier: 3,
+  },
+
+  {
+    identifier: 6,
+    name: 'Bằng tốt nghiệp Đại học Y - Nội khoa',
+    specialty: 'Nội khoa',
+    issuer: 'Bộ Y tế',
+    type: 'Bằng cấp',
+    effectiveDate: '2009-07-20',
+    expiredDate: undefined,
+    physicianIdentifier: 3000000001,
+  },
+
+  // Ngoại khoa
+  {
+    identifier: 7,
+    name: 'Bằng tốt nghiệp Đại học Y - Ngoại khoa',
+    specialty: 'Ngoại khoa',
+    issuer: 'Bộ Y tế',
+    type: 'Bằng cấp',
+    effectiveDate: '2007-05-18',
+    expiredDate: undefined,
+    physicianIdentifier: 3000000002,
+  },
+  {
+    identifier: 8,
+    name: 'Chứng chỉ phẫu thuật nâng cao',
+    specialty: 'Ngoại khoa',
+    issuer: 'Bộ Y tế',
+    type: 'Chứng chỉ',
+    effectiveDate: '2012-02-21',
+    expiredDate: undefined,
+    physicianIdentifier: 3000000002,
+  },
+
+  {
+    identifier: 9,
+    name: 'Bằng tốt nghiệp Đại học Y - Ngoại khoa',
+    specialty: 'Ngoại khoa',
+    issuer: 'Bộ Y tế',
+    type: 'Bằng cấp',
+    effectiveDate: '2007-05-18',
+    expiredDate: undefined,
+    physicianIdentifier: 3000000003,
+  },
+
+  // Sản phụ khoa
+  {
+    identifier: 10,
+    name: 'Bằng tốt nghiệp Đại học Y - Sản phụ khoa',
+    specialty: 'Sản phụ khoa',
+    issuer: 'Bộ Y tế',
+    type: 'Bằng cấp',
+    effectiveDate: '2008-12-01',
+    expiredDate: undefined,
+    physicianIdentifier: 3000000004,
+  },
+  {
+    identifier: 11,
+    name: 'Chứng chỉ Sản phụ khoa nâng cao',
+    specialty: 'Sản phụ khoa',
+    issuer: 'Bộ Y tế',
+    type: 'Chứng chỉ',
+    effectiveDate: '2014-03-20',
+    expiredDate: undefined,
+    physicianIdentifier: 3000000004,
+  },
+
+  // Nhi khoa
+  {
+    identifier: 12,
+    name: 'Bằng tốt nghiệp Đại học Y - Nhi khoa',
+    specialty: 'Nhi khoa',
+    issuer: 'Bộ Y tế',
+    type: 'Bằng cấp',
+    effectiveDate: '2009-04-12',
+    expiredDate: undefined,
+    physicianIdentifier: 3000000005,
+  },
+
+  // Tai Mũi Họng
+  {
+    identifier: 13,
+    name: 'Bằng tốt nghiệp Đại học Y - Tai Mũi Họng',
+    specialty: 'Tai Mũi Họng',
+    issuer: 'Bộ Y tế',
+    type: 'Bằng cấp',
+    effectiveDate: '2008-09-09',
+    expiredDate: undefined,
+    physicianIdentifier: 3000000006,
+  },
+
+  // Mắt
+  {
+    identifier: 14,
+    name: 'Bằng tốt nghiệp Đại học Y - Nhãn khoa',
+    specialty: 'Mắt',
+    issuer: 'Bộ Y tế',
+    type: 'Bằng cấp',
+    effectiveDate: '2009-03-14',
+    expiredDate: undefined,
+    physicianIdentifier: 3000000007,
+  },
+
+  // Răng Hàm Mặt
+  {
+    identifier: 15,
+    name: 'Bằng tốt nghiệp ĐH Y - Răng Hàm Mặt',
+    specialty: 'Răng Hàm Mặt',
+    issuer: 'Bộ Y tế',
+    type: 'Bằng cấp',
+    effectiveDate: '2010-06-22',
+    expiredDate: undefined,
+    physicianIdentifier: 3000000008,
+  },
+
+  // Da liễu
+  {
+    identifier: 16,
+    name: 'Bằng tốt nghiệp Đại học Y - Da liễu',
+    specialty: 'Da liễu',
+    issuer: 'Bộ Y tế',
+    type: 'Bằng cấp',
+    effectiveDate: '2011-01-18',
+    expiredDate: undefined,
+    physicianIdentifier: 3000000009,
+  },
+
+  // Thần kinh
+  {
+    identifier: 17,
+    name: 'Bằng tốt nghiệp Đại học Y - Thần kinh',
+    specialty: 'Thần kinh',
+    issuer: 'Bộ Y tế',
+    type: 'Bằng cấp',
+    effectiveDate: '2008-08-12',
+    expiredDate: undefined,
+    physicianIdentifier: 3000000010,
+  },
+
+  // Tim mạch
+  {
+    identifier: 18,
+    name: 'Bằng tốt nghiệp Đại học Y - Tim mạch',
+    specialty: 'Tim mạch',
+    issuer: 'Bộ Y tế',
+    type: 'Bằng cấp',
+    effectiveDate: '2008-03-17',
+    expiredDate: undefined,
+    physicianIdentifier: 3000000011,
+  },
+
+  // Hóa sinh
+  {
+    identifier: 19,
+    name: 'Bằng tốt nghiệp Đại học Y - Hóa sinh',
+    specialty: 'Hóa sinh',
+    issuer: 'Bộ Y tế',
+    type: 'Bằng cấp',
+    effectiveDate: '2008-07-17',
+    expiredDate: undefined,
+    physicianIdentifier: 4,
+  },
+  {
+    identifier: 20,
+    name: 'Bằng tốt nghiệp Đại học Y - Hóa sinh',
+    specialty: 'Hóa sinh',
+    issuer: 'Bộ Y tế',
+    type: 'Bằng cấp',
+    effectiveDate: '2008-07-17',
+    expiredDate: undefined,
+    physicianIdentifier: 4000000001,
+  },
+
+  // Huyết học
+  {
+    identifier: 21,
+    name: 'Bằng tốt nghiệp Đại học Y - Huyết học',
+    specialty: 'Huyết học',
+    issuer: 'Bộ Y tế',
+    type: 'Bằng cấp',
+    effectiveDate: '2009-06-10',
+    expiredDate: undefined,
+    physicianIdentifier: 4000000002,
+  },
+
+  // Huyết học lâm sàng
+  {
+    identifier: 22,
+    name: 'Bằng tốt nghiệp Đại học Y - Huyết học lâm sàng',
+    specialty: 'Huyết học lâm sàng',
+    issuer: 'Bộ Y tế',
+    type: 'Bằng cấp',
+    effectiveDate: '2010-01-22',
+    expiredDate: undefined,
+    physicianIdentifier: 4000000003,
+  },
+
+  // Chẩn đoán hình ảnh
+  {
+    identifier: 23,
+    name: 'Bằng tốt nghiệp Đại học Y - CĐHA',
+    specialty: 'Chẩn đoán hình ảnh',
+    issuer: 'Bộ Y tế',
+    type: 'Bằng cấp',
+    effectiveDate: '2007-11-05',
+    expiredDate: undefined,
+    physicianIdentifier: 5,
+  },
+  {
+    identifier: 24,
+    name: 'Bằng tốt nghiệp Đại học Y - CĐHA',
+    specialty: 'Chẩn đoán hình ảnh',
+    issuer: 'Bộ Y tế',
+    type: 'Bằng cấp',
+    effectiveDate: '2007-11-05',
+    expiredDate: undefined,
+    physicianIdentifier: 5000000001,
+  },
+];
+
+// TODO: Dịch vụ
 export const ServiceData = [
+  // --- Khám sơ bộ ---
   {
     identifier: 1,
     type: 'Sơ bộ',
     name: 'Khám sơ bộ',
     detailDescription: '',
-    price: 50000,
+    price: 500,
     active: true,
-    locationIdentifier: 3001,
+    locationIdentifier: 9,
   },
-  {
-    identifier: 2,
-    type: 'Chuyên khoa',
-    name: 'Khám Chuyên khoa',
-    detailDescription: '',
-    price: 150000,
-    active: true,
-    locationIdentifier: 3003,
-  },
+
+  // --- Chuyên khoa ---
   {
     identifier: 3,
     type: 'Chuyên khoa',
     name: 'Khám Nội khoa',
     detailDescription: '',
-    price: 150000,
+    price: 1500,
     active: true,
-    locationIdentifier: 3003,
+    locationIdentifier: 11,
   },
   {
     identifier: 4,
     type: 'Chuyên khoa',
     name: 'Khám Ngoại khoa',
     detailDescription: '',
-    price: 200000,
+    price: 2000,
     active: true,
-    locationIdentifier: 3005,
+    locationIdentifier: 13,
   },
   {
     identifier: 5,
     type: 'Chuyên khoa',
     name: 'Khám Sản phụ khoa',
     detailDescription: '',
-    price: 180000,
+    price: 1800,
     active: true,
-    locationIdentifier: 3007,
+    locationIdentifier: 15,
   },
   {
     identifier: 6,
     type: 'Chuyên khoa',
     name: 'Khám Nhi khoa',
     detailDescription: '',
-    price: 150000,
+    price: 1500,
     active: true,
-    locationIdentifier: 3009,
+    locationIdentifier: 17,
   },
   {
     identifier: 7,
     type: 'Chuyên khoa',
     name: 'Khám Tai Mũi Họng',
     detailDescription: '',
-    price: 160000,
+    price: 1600,
     active: true,
-    locationIdentifier: 3011,
+    locationIdentifier: 19,
   },
   {
     identifier: 8,
     type: 'Chuyên khoa',
     name: 'Khám Mắt',
     detailDescription: '',
-    price: 160000,
+    price: 1600,
     active: true,
-    locationIdentifier: 3013,
+    locationIdentifier: 21,
   },
   {
     identifier: 9,
     type: 'Chuyên khoa',
     name: 'Khám Răng Hàm Mặt',
     detailDescription: '',
-    price: 170000,
+    price: 1700,
     active: true,
-    locationIdentifier: 3015,
+    locationIdentifier: 23,
   },
   {
     identifier: 10,
     type: 'Chuyên khoa',
     name: 'Khám Da liễu',
     detailDescription: '',
-    price: 150000,
+    price: 1500,
     active: true,
-    locationIdentifier: 3017,
+    locationIdentifier: 25,
   },
   {
     identifier: 11,
     type: 'Chuyên khoa',
     name: 'Khám Thần kinh',
     detailDescription: '',
-    price: 180000,
+    price: 1800,
     active: true,
-    locationIdentifier: 3019,
+    locationIdentifier: 27,
   },
   {
     identifier: 12,
     type: 'Chuyên khoa',
     name: 'Khám Tim mạch',
     detailDescription: '',
-    price: 200000,
+    price: 2000,
     active: true,
-    locationIdentifier: 3021,
+    locationIdentifier: 29,
   },
+
+  // --- Xét nghiệm ---
   {
     identifier: 13,
     type: 'Xét nghiệm',
     name: 'Xét nghiệm hóa sinh máu',
     detailDescription: '',
-    price: 130000,
+    price: 1300,
     active: true,
-    locationIdentifier: 3024,
+    locationIdentifier: 31,
   },
   {
     identifier: 14,
     type: 'Xét nghiệm',
     name: 'Xét nghiệm huyết học',
     detailDescription: '',
-    price: 120000,
+    price: 1200,
     active: true,
-    locationIdentifier: 3023,
+    locationIdentifier: 32,
   },
   {
     identifier: 15,
     type: 'Xét nghiệm',
     name: 'Xét nghiệm sinh thiết tủy xương',
     detailDescription: '',
-    price: 300000,
+    price: 3000,
     active: true,
-    locationIdentifier: 3025,
+    locationIdentifier: 33,
   },
   {
     identifier: 16,
     type: 'Xét nghiệm',
     name: 'Điện não đồ (EEG)',
     detailDescription: '',
-    price: 250000,
+    price: 2500,
     active: true,
-    locationIdentifier: 3028,
+    locationIdentifier: 34,
   },
   {
     identifier: 17,
     type: 'Xét nghiệm',
     name: 'Đo chức năng hô hấp',
     detailDescription: '',
-    price: 180000,
+    price: 1800,
     active: true,
-    locationIdentifier: 3030,
+    locationIdentifier: 35,
   },
+
+  // --- Chẩn đoán hình ảnh ---
   {
     identifier: 18,
     type: 'Chẩn đoán hình ảnh',
     name: 'Chụp X-quang',
     detailDescription: '',
-    price: 200000,
+    price: 2000,
     active: true,
-    locationIdentifier: 3026,
+    locationIdentifier: 36,
   },
   {
     identifier: 19,
     type: 'Chẩn đoán hình ảnh',
     name: 'Chụp cộng hưởng từ (MRI)',
     detailDescription: '',
-    price: 800000,
+    price: 8000,
     active: true,
-    locationIdentifier: 3027,
+    locationIdentifier: 37,
   },
 ];
 
+// TODO: Lịch làm việc
+/*
+ * Tất cả các bác sĩ làm tất cả các ca trong tháng
+ * Phải đúng chuyên khoa → đúng phòng → đúng dịch vụ
+ */
 export const ShiftData = [
   {
     identifier: 1,
@@ -1335,12 +1176,32 @@ export const WorkScheduleData = (() => {
   let id = 1;
   for (let day = 1; day <= daysInMonth; day++) {
     const dateStr = new Date(year, month, day).toISOString().split('T')[0];
-    for (let shift = 1; shift <= ShiftData.length; shift++) {
+    for (let shift = 1; shift <= 4; shift++) {
       data.push({ identifier: id++, date: dateStr, shiftIdentifier: shift });
     }
   }
   return data;
 })();
+
+const SPECIALTY_TO_ROOM: Record<number, number> = {
+  1: 9,
+  2: 11,
+  3: 13,
+  4: 15,
+  5: 17,
+  6: 19,
+  7: 21,
+  8: 23,
+  9: 25,
+  10: 27,
+  11: 29,
+  12: 31,
+  13: 32,
+  14: 33,
+  15: 34,
+  16: 35,
+  17: 36,
+};
 
 export const StaffWorkScheduleData = (() => {
   const data: {
@@ -1352,120 +1213,96 @@ export const StaffWorkScheduleData = (() => {
     staffIdentifier: number;
   }[] = [];
 
-  let tmpIndex = 1;
-  // For sơ bộ và chuyên khoa
-  {
-    for (let specialtyIndex = 0; specialtyIndex < 11; specialtyIndex++) {
-      const specialty = SpecialtyData[specialtyIndex];
-      const specialPhysicians = PhysicianData.filter(
-        (physician) => physician.specialtyIdentifier === specialty.identifier,
-      );
-      const locationIdentifier = LocationData.find((location) =>
-        location.name.startsWith('Phòng ' + specialty.name),
-      )!.identifier;
+  let id = 1;
 
-      WorkScheduleData.forEach((workSchedule, index) => {
-        if (workSchedule.shiftIdentifier === 4) {
-          return;
-        }
+  const physicians = PhysicianData;
 
-        const specialtyPhysicianIdentifier =
-          specialPhysicians[index % specialPhysicians.length].identifier;
+  for (const ws of WorkScheduleData) {
+    for (const doctor of physicians) {
+      const room = SPECIALTY_TO_ROOM[doctor.specialtyIdentifier];
 
+      if (!room) {
+        console.warn('Missing room for specialty:', doctor.specialtyIdentifier);
+        continue;
+      }
+
+      if (doctor.identifier === 2 || doctor.identifier === 2000000001) {
         data.push({
-          identifier: tmpIndex,
-          duty: 'Khám ' + specialty.name,
+          identifier: id++,
+          duty: 'Khám sơ bộ',
           active: true,
-          workScheduleIdentifier: workSchedule.identifier,
-          locationIdentifier: locationIdentifier,
-          staffIdentifier: specialtyPhysicianIdentifier,
+          workScheduleIdentifier: ws.identifier,
+          locationIdentifier: room,
+          staffIdentifier: doctor.identifier,
         });
-        tmpIndex++;
+        continue;
+      }
+
+      if (doctor.identifier === 4 || doctor.identifier === 4000000001) {
+        data.push({
+          identifier: id++,
+          duty: 'Xét nghiệm hoá sinh',
+          active: true,
+          workScheduleIdentifier: ws.identifier,
+          locationIdentifier: room,
+          staffIdentifier: doctor.identifier,
+        });
+        continue;
+      }
+
+      if (doctor.identifier === 4000000002) {
+        data.push({
+          identifier: id++,
+          duty: 'Xét nghiệm huyết học',
+          active: true,
+          workScheduleIdentifier: ws.identifier,
+          locationIdentifier: room,
+          staffIdentifier: doctor.identifier,
+        });
+        continue;
+      }
+
+      if (doctor.identifier === 4000000003) {
+        data.push({
+          identifier: id++,
+          duty: 'Xét nghiệm huyết học lâm sàng',
+          active: true,
+          workScheduleIdentifier: ws.identifier,
+          locationIdentifier: room,
+          staffIdentifier: doctor.identifier,
+        });
+        continue;
+      }
+
+      if (doctor.identifier === 5 || doctor.identifier === 5000000001) {
+        data.push({
+          identifier: id++,
+          duty: 'Chụp X-Quang',
+          active: true,
+          workScheduleIdentifier: ws.identifier,
+          locationIdentifier: room,
+          staffIdentifier: doctor.identifier,
+        });
+        continue;
+      }
+
+      data.push({
+        identifier: id++,
+        duty: 'Khám chuyên khoa',
+        active: true,
+        workScheduleIdentifier: ws.identifier,
+        locationIdentifier: room,
+        staffIdentifier: doctor.identifier,
       });
     }
-  }
-
-  // For xét nghiệm
-  {
-    const labPhysicians = PhysicianData.filter(
-      (physician) =>
-        physician.specialtyIdentifier > 11 &&
-        physician.specialtyIdentifier < 17,
-    );
-
-    const locationsForLab = LocationData.filter((location) =>
-      location.name.startsWith('Phòng Xét nghiệm'),
-    ).slice(0, 5);
-
-    const dutyForLab = ServiceData.filter(
-      (service) => service.type == 'Xét nghiệm',
-    ).map((service) => service.name);
-
-    locationsForLab.forEach((location, locIndex) => {
-      const labPhysiciansForThisLocation = labPhysicians.slice(
-        locIndex * 3,
-        (locIndex + 1) * 3,
-      );
-
-      WorkScheduleData.forEach((workSchedule, index) => {
-        if (workSchedule.shiftIdentifier === 4) {
-          return;
-        }
-
-        data.push({
-          identifier: tmpIndex,
-          duty: dutyForLab[locIndex],
-          active: true,
-          workScheduleIdentifier: workSchedule.identifier,
-          locationIdentifier: location.identifier,
-          staffIdentifier: labPhysiciansForThisLocation[index % 3].identifier,
-        });
-        tmpIndex++;
-      });
-    });
-  }
-
-  // For chẩn đoán hình ảnh
-  {
-    const imagePhysicians = PhysicianData.filter(
-      (physician) => physician.specialtyIdentifier === 17,
-    ).slice(0, 4);
-
-    const locationsForImaging = LocationData.filter((location) =>
-      location.name.startsWith('Phòng Chẩn đoán hình ảnh'),
-    ).slice(0, 2);
-
-    const dutyForImaging = ServiceData.filter(
-      (service) => service.type == 'Chẩn đoán hình ảnh',
-    ).map((service) => service.name);
-
-    WorkScheduleData.forEach((workSchedule, index) => {
-      data.push({
-        identifier: tmpIndex,
-        duty: dutyForImaging[0],
-        active: true,
-        workScheduleIdentifier: workSchedule.identifier,
-        locationIdentifier: locationsForImaging[0].identifier,
-        staffIdentifier: imagePhysicians[index % 2 == 0 ? 0 : 1].identifier,
-      });
-      tmpIndex++;
-
-      data.push({
-        identifier: tmpIndex,
-        duty: dutyForImaging[1],
-        active: true,
-        workScheduleIdentifier: workSchedule.identifier,
-        locationIdentifier: locationsForImaging[1].identifier,
-        staffIdentifier: imagePhysicians[index % 2 == 0 ? 2 : 3].identifier,
-      });
-      tmpIndex++;
-    });
   }
 
   return data;
 })();
 
+// TODO: Tạo các chỉ số, thông tin cần hỏi cho form
 export const AssessmentItemData = [
+  // Khám sơ bộ
   {
     identifier: 1,
     name: 'Lí do vào viện',
@@ -1532,24 +1369,25 @@ export const AssessmentItemData = [
     serviceIdentifier: 1,
     parentIdentifier: 7,
   },
-  {
-    identifier: 12,
-    name: 'Chú ý',
-    serviceIdentifier: 1,
-    parentIdentifier: 7,
-  },
+  { identifier: 12, name: 'Chú ý', serviceIdentifier: 1, parentIdentifier: 7 },
+
+  // Chụp X-quang
   {
     identifier: 15,
     name: 'Kết quả chụp X-quang',
     serviceIdentifier: 18,
     parentIdentifier: null,
   },
+
+  // Chụp cộng hưởng từ (MRI)
   {
     identifier: 16,
     name: 'Kết quả chụp cộng hưởng',
     serviceIdentifier: 19,
     parentIdentifier: null,
   },
+
+  // Điện não đồ (EEG)
   {
     identifier: 19,
     name: 'Tình trạng người bệnh lúc điện não',
@@ -1562,6 +1400,8 @@ export const AssessmentItemData = [
     serviceIdentifier: 16,
     parentIdentifier: null,
   },
+
+  // Đo chức năng hô hấp
   {
     identifier: 21,
     name: 'Dung tích sống',
@@ -1592,6 +1432,8 @@ export const AssessmentItemData = [
     serviceIdentifier: 17,
     parentIdentifier: null,
   },
+
+  // Xét nghiệm huyết học
   {
     identifier: 26,
     name: 'Tế bào máu ngoại vi',
@@ -1620,69 +1462,14 @@ export const AssessmentItemData = [
   { identifier: 31, name: 'MCH', serviceIdentifier: 14, parentIdentifier: 26 },
   { identifier: 32, name: 'MCHC', serviceIdentifier: 14, parentIdentifier: 26 },
   {
-    identifier: 33,
-    name: 'Hồng cầu có nhân',
-    serviceIdentifier: 14,
-    parentIdentifier: 26,
-  },
-  {
-    identifier: 34,
-    name: 'Hồng cầu lưới',
-    serviceIdentifier: 14,
-    parentIdentifier: 26,
-  },
-  {
     identifier: 35,
     name: 'Số lượng tiểu cầu',
     serviceIdentifier: 14,
     parentIdentifier: 26,
   },
   {
-    identifier: 36,
-    name: 'Ký sinh trùng sốt rét',
-    serviceIdentifier: 14,
-    parentIdentifier: 26,
-  },
-  {
     identifier: 37,
-    name: 'Số lượng bạch cầu (BC)',
-    serviceIdentifier: 14,
-    parentIdentifier: 26,
-  },
-  {
-    identifier: 38,
-    name: 'Thành phần bạch cầu (%)',
-    serviceIdentifier: 14,
-    parentIdentifier: 26,
-  },
-  {
-    identifier: 39,
-    name: 'Đoạn trung tính',
-    serviceIdentifier: 14,
-    parentIdentifier: 26,
-  },
-  {
-    identifier: 40,
-    name: 'Đoạn ưa a xít',
-    serviceIdentifier: 14,
-    parentIdentifier: 26,
-  },
-  {
-    identifier: 41,
-    name: 'Đoạn ưa ba zơ',
-    serviceIdentifier: 14,
-    parentIdentifier: 26,
-  },
-  { identifier: 42, name: 'Mono', serviceIdentifier: 14, parentIdentifier: 26 },
-  {
-    identifier: 43,
-    name: 'Lympho',
-    serviceIdentifier: 14,
-    parentIdentifier: 26,
-  },
-  {
-    identifier: 44,
-    name: 'Tế bào bất thường',
+    name: 'Số lượng bạch cầu',
     serviceIdentifier: 14,
     parentIdentifier: 26,
   },
@@ -1705,18 +1492,6 @@ export const AssessmentItemData = [
     parentIdentifier: null,
   },
   {
-    identifier: 48,
-    name: 'Thời gian máu chảy',
-    serviceIdentifier: 14,
-    parentIdentifier: 47,
-  },
-  {
-    identifier: 49,
-    name: 'Thời gian máu đông',
-    serviceIdentifier: 14,
-    parentIdentifier: 47,
-  },
-  {
     identifier: 50,
     name: 'Nhóm máu',
     serviceIdentifier: 14,
@@ -1734,6 +1509,8 @@ export const AssessmentItemData = [
     serviceIdentifier: 14,
     parentIdentifier: 50,
   },
+
+  // Xét nghiệm sinh thiết tủy xương
   {
     identifier: 53,
     name: 'Kết quả sinh thiết',
@@ -1752,6 +1529,8 @@ export const AssessmentItemData = [
     serviceIdentifier: 15,
     parentIdentifier: null,
   },
+
+  // Xét nghiệm hóa sinh máu
   {
     identifier: 56,
     name: 'Urê',
@@ -1848,136 +1627,331 @@ export const AssessmentItemData = [
     serviceIdentifier: 13,
     parentIdentifier: null,
   },
+
+  // Khám Đa khoa
+  { id: 72, name: 'Lý do khám', serviceIdentifier: 2, parentIdentifier: null },
   {
-    identifier: 72,
-    name: 'Na⁺ (Natri)',
-    serviceIdentifier: 13,
+    id: 73,
+    name: 'Triệu chứng hiện tại',
+    serviceIdentifier: 2,
     parentIdentifier: null,
   },
   {
-    identifier: 73,
-    name: 'K⁺ (Kali)',
-    serviceIdentifier: 13,
+    id: 74,
+    name: 'Tiền sử bệnh lý',
+    serviceIdentifier: 2,
     parentIdentifier: null,
   },
   {
-    identifier: 74,
-    name: 'Cl⁻ (Clo)',
-    serviceIdentifier: 13,
+    id: 75,
+    name: 'Khám lâm sàng toàn thân',
+    serviceIdentifier: 2,
     parentIdentifier: null,
   },
   {
-    identifier: 75,
-    name: 'Canxi (Calci)',
-    serviceIdentifier: 13,
+    id: 76,
+    name: 'Định hướng chẩn đoán',
+    serviceIdentifier: 2,
+    parentIdentifier: null,
+  },
+
+  // Khám Nội khoa
+  {
+    id: 77,
+    name: 'Triệu chứng cơ năng (ho, sốt, tức ngực...)',
+    serviceIdentifier: 3,
     parentIdentifier: null,
   },
   {
-    identifier: 76,
-    name: 'Canxi ion hoá',
-    serviceIdentifier: 13,
+    id: 78,
+    name: 'Triệu chứng thực thể (tim–phổi–bụng)',
+    serviceIdentifier: 3,
     parentIdentifier: null,
   },
   {
-    identifier: 77,
-    name: 'Phospho',
-    serviceIdentifier: 13,
+    id: 79,
+    name: 'Bệnh lý mạn tính kèm theo',
+    serviceIdentifier: 3,
     parentIdentifier: null,
   },
   {
-    identifier: 78,
-    name: 'Sắt',
-    serviceIdentifier: 13,
+    id: 80,
+    name: 'Khám tim mạch – hô hấp – tiêu hoá',
+    serviceIdentifier: 3,
     parentIdentifier: null,
   },
   {
-    identifier: 79,
-    name: 'Magie',
-    serviceIdentifier: 13,
+    id: 81,
+    name: 'Đánh giá ban đầu',
+    serviceIdentifier: 3,
+    parentIdentifier: null,
+  },
+
+  // Khám Ngoại khoa
+  {
+    id: 82,
+    name: 'Vị trí và đặc điểm đau',
+    serviceIdentifier: 4,
     parentIdentifier: null,
   },
   {
-    identifier: 80,
-    name: 'AST (GOT)',
-    serviceIdentifier: 13,
+    id: 83,
+    name: 'Tiền sử chấn thương/phẫu thuật',
+    serviceIdentifier: 4,
     parentIdentifier: null,
   },
   {
-    identifier: 81,
-    name: 'ALT (GPT)',
-    serviceIdentifier: 13,
+    id: 84,
+    name: 'Khám vết thương/khối u',
+    serviceIdentifier: 4,
     parentIdentifier: null,
   },
   {
-    identifier: 82,
-    name: 'Amylase',
-    serviceIdentifier: 13,
+    id: 85,
+    name: 'Dấu hiệu viêm/áp xe',
+    serviceIdentifier: 4,
     parentIdentifier: null,
   },
   {
-    identifier: 83,
-    name: 'CK',
-    serviceIdentifier: 13,
+    id: 86,
+    name: 'Hướng xử lý ngoại khoa',
+    serviceIdentifier: 4,
+    parentIdentifier: null,
+  },
+
+  // Sản phụ khoa
+  {
+    id: 87,
+    name: 'Chu kỳ kinh nguyệt',
+    serviceIdentifier: 5,
     parentIdentifier: null,
   },
   {
-    identifier: 84,
-    name: 'CK-MB',
-    serviceIdentifier: 13,
+    id: 88,
+    name: 'Tình trạng thai kỳ hiện tại',
+    serviceIdentifier: 5,
     parentIdentifier: null,
   },
   {
-    identifier: 85,
-    name: 'LDH',
-    serviceIdentifier: 13,
+    id: 89,
+    name: 'Dịch âm đạo – bất thường',
+    serviceIdentifier: 5,
     parentIdentifier: null,
   },
   {
-    identifier: 86,
-    name: 'GGT',
-    serviceIdentifier: 13,
+    id: 90,
+    name: 'Khám phụ khoa',
+    serviceIdentifier: 5,
     parentIdentifier: null,
   },
   {
-    identifier: 87,
-    name: 'Cholinesterase',
-    serviceIdentifier: 13,
+    id: 91,
+    name: 'Chẩn đoán – tư vấn',
+    serviceIdentifier: 5,
+    parentIdentifier: null,
+  },
+
+  // Nhi khoa
+  {
+    id: 92,
+    name: 'Tiền sử sinh – phát triển',
+    serviceIdentifier: 6,
+    parentIdentifier: null,
+  },
+  { id: 93, name: 'Tiêm chủng', serviceIdentifier: 6, parentIdentifier: null },
+  {
+    id: 94,
+    name: 'Triệu chứng hiện tại',
+    serviceIdentifier: 6,
     parentIdentifier: null,
   },
   {
-    identifier: 88,
-    name: 'Phosphatase kiềm',
-    serviceIdentifier: 13,
+    id: 95,
+    name: 'Khám nhi tổng quát',
+    serviceIdentifier: 6,
     parentIdentifier: null,
   },
   {
-    identifier: 89,
-    name: 'pH động mạch',
-    serviceIdentifier: 13,
+    id: 96,
+    name: 'Theo dõi – điều trị',
+    serviceIdentifier: 6,
+    parentIdentifier: null,
+  },
+
+  // Tai Mũi Họng
+  {
+    id: 97,
+    name: 'Triệu chứng tai',
+    serviceIdentifier: 7,
     parentIdentifier: null,
   },
   {
-    identifier: 90,
-    name: 'pCO₂',
-    serviceIdentifier: 13,
+    id: 98,
+    name: 'Triệu chứng mũi',
+    serviceIdentifier: 7,
     parentIdentifier: null,
   },
   {
-    identifier: 91,
-    name: 'pO₂ động mạch',
-    serviceIdentifier: 13,
+    id: 99,
+    name: 'Triệu chứng họng',
+    serviceIdentifier: 7,
+    parentIdentifier: null,
+  },
+  { id: 100, name: 'Khám TMH', serviceIdentifier: 7, parentIdentifier: null },
+  {
+    id: 101,
+    name: 'Định hướng điều trị',
+    serviceIdentifier: 7,
+    parentIdentifier: null,
+  },
+
+  // Mắt
+  {
+    id: 102,
+    name: 'Thị lực – tật khúc xạ',
+    serviceIdentifier: 8,
     parentIdentifier: null,
   },
   {
-    identifier: 92,
-    name: 'HCO₃⁻ chuẩn',
-    serviceIdentifier: 13,
+    id: 103,
+    name: 'Đỏ mắt – chảy nước mắt',
+    serviceIdentifier: 8,
     parentIdentifier: null,
   },
   {
-    identifier: 93,
-    name: 'Kiềm dư',
-    serviceIdentifier: 13,
+    id: 104,
+    name: 'Khám đáy mắt',
+    serviceIdentifier: 8,
+    parentIdentifier: null,
+  },
+  { id: 105, name: 'Nhãn áp', serviceIdentifier: 8, parentIdentifier: null },
+  {
+    id: 106,
+    name: 'Đánh giá thị lực tổng quát',
+    serviceIdentifier: 8,
+    parentIdentifier: null,
+  },
+
+  // Răng Hàm Mặt
+  {
+    id: 107,
+    name: 'Đau răng – sâu răng',
+    serviceIdentifier: 9,
+    parentIdentifier: null,
+  },
+  {
+    id: 108,
+    name: 'Viêm lợi – nha chu',
+    serviceIdentifier: 9,
+    parentIdentifier: null,
+  },
+  {
+    id: 109,
+    name: 'Khám răng miệng tổng quát',
+    serviceIdentifier: 9,
+    parentIdentifier: null,
+  },
+  { id: 110, name: 'Khớp cắn', serviceIdentifier: 9, parentIdentifier: null },
+  {
+    id: 111,
+    name: 'Hướng can thiệp răng hàm mặt',
+    serviceIdentifier: 9,
+    parentIdentifier: null,
+  },
+
+  // Da liễu
+  {
+    id: 112,
+    name: 'Thời gian – tiến triển tổn thương',
+    serviceIdentifier: 10,
+    parentIdentifier: null,
+  },
+  {
+    id: 113,
+    name: 'Dạng tổn thương da',
+    serviceIdentifier: 10,
+    parentIdentifier: null,
+  },
+  {
+    id: 114,
+    name: 'Yếu tố dị ứng – kích ứng',
+    serviceIdentifier: 10,
+    parentIdentifier: null,
+  },
+  {
+    id: 115,
+    name: 'Khám da toàn thân',
+    serviceIdentifier: 10,
+    parentIdentifier: null,
+  },
+  {
+    id: 116,
+    name: 'Hướng chẩn đoán da liễu',
+    serviceIdentifier: 10,
+    parentIdentifier: null,
+  },
+
+  // Thần kinh
+  {
+    id: 117,
+    name: 'Triệu chứng: đau đầu, chóng mặt…',
+    serviceIdentifier: 11,
+    parentIdentifier: null,
+  },
+  {
+    id: 118,
+    name: 'Rối loạn vận động – cảm giác',
+    serviceIdentifier: 11,
+    parentIdentifier: null,
+  },
+  {
+    id: 119,
+    name: 'Khám dây thần kinh',
+    serviceIdentifier: 11,
+    parentIdentifier: null,
+  },
+  {
+    id: 120,
+    name: 'Khám vận động – phản xạ',
+    serviceIdentifier: 11,
+    parentIdentifier: null,
+  },
+  {
+    id: 121,
+    name: 'Đánh giá thần kinh tổng quát',
+    serviceIdentifier: 11,
+    parentIdentifier: null,
+  },
+
+  // Tim mạch
+  {
+    id: 122,
+    name: 'Khó thở – đau ngực – hồi hộp',
+    serviceIdentifier: 12,
+    parentIdentifier: null,
+  },
+  {
+    id: 123,
+    name: 'Tiền sử THA – bệnh tim',
+    serviceIdentifier: 12,
+    parentIdentifier: null,
+  },
+  {
+    id: 124,
+    name: 'Khám tim: mạch – huyết áp – tiếng tim',
+    serviceIdentifier: 12,
+    parentIdentifier: null,
+  },
+  {
+    id: 125,
+    name: 'Phù – tuần hoàn ngoại vi',
+    serviceIdentifier: 12,
+    parentIdentifier: null,
+  },
+  {
+    id: 126,
+    name: 'Nhận định ban đầu tim mạch',
+    serviceIdentifier: 12,
     parentIdentifier: null,
   },
 ];
@@ -2026,20 +2000,6 @@ export const MeasurementItemData = [
     maximum: '356',
   },
   {
-    identifier: 33,
-    type: 'Hồng cầu có nhân (Nucleated Red Blood Cells)',
-    unit: 'x 10^9/l',
-    minimum: '0',
-    maximum: '0',
-  },
-  {
-    identifier: 34,
-    type: 'Hồng cầu lưới (Reticulocytes)',
-    unit: '%',
-    minimum: '0.1',
-    maximum: '0.5',
-  },
-  {
     identifier: 35,
     type: 'Số lượng tiểu cầu (Platelet Count)',
     unit: 'x 10^9/l',
@@ -2047,67 +2007,11 @@ export const MeasurementItemData = [
     maximum: '400',
   },
   {
-    identifier: 36,
-    type: 'KSV sốt rét (Malaria Parasite Screen)',
-    unit: '',
-    minimum: '',
-    maximum: '',
-  },
-  {
     identifier: 37,
     type: 'Số lượng BC (Bạch cầu) (White Blood Cell Count)',
     unit: 'x 10^9/l',
     minimum: '4',
     maximum: '10',
-  },
-  {
-    identifier: 38,
-    type: 'Thành phần bạch cầu (%) (Differential White Blood Cell Count)',
-    unit: '%',
-    minimum: '',
-    maximum: '',
-  },
-  {
-    identifier: 39,
-    type: 'Đoạn trung tính (Neutrophils)',
-    unit: '',
-    minimum: '',
-    maximum: '',
-  },
-  {
-    identifier: 40,
-    type: 'Đoạn ưa a xít (Eosinophils)',
-    unit: '',
-    minimum: '',
-    maximum: '',
-  },
-  {
-    identifier: 41,
-    type: 'Đoạn ưa ba zơ (Basophils)',
-    unit: '',
-    minimum: '',
-    maximum: '',
-  },
-  {
-    identifier: 42,
-    type: 'Mono (Monocytes)',
-    unit: '',
-    minimum: '',
-    maximum: '',
-  },
-  {
-    identifier: 43,
-    type: 'Lympho (Lymphocytes)',
-    unit: '',
-    minimum: '',
-    maximum: '',
-  },
-  {
-    identifier: 44,
-    type: 'Tế bào bất thường (Abnormal Cells)',
-    unit: '',
-    minimum: '',
-    maximum: '',
   },
   {
     identifier: 45,
@@ -2123,6 +2027,7 @@ export const MeasurementItemData = [
     minimum: '',
     maximum: '20',
   },
+
   { identifier: 56, type: '', unit: 'mmol/L', minimum: '2.5', maximum: '7.5' }, // Urê
   { identifier: 57, type: '', unit: 'mmol/L', minimum: '3.9', maximum: '6.4' }, // Glucose
   {
@@ -2157,54 +2062,9 @@ export const MeasurementItemData = [
   }, // Triglycerid
   { identifier: 70, type: '', unit: 'mmol/L', minimum: '0.9', maximum: '' }, // HDL
   { identifier: 71, type: '', unit: 'mmol/L', minimum: '', maximum: '3.4' }, // LDL
-  { identifier: 72, type: '', unit: 'mmol/L', minimum: '135', maximum: '145' }, // Na+
-  { identifier: 73, type: '', unit: 'mmol/L', minimum: '3.5', maximum: '5.5' }, // K+
-  { identifier: 74, type: '', unit: 'mmol/L', minimum: '98', maximum: '106' }, // Cl-
-  { identifier: 75, type: '', unit: 'mmol/L', minimum: '2.15', maximum: '2.6' }, // Calci
-  { identifier: 76, type: '', unit: 'mmol/L', minimum: '', maximum: '' }, // Calci ion hoá
-  { identifier: 77, type: '', unit: 'mmol/L', minimum: '0.9', maximum: '1.5' }, // Phospho
-  {
-    identifier: 78,
-    type: '',
-    unit: 'µmol/L',
-    minimum: '11(nam), 7(nữ)',
-    maximum: '27(nam), 26(nữ)',
-  }, // Sắt
-  { identifier: 79, type: '', unit: 'mmol/L', minimum: '0.8', maximum: '1.0' }, // Magiê
-  { identifier: 80, type: '', unit: 'U/L', minimum: '', maximum: '37' }, // AST (GOT)
-  { identifier: 81, type: '', unit: 'U/L', minimum: '', maximum: '40' }, // ALT (GPT)
-  { identifier: 82, type: '', unit: '', minimum: '', maximum: '' }, // Amylase
-  {
-    identifier: 83,
-    type: '',
-    unit: 'U/L',
-    minimum: '24(nam), 24(nữ)',
-    maximum: '190(nam), 167(nữ)',
-  }, // CK
-  { identifier: 84, type: '', unit: 'U/L', minimum: '', maximum: '24' }, // CK-MB
-  { identifier: 85, type: '', unit: 'U/L', minimum: '230', maximum: '460' }, // LDH
-  {
-    identifier: 86,
-    type: '',
-    unit: 'U/L',
-    minimum: '11(nam), 7(nữ)',
-    maximum: '50(nam), 32(nữ)',
-  }, // GGT
-  { identifier: 87, type: '', unit: 'U/L', minimum: '5300', maximum: '12900' }, // Cholinesterase
-  { identifier: 88, type: '', unit: '', minimum: '', maximum: '' }, // Phosphatase kiềm
-  { identifier: 89, type: '', unit: '', minimum: '7.37', maximum: '7.45' }, // pH động mạch
-  {
-    identifier: 90,
-    type: '',
-    unit: 'mmHg',
-    minimum: '35(nữ), 32(nam)',
-    maximum: '46(nữ), 43(nam)',
-  }, // pCO2
-  { identifier: 91, type: '', unit: 'mmHg', minimum: '71', maximum: '104' }, // pO2
-  { identifier: 92, type: '', unit: 'mmol/L', minimum: '21', maximum: '26' }, // HCO3-
-  { identifier: 93, type: '', unit: 'mmol/L', minimum: '-2', maximum: '+3' }, // Kiềm dư
 ];
 
+// TODO: Thuốc
 export const MedicationData = [
   {
     identifier: 1,

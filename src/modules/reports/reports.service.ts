@@ -371,6 +371,10 @@ export class ReportsService {
       if (currentUser.identifier !== serviceReport.reporterIdentifier)
         throw new HttpExceptionWrapper(ERROR_MESSAGES.PERMISSION_DENIED);
 
+      await this.closeAllSpecimenByLaboratoryReportIdentifier(
+        serviceReport.identifier,
+      );
+
       const now = new Date();
       const dateFormatted = now
         .toISOString()
@@ -408,7 +412,6 @@ export class ReportsService {
         ...mergeIfExist(serviceReport, 'laboratoryReport'),
         ...mergeIfExist(serviceReport, 'imagingReport'),
       };
-
       await this.serviceReportRepository.save(serviceReport);
 
       // Chưa check đẩy đủ assessment results
@@ -416,16 +419,12 @@ export class ReportsService {
         serviceReportIdentifier: serviceReport.identifier,
         assessmentResults: updateDetailReportResultDto.assessmentResults,
       });
-
-      await this.closeAllSpecimenByLaboratoryReportIdentifier(
-        serviceReport.identifier,
-      );
     } catch (err) {
       console.log(err);
-      // throw new HttpExceptionWrapper(
-      //   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      //   `${err.message}, ${ERROR_MESSAGES.UPDATE_DETAIL_REPORT_FAIL}`,
-      // );
+      throw new HttpExceptionWrapper(
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        `${err.message}, ${ERROR_MESSAGES.UPDATE_DETAIL_REPORT_FAIL}`,
+      );
     }
   }
 

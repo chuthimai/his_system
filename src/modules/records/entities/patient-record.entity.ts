@@ -46,7 +46,7 @@ export class PatientRecord {
   })
   prescription: Prescription;
 
-  @Column({ name: 'patient_identifier' })
+  @Column({ name: 'patient_identifier', type: 'bigint', unsigned: true })
   patientIdentifier: number;
 
   @ManyToOne(() => User, (patient) => patient.patientRecords)

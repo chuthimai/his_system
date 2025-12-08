@@ -13,7 +13,7 @@ import { User } from './user.entity';
 
 @Entity('staffs')
 export class Staff {
-  @PrimaryColumn()
+  @PrimaryColumn({ type: 'bigint', unsigned: true })
   identifier: number;
 
   @OneToOne(() => User, { cascade: true })
