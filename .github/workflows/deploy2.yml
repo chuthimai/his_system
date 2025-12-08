@@ -68,7 +68,11 @@ jobs:
               --env=PAYOS_CHECKSUM_KEY=${{ secrets.PAYOS_CHECKSUM_KEY }} \
               --env=FIREBASE_PROJECT_ID=${{ secrets.FIREBASE_PROJECT_ID }} \
               --env=FIREBASE_CLIENT_ID=${{ secrets.FIREBASE_CLIENT_ID }} \
-              --env=FIREBASE_PRIVATE_KEY=${{ secrets.FIREBASE_PRIVATE_KEY }} \
+              --env=FIREBASE_PRIVATE_KEY='${{ secrets.FIREBASE_PRIVATE_KEY }}' \
+              --env=AWS_REGION=${{ secrets.AWS_REGION }} \
+              --env=AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }} \
+              --env=AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }} \
+              --env=AWS_S3_BUCKET=${{ secrets.AWS_S3_BUCKET }} \
               --network=bridge \
               --restart=no \
               ${{ secrets.DOCKER_USERNAME }}/nestjs-his-2:latest
