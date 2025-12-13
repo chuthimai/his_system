@@ -5,7 +5,7 @@ import { Transactional } from '@nestjs-cls/transactional';
 import * as bcrypt from 'bcrypt';
 import { ERROR_MESSAGES } from 'src/common/constants/error-messages';
 import { ROLES } from 'src/common/constants/others';
-import { HttpExceptionWrapper } from 'src/common/helpers/http-exception-wrapper';
+import { HttpExceptionWrapper } from 'src/common/helpers/wrapper';
 import { ILike, Repository } from 'typeorm';
 
 import { CreateUserDto } from './dto/create-user.dto';

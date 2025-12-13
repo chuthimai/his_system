@@ -6,7 +6,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Transactional } from '@nestjs-cls/transactional';
 import { ERROR_MESSAGES } from 'src/common/constants/error-messages';
-import { HttpExceptionWrapper } from 'src/common/helpers/http-exception-wrapper';
+import { HttpExceptionWrapper } from 'src/common/helpers/wrapper';
 import { Repository } from 'typeorm';
 
 import { CreateAppointmentDto } from './dto/create-appointment.dto';

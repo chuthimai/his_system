@@ -16,6 +16,13 @@ export class RecordsController {
   constructor(private readonly recordsService: RecordsService) {}
 
   @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(ROLES.PHYSICIAN)
+  @Get('/hie/:patientIdentifier')
+  getAllFromHie(@Param('patientIdentifier') patientIdentifier: number) {
+    return this.recordsService.findAllFromHie(patientIdentifier);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(ROLES.PATIENT)
   @Get('/')
   getAll(@CurrentUser() currentUser: User) {

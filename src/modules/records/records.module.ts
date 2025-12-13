@@ -1,4 +1,6 @@
 import { AuthModule } from '@modules/auth/auth.module';
+import { EthersModule } from '@modules/ethers/ethers.module';
+import { HieModule } from '@modules/hie/hie.module';
 import { PaymentModule } from '@modules/payments/payments.module';
 import { ReportsModule } from '@modules/reports/reports.module';
 import { S3Module } from '@modules/s3/s3.module';
@@ -24,7 +26,9 @@ import { RecordsService } from './records.service';
     forwardRef(() => ReportsModule),
     forwardRef(() => MedicinesModule),
     forwardRef(() => PaymentModule),
+    HieModule,
     S3Module,
+    EthersModule,
   ],
   controllers: [RecordsController],
   providers: [RecordsService],
