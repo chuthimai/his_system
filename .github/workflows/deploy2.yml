@@ -73,6 +73,11 @@ jobs:
               --env=AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }} \
               --env=AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }} \
               --env=AWS_S3_BUCKET=${{ secrets.AWS_S3_BUCKET }} \
+              --env=WALLET_PRIVATE_KEY=${{ secrets.WALLET_PRIVATE_KEY }} \
+              --env=CONTRACT_ADDRESS=${{ secrets.CONTRACT_ADDRESS }} \
+              --env=RPC_URL='${{ secrets.RPC_URL }}' \
+              --env=HIE_URL=${{ secrets.HIE_URL }} \
+              --env=HOSPITAL_IDENTIFIER=${{ secrets.HOSPITAL_IDENTIFIER_2 }} \
               --network=bridge \
               --restart=no \
               ${{ secrets.DOCKER_USERNAME }}/nestjs-his-2:latest
