@@ -21,8 +21,7 @@ export class HieService {
       },
       body: JSON.stringify(getAllHieRecordsDto),
     });
-    if (!res.ok) return await res.json();
-    return await res.text();
+    return await res.json();
   }
 
   async pushRecord(
