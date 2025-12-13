@@ -4,7 +4,7 @@ import { UsersService } from '@modules/users/users.service';
 import { forwardRef, Inject } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ERROR_MESSAGES } from 'src/common/constants/error-messages';
-import { HttpExceptionWrapper } from 'src/common/helpers/http-exception-wrapper';
+import { HttpExceptionWrapper } from 'src/common/helpers/wrapper';
 import { LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
 
 import { StaffWorkScheduleConditionDto } from './dto/staff-work-schedules-by-condition.dto';

@@ -154,3 +154,7 @@ export async function deleteFiles(paths: string[]): Promise<void> {
     }
   }
 }
+
+export async function extractFileBuffer(filePath: string): Promise<Buffer> {
+  return await fs.promises.readFile(filePath);
+}

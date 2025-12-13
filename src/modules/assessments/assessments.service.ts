@@ -3,7 +3,7 @@ import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Transactional } from '@nestjs-cls/transactional';
 import { ERROR_MESSAGES } from 'src/common/constants/error-messages';
-import { HttpExceptionWrapper } from 'src/common/helpers/http-exception-wrapper';
+import { HttpExceptionWrapper } from 'src/common/helpers/wrapper';
 import { IsNull, Repository } from 'typeorm';
 
 import { CreateAssessmentResultsDto } from './dto/create-assessment-results.dto';
@@ -64,7 +64,7 @@ export class AssessmentsService {
         createAssessmentResults.serviceReportIdentifier,
       );
       if (!existedServiceReport)
-        throw new Error(ERROR_MESSAGES.SERVICE_REPORT_NOT_FOUND);
+        throw new HttpExceptionWrapper(ERROR_MESSAGES.SERVICE_REPORT_NOT_FOUND);
 
       await Promise.all(
         createAssessmentResults.assessmentResults.map(

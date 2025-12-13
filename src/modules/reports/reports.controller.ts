@@ -15,7 +15,7 @@ import { ROLES } from 'src/common/constants/others';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator.dto';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { RolesGuard } from 'src/common/guards/roles.guard';
-import { ImageUploadInterceptor } from 'src/common/interceptors/image-upload.interceptor';
+import { ImageUploadInterceptor } from 'src/common/interceptors/file-upload.interceptor';
 
 import { CreateImagesDto } from './dto/create-images.dto';
 import { CreateSpecimenDto } from './dto/create-specimen.dto';

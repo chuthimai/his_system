@@ -11,7 +11,7 @@ import * as node from '@payos/node';
 import { Notification } from 'firebase-admin/messaging';
 import { ERROR_MESSAGES } from 'src/common/constants/error-messages';
 import { SERVICE_TYPES } from 'src/common/constants/others';
-import { HttpExceptionWrapper } from 'src/common/helpers/http-exception-wrapper';
+import { HttpExceptionWrapper } from 'src/common/helpers/wrapper';
 import { Repository } from 'typeorm';
 
 import { CreateInvoiceDto } from './dto/create-invoice.dto';
