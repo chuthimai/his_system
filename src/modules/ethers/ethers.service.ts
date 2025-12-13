@@ -35,8 +35,16 @@ export class EthersService {
     );
   }
 
-  async sendTransaction(fileId: number, fileHash: string): Promise<void> {
-    const transaction = await this.contract.storeFile(fileId, fileHash);
+  async sendTransaction(
+    fileId: number,
+    fileHash: string,
+    fileSignature: string,
+  ): Promise<void> {
+    const transaction = await this.contract.storeFile(
+      fileId,
+      fileHash,
+      fileSignature,
+    );
     const receipt = await transaction.wait();
 
     const block = (await this.provider.getBlock(

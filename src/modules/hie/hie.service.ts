@@ -27,7 +27,9 @@ export class HieService {
   async pushRecord(
     createRecordDto: CreateHieRecordDto,
     record: Buffer,
-  ): Promise<{ fileId: number; fileHash: string } | undefined> {
+  ): Promise<
+    { fileId: number; fileHash: string; fileSignature: string } | undefined
+  > {
     const form = new FormData();
     form.append('hospitalIdentifier', createRecordDto.hospitalIdentifier);
     form.append('patientIdentifier', createRecordDto.patientIdentifier);
@@ -47,6 +49,10 @@ export class HieService {
     });
 
     if (!res.ok) return undefined;
-    return (await res.json()) as { fileId: number; fileHash: string };
+    return (await res.json()) as {
+      fileId: number;
+      fileHash: string;
+      fileSignature: string;
+    };
   }
 }
