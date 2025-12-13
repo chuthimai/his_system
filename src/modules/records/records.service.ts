@@ -1,4 +1,6 @@
 import { BillingService } from '@modules/billing/billing.service';
+import { EthersService } from '@modules/ethers/ethers.service';
+import { HieService } from '@modules/hie/hie.service';
 import { MedicinesService } from '@modules/medicines/medicines.service';
 import { PaymentService } from '@modules/payments/payments.service';
 import { DiagnosisReport } from '@modules/reports/entities/diagnosis-report.entity';
@@ -12,6 +14,7 @@ import { Physician } from '@modules/users/entities/physician.entity';
 import { User } from '@modules/users/entities/user.entity';
 import { UsersService } from '@modules/users/users.service';
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Transactional } from '@nestjs-cls/transactional';
 import path from 'path';
@@ -21,8 +24,10 @@ import {
   PROCESS_PATH,
   SERVICE_TYPES,
 } from 'src/common/constants/others';
-import { deleteFiles, mergeFiles } from 'src/common/files/utils/render';
-import { HttpExceptionWrapper } from 'src/common/helpers/http-exception-wrapper';
+import { getCurrentDateTime } from 'src/common/helpers/converter';
+import { deleteFiles, mergeFiles } from 'src/common/helpers/render';
+import { extractFileBuffer } from 'src/common/helpers/render';
+import { HttpExceptionWrapper } from 'src/common/helpers/wrapper';
 import { Repository } from 'typeorm';
 
 import { CreateRecordDto } from './dto/create-record.dto';
@@ -41,6 +46,7 @@ export const mapServiceTypeToEntity = new Map<string, Function>([
 @Injectable()
 export class RecordsService {
   constructor(
+    private readonly configService: ConfigService,
     @InjectRepository(PatientRecord)
     private readonly patientRecordRepository: Repository<PatientRecord>,
     @Inject(forwardRef(() => BillingService))
@@ -57,6 +63,8 @@ export class RecordsService {
     private readonly paymentService: PaymentService,
     @Inject(forwardRef(() => S3Service))
     private readonly s3Service: S3Service,
+    private readonly hieService: HieService,
+    private readonly ethersService: EthersService,
   ) {}
 
   async findOne(
@@ -180,6 +188,13 @@ export class RecordsService {
     });
   }
 
+  async findAllFromHie(patientIdentifier: number): Promise<any> {
+    return await this.hieService.getAllRecords({
+      hospitalIdentifier: this.configService.getOrThrow('HOSPITAL_IDENTIFIER'),
+      patientIdentifier,
+    });
+  }
+
   @Transactional()
   async create(
     createRecordDto: CreateRecordDto,
@@ -193,11 +208,11 @@ export class RecordsService {
         );
         if (!patient) {
           patient = await this.usersService.create(
-              {
-                identifier: createRecordDto.patientIdentifier,
-                ...createRecordDto,
-              } as CreateUserDto,
-              true,
+            {
+              identifier: createRecordDto.patientIdentifier,
+              ...createRecordDto,
+            } as CreateUserDto,
+            true,
           );
         }
       } else {
@@ -389,10 +404,7 @@ export class RecordsService {
         );
       }
 
-      const now = new Date();
-      const yyyyMMdd = now.toISOString().slice(0, 10).replace(/-/g, '');
-
-      const exportFileName = `record_${existedPatientRecord.identifier}_${yyyyMMdd}.pdf`;
+      const exportFileName = `record_${existedPatientRecord.identifier}_${getCurrentDateTime()}.pdf`;
       const exportFilePath: string = path.resolve(
         PROCESS_PATH,
         `${EXPORT_PATH}${exportFileName}`,
@@ -405,12 +417,32 @@ export class RecordsService {
         'application/pdf',
       );
 
-      exportFilePaths.push(exportFilePath);
-      await deleteFiles(exportFilePaths);
-
       existedPatientRecord.status = true;
       existedPatientRecord.exportFileName = exportFileName;
       await this.update(existedPatientRecord);
+
+      const exportFileBuffer = await extractFileBuffer(exportFilePath);
+      const hieFileInfo = await this.hieService.pushRecord(
+        {
+          hospitalIdentifier: this.configService.getOrThrow(
+            'HOSPITAL_IDENTIFIER',
+          ),
+          patientIdentifier: existedPatientRecord.patientIdentifier,
+        },
+        exportFileBuffer,
+      );
+      if (!hieFileInfo)
+        throw new HttpExceptionWrapper(
+          ERROR_MESSAGES.UPLOAD_RECORD_TO_CENTER_SYSTEM_FAIL,
+        );
+
+      await this.ethersService.sendTransaction(
+        hieFileInfo.fileId,
+        hieFileInfo.fileHash,
+      );
+
+      exportFilePaths.push(exportFilePath);
+      await deleteFiles(exportFilePaths);
     })();
 
     try {
