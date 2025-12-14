@@ -24,6 +24,12 @@ RUN apt-get update && apt-get install -y \
   fonts-liberation \
   && rm -rf /var/lib/apt/lists/*
 
+# Cài font chữ
+RUN apt-get update && apt-get install -y \
+  fonts-liberation \
+  fonts-noto \
+  && rm -rf /var/lib/apt/lists/*
+
 # 2. ENV cho Puppeteer
 ENV PUPPETEER_SKIP_DOWNLOAD=true
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium

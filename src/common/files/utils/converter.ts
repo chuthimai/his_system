@@ -33,6 +33,19 @@ export function formatVnFullDateTime(data: string) {
   return `${hour} giờ ${minute} phút, ngày ${day} tháng ${month} năm ${year}`;
 }
 
+export function conditionDiagnosisSeverityToVn(severity: string): string {
+  switch (severity) {
+    case 'severe':
+      return "Nghiêm trọng";
+    case 'moderate':
+      return "Trung bình";
+    case 'mild':
+      return "Nhẹ";
+    default:
+      return "Không xác định";
+  }
+}
+
 export function buildTree(data: AssessmentResult[]): MappedItem[] {
   const nodes = new Map<number, MappedItem>();
   const parentLinks = new Map<number, number | null>();
@@ -200,7 +213,7 @@ export function convertDataForSpecialReport(data: ServiceReport): any {
     reportCreatedTime: formatVnFullDateTime(restServiceReport.effectiveTime),
     reportResultTime: formatVnDateWithText(restServiceReport.recordedTime),
 
-    severity: severity,
+    severity: conditionDiagnosisSeverityToVn(severity),
     conclusion: conclusion,
 
     performDoctor: performer.name,
