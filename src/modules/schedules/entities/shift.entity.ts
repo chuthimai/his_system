@@ -1,4 +1,5 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+
 import { WorkSchedule } from './work-schedule.entity';
 
 @Entity('shifts')

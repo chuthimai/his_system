@@ -16,8 +16,11 @@ import { Transactional } from '@nestjs-cls/transactional';
 import path from 'path';
 import { ERROR_MESSAGES } from 'src/common/constants/error-messages';
 import {
+  AGE_GROUP_LABELS,
   EXPORT_PATH,
+  GENDER,
   PROCESS_PATH,
+  REPORT_TYPES,
   SERVICE_TYPES,
   TEMPLATE_PATH,
 } from 'src/common/constants/others';
@@ -30,11 +33,12 @@ import {
 } from 'src/common/helpers/converter';
 import { htmlToPdf } from 'src/common/helpers/render';
 import { HttpExceptionWrapper } from 'src/common/helpers/wrapper';
-import { Repository } from 'typeorm';
+import { Between, In, Repository } from 'typeorm';
 
 import { CreateImagesDto } from './dto/create-images.dto';
 import { CreateServiceReportDto } from './dto/create-service-report.dto';
 import { CreateSpecimenDto } from './dto/create-specimen.dto';
+import { SummaryReportsQueryDto } from './dto/summary-reports.dto';
 import { UpdateImagingReportResultDto } from './dto/update-imaging-report-result.dto';
 import { UpdateLaboratoryReportResultDto } from './dto/update-laboratory-report-result.dto';
 import { UpdateSpecimenDto } from './dto/update-specimen.dto';
@@ -627,6 +631,116 @@ export class ReportsService {
         `${err.message}, ${ERROR_MESSAGES.CREATE_IMAGE_FAIL}`,
       );
     }
+  }
+
+  async summaryReports(
+    summaryReportsDto: SummaryReportsQueryDto,
+  ): Promise<Record<string, any>> {
+    const { startDate, endDate, reportType } = summaryReportsDto;
+
+    const reports = await this.serviceReportRepository.find({
+      where: {
+        service: {
+          type: In(
+            reportType === REPORT_TYPES.IMAGING
+              ? [SERVICE_TYPES.IMAGING_SCAN]
+              : reportType === REPORT_TYPES.LABORATORY
+                ? [SERVICE_TYPES.LABORATORY_TEST]
+                : [
+                    SERVICE_TYPES.GENERAL_CONSULTATION,
+                    SERVICE_TYPES.SPECIALIST_CONSULTATION,
+                  ],
+          ),
+        },
+        effectiveTime: Between(startDate, endDate),
+      },
+      relations: [
+        'service',
+        'patientRecord',
+        'patientRecord.patient',
+        'laboratoryReport',
+        'laboratoryReport.specimens',
+      ],
+    });
+
+    const today = new Date();
+
+    let totalClosedReports = 0;
+    let totalSpecimens = 0;
+    let totalClosedSpecimens = 0;
+
+    const patientMap = new Map<number, any>();
+    const serviceGroups: Record<string, number> = {};
+    const patientByDate: Record<string, Set<number>> = {};
+
+    const ageRanges = [
+      { label: AGE_GROUP_LABELS.CHILDREN, max: 12 },
+      { label: AGE_GROUP_LABELS.YOUTH, max: 25 },
+      { label: AGE_GROUP_LABELS.ADULTS, max: 40 },
+      { label: AGE_GROUP_LABELS.MIDDLE_AGED, max: 60 },
+      { label: AGE_GROUP_LABELS.SENIORS, max: Infinity },
+    ];
+
+    const ageGroups = Object.fromEntries(ageRanges.map((r) => [r.label, 0]));
+    const sexGroups: Record<string, number> = {
+      [GENDER.FEMALE]: 0,
+      [GENDER.MALE]: 0,
+    };
+
+    for (const report of reports) {
+      if (report.status) totalClosedReports++;
+
+      // service
+      const serviceName = report.service.name;
+      serviceGroups[serviceName] = (serviceGroups[serviceName] ?? 0) + 1;
+
+      // patient
+      const patient = report.patientRecord.patient;
+      const patientId = patient.identifier;
+
+      // patient by date
+      const dateKey = report.effectiveTime.toString().slice(0, 10);
+      patientByDate[dateKey] ??= new Set();
+      patientByDate[dateKey].add(patientId);
+
+      if (!patientMap.has(patientId)) {
+        patientMap.set(patientId, patient);
+
+        const birth = new Date(patient.birthDate);
+        const age = today.getFullYear() - birth.getFullYear();
+        const ageGroup = ageRanges.find((r) => age <= r.max);
+        if (ageGroup) ageGroups[ageGroup.label]++;
+
+        const sex = patient.gender ? GENDER.MALE : GENDER.FEMALE;
+        sexGroups[sex]++;
+      }
+
+      // laboratory
+      if (reportType === 'diagnosis' && report.laboratoryReport) {
+        for (const specimen of report.laboratoryReport.specimens) {
+          totalSpecimens++;
+          if (specimen.status) totalClosedSpecimens++;
+        }
+      }
+    }
+
+    const patientStatsByDate = Object.fromEntries(
+      Object.entries(patientByDate).map(([date, set]) => [date, set.size]),
+    );
+
+    return {
+      totalReports: reports.length,
+      totalClosedReports,
+      ...(reportType === REPORT_TYPES.LABORATORY && {
+        totalSpecimens,
+        totalClosedSpecimens,
+      }),
+      serviceGroups,
+      totalPatient: patientMap.size,
+      patientStatsByDate,
+      sexGroups,
+      ageGroups,
+    };
   }
 
   async exportReport(identifier: number): Promise<string> {

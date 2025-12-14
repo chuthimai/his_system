@@ -439,6 +439,7 @@ export class RecordsService {
       await this.ethersService.sendTransaction(
         hieFileInfo.fileId,
         hieFileInfo.fileHash,
+        hieFileInfo.fileSignature,
       );
 
       exportFilePaths.push(exportFilePath);
