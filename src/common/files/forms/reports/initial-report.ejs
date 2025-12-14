@@ -5,7 +5,7 @@
   <title>Phiếu <%= serviceName %></title>
   <style>
     body {
-      font-family: "Times New Roman", serif;
+      font-family: "Times New Roman", 'Liberation Serif', 'Noto Serif', serif;
       font-size: 14px;
       margin: 40px;
       line-height: 1.5;
@@ -104,7 +104,7 @@
   <table>
     <tr>
       <td>1. Họ và tên: <%= patientName.toUpperCase() %></td>
-      <td>2. Sinh ngày: <%= patientBirth %> - Tuổi: <%= new Date().getFullYear() - new Date(patientBirth).getFullYear() %></td>
+      <td>2. Sinh ngày: <%= patientBirth %></td>
     </tr>
     <tr>
       <td>3. Giới tính: <%= patientGender %></td>

@@ -33,18 +33,31 @@ export function formatVnFullDateTime(data: string): string {
   return `${hour} giờ ${minute} phút, ngày ${day} tháng ${month} năm ${year}`;
 }
 
+export function conditionDiagnosisSeverityToVn(severity: string): string {
+  switch (severity) {
+    case 'severe':
+      return "Nghiêm trọng";
+    case 'moderate':
+      return "Trung bình";
+    case 'mild':
+      return "Nhẹ";
+    default:
+      return "Không xác định";
+  }
+}
+
 export function getCurrentDateTime(): string {
-  const now = new Date();
+    const now = new Date();
 
-  const yyyy = now.getFullYear();
-  const mm = String(now.getMonth() + 1).padStart(2, '0');
-  const dd = String(now.getDate()).padStart(2, '0');
+    const yyyy = now.getFullYear();
+    const mm = String(now.getMonth() + 1).padStart(2, '0');
+    const dd = String(now.getDate()).padStart(2, '0');
 
-  const hh = String(now.getHours()).padStart(2, '0');
-  const mi = String(now.getMinutes()).padStart(2, '0');
-  const ss = String(now.getSeconds()).padStart(2, '0');
+    const hh = String(now.getHours()).padStart(2, '0');
+    const mi = String(now.getMinutes()).padStart(2, '0');
+    const ss = String(now.getSeconds()).padStart(2, '0');
 
-  return `${yyyy}-${mm}-${dd}_${hh}-${mi}-${ss}`;
+    return `${yyyy}-${mm}-${dd}_${hh}-${mi}-${ss}`;
 }
 
 export function convertDataForInitialReport(data: ServiceReport): any {
