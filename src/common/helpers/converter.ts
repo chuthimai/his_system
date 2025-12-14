@@ -132,7 +132,7 @@ export function convertDataForSpecialReport(data: ServiceReport): any {
     conclusion: conclusion,
 
     performDoctor: performer.name,
-    specialDoctor: requester.name,
+    specialDoctor: performer.name,
   };
 }
 
