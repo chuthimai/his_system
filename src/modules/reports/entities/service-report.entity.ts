@@ -47,7 +47,7 @@ export class ServiceReport {
   })
   recordedTime: string;
 
-  @Column({ name: 'patient_record_identifier'})
+  @Column({ name: 'patient_record_identifier' })
   patientRecordIdentifier: number;
 
   @ManyToOne(
@@ -76,7 +76,12 @@ export class ServiceReport {
   )
   assessmentResults: AssessmentResult[];
 
-  @Column({ name: 'performer_identifier', type: 'bigint', unsigned: true, nullable: true })
+  @Column({
+    name: 'performer_identifier',
+    type: 'bigint',
+    unsigned: true,
+    nullable: true,
+  })
   performerIdentifier: number;
 
   @ManyToOne(() => Physician, (performer) => performer.performedServiceReports)
@@ -86,7 +91,12 @@ export class ServiceReport {
   })
   performer: Physician;
 
-  @Column({ name: 'reporter_identifier', type: 'bigint', unsigned: true, nullable: true })
+  @Column({
+    name: 'reporter_identifier',
+    type: 'bigint',
+    unsigned: true,
+    nullable: true,
+  })
   reporterIdentifier: number;
 
   @ManyToOne(() => Physician, (reporter) => reporter.reportedServiceReports)
@@ -96,7 +106,12 @@ export class ServiceReport {
   })
   reporter: Physician;
 
-  @Column({ name: 'requester_identifier', type: 'bigint', unsigned: true, nullable: true })
+  @Column({
+    name: 'requester_identifier',
+    type: 'bigint',
+    unsigned: true,
+    nullable: true,
+  })
   requesterIdentifier: number;
 
   @ManyToOne(() => Physician, (requester) => requester.requestedServiceReports)

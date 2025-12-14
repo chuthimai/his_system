@@ -19,6 +19,7 @@ import { ImageUploadInterceptor } from 'src/common/interceptors/file-upload.inte
 
 import { CreateImagesDto } from './dto/create-images.dto';
 import { CreateSpecimenDto } from './dto/create-specimen.dto';
+import { SummaryReportsQueryDto } from './dto/summary-reports.dto';
 import { UpdateDiagnosisReportResultDto } from './dto/update-diagnosis-report-result.dto';
 import { UpdateImagingReportResultDto } from './dto/update-imaging-report-result.dto';
 import { UpdateLaboratoryReportResultDto } from './dto/update-laboratory-report-result.dto';
@@ -201,5 +202,12 @@ export class ReportsController {
       'reporter',
       currentUser,
     );
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(ROLES.PHYSICIAN)
+  @Get('/summary-reports')
+  summaryReports(@Query() summaryReportDto: SummaryReportsQueryDto) {
+    return this.reportService.summaryReports(summaryReportDto);
   }
 }
