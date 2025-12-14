@@ -33,6 +33,19 @@ export function formatVnFullDateTime(data: string): string {
   return `${hour} giờ ${minute} phút, ngày ${day} tháng ${month} năm ${year}`;
 }
 
+export function conditionDiagnosisSeverityToVn(severity: string): string {
+  switch (severity) {
+    case 'severe':
+      return "Nghiêm trọng";
+    case 'moderate':
+      return "Trung bình";
+    case 'mild':
+      return "Nhẹ";
+    default:
+      return "Không xác định";
+  }
+}
+
 export function getCurrentDateTime(): string {
   const now = new Date();
 
