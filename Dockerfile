@@ -1,9 +1,12 @@
-FROM node:20
+FROM node:20-bookworm
 
 WORKDIR /app
 
-# 1. System libs cho Chromium
+# 1. Cài Chromium + system libs
 RUN apt-get update && apt-get install -y \
+  chromium \
+  chromium-common \
+  chromium-sandbox \
   libnspr4 \
   libnss3 \
   libatk-bridge2.0-0 \
@@ -22,13 +25,13 @@ RUN apt-get update && apt-get install -y \
   && rm -rf /var/lib/apt/lists/*
 
 # 2. ENV cho Puppeteer
-ENV PUPPETEER_SKIP_SANDBOX=true
-ENV PUPPETEER_EXECUTABLE_PATH=/root/.cache/puppeteer/chrome/linux-*/chrome-linux64/chrome
+ENV PUPPETEER_SKIP_DOWNLOAD=true
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 
 # 3. Copy package.json
 COPY package*.json ./
 
-# 4. npm install (puppeteer download chrome)
+# 4. npm install
 RUN npm install
 
 # 5. Copy source
