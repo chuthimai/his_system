@@ -1,4 +1,4 @@
-import { ValidationPipe } from '@nestjs/common';
+import {Logger, ValidationPipe} from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as dotenv from 'dotenv';
@@ -9,6 +9,16 @@ dotenv.config();
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  Logger.overrideLogger(['log','debug','error','warn','verbose']);
+  Logger.overrideLogger(true);
+  Logger.log('LOGGER LOG WORKING >>>>>>');
+  console.log('CONSOLE LOG WORKING >>>>>>');
+
+  app.use((req: Request, res: Response, next) => {
+    console.log('===TRIGGER GLOBAL MIDDLEWARE HIS===');
+    next();
+  });
 
   app.enableCors({
     origin: process.env.ORIGIN_URL,

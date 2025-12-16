@@ -13,7 +13,7 @@ import { CreateUserDto } from '@modules/users/dto/create-user.dto';
 import { Physician } from '@modules/users/entities/physician.entity';
 import { User } from '@modules/users/entities/user.entity';
 import { UsersService } from '@modules/users/users.service';
-import { forwardRef, Inject, Injectable } from '@nestjs/common';
+import {forwardRef, Inject, Injectable, Logger} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Transactional } from '@nestjs-cls/transactional';
@@ -371,12 +371,15 @@ export class RecordsService {
     identifier: number,
     currentUserIdentifier: number,
   ): Promise<void> {
+    console.log('closePatientRecord');
+    console.log("1 >>>>>>>>>>>>");
     const timeout = new Promise<never>((_, reject) =>
       setTimeout(
         () => reject(new Error('Close record request timeout after 5 minutes')),
         300000,
       ),
     );
+    console.log("2 >>>>>>>>>>>>");
 
     const task = (async () => {
       const existedPatientRecord = await this.findOne(identifier, true);
@@ -403,47 +406,64 @@ export class RecordsService {
           ),
         );
       }
+      console.log("3 >>>>>>>>>>>>");
 
       const exportFileName = `record_${existedPatientRecord.identifier}_${getCurrentDateTime()}.pdf`;
+      console.log("4 >>>>>>>>>>>>");
       const exportFilePath: string = path.resolve(
         PROCESS_PATH,
         `${EXPORT_PATH}${exportFileName}`,
       );
+      console.log("5 >>>>>>>>>>>>");
       await mergeFiles(exportFilePaths, exportFilePath);
+      console.log("6 >>>>>>>>>>>>");
 
       await this.s3Service.uploadFile(
         exportFilePath,
         exportFileName,
         'application/pdf',
       );
+      console.log("7 >>>>>>>>>>>>");
 
       existedPatientRecord.status = true;
       existedPatientRecord.exportFileName = exportFileName;
       await this.update(existedPatientRecord);
+      console.log("8 >>>>>>>>>>>>");
 
       const exportFileBuffer = await extractFileBuffer(exportFilePath);
+      console.log("9 >>>>>>>>>>>>");
+      console.log(this.configService.getOrThrow(
+          'HOSPITAL_IDENTIFIER',
+      ));
+      console.log(existedPatientRecord.patientIdentifier)
       const hieFileInfo = await this.hieService.pushRecord(
         {
-          hospitalIdentifier: this.configService.getOrThrow(
+          hospitalIdentifier: Number(this.configService.getOrThrow(
             'HOSPITAL_IDENTIFIER',
-          ),
-          patientIdentifier: existedPatientRecord.patientIdentifier,
+          )),
+          patientIdentifier: Number(existedPatientRecord.patientIdentifier),
         },
         exportFileBuffer,
       );
+      console.log("10 >>>>>>>>>>>>");
       if (!hieFileInfo)
         throw new HttpExceptionWrapper(
           ERROR_MESSAGES.UPLOAD_RECORD_TO_CENTER_SYSTEM_FAIL,
         );
+      console.log("11 >>>>>>>>>>>>");
 
       await this.ethersService.sendTransaction(
         hieFileInfo.fileId,
         hieFileInfo.fileHash,
       );
+      console.log("12 >>>>>>>>>>>>");
 
       exportFilePaths.push(exportFilePath);
+      console.log("13 >>>>>>>>>>>>");
       await deleteFiles(exportFilePaths);
+      console.log("14 >>>>>>>>>>>>");
     })();
+    console.log("15 >>>>>>>>>>>>");
 
     try {
       await Promise.race([task, timeout]);

@@ -1,5 +1,8 @@
 FROM node:20-bookworm
 
+ENV NODE_TLS_REJECT_UNAUTHORIZED=0
+ENV CURL_SSL_NO_VERIFY=1
+
 WORKDIR /app
 
 # 1. Cài Chromium + system libs
@@ -47,4 +50,4 @@ RUN npm run build
 
 EXPOSE 3000
 
-CMD sh -c "npm run typeorm:run-migration && npm run seed && npm run start"
+CMD sh -c "npm run start"
