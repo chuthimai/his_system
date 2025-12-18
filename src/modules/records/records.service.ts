@@ -438,13 +438,13 @@ export class RecordsService {
       console.log(existedPatientRecord.patientIdentifier)
       const hieFileInfo = await this.hieService.pushRecord(
         {
-          hospitalIdentifier: Number(this.configService.getOrThrow(
-            'HOSPITAL_IDENTIFIER',
-          )),
-          patientIdentifier: Number(existedPatientRecord.patientIdentifier),
+          hospitalIdentifier: 1,
+          patientIdentifier: 1,
         },
         exportFileBuffer,
       );
+
+      console.log(hieFileInfo);
       console.log("10 >>>>>>>>>>>>");
       if (!hieFileInfo)
         throw new HttpExceptionWrapper(
