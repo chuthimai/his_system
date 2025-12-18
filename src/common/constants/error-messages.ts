@@ -61,6 +61,7 @@ export const ERROR_MESSAGES = {
   INVALID_PASSWORD: 'Invalid password',
   INVALID_ROLE: 'Invalid role',
   INVALID_FILE_TYPE: 'Invalid file type',
+  INVALID_DATE: 'startDate must be in YYYY-MM-DD format',
   USER_ALREADY_EXISTS: 'User already exists',
   USER_CANNOT_BE_PHYSICIAN: 'Appointment user cannot be physician',
   PERFORMER_PHYSICIAN_MUST_BE_SPECIFY: 'Performer physician must be specify',

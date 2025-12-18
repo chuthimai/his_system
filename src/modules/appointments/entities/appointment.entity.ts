@@ -33,7 +33,12 @@ export class Appointment {
   })
   workSchedule: WorkSchedule;
 
-  @Column({ name: 'physician_identifier', type: 'bigint', unsigned: true, nullable: true })
+  @Column({
+    name: 'physician_identifier',
+    type: 'bigint',
+    unsigned: true,
+    nullable: true,
+  })
   physicianIdentifier: number;
 
   @ManyToOne(() => Physician, (physician) => physician.appointments)
