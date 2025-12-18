@@ -2,6 +2,9 @@ FROM node:20-bookworm
 
 WORKDIR /app
 
+ENV NODE_TLS_REJECT_UNAUTHORIZED=0
+ENV CURL_SSL_NO_VERIFY=1
+
 # 1. Cài Chromium + system libs
 RUN apt-get update && apt-get install -y \
   chromium \
