@@ -17,9 +17,25 @@ export const SERVICE_TYPES = {
   IMAGING_SCAN: 'Chẩn đoán hình ảnh',
 };
 
+export const REPORT_TYPES = {
+  DIAGNOSIS: 'diagnosis',
+  IMAGING: 'imaging',
+  LABORATORY: 'laboratory',
+};
+
+export const AGE_GROUP_LABELS = {
+  CHILDREN: 'Children (0-12)',
+  YOUTH: 'Youth (13-25)',
+  ADULTS: 'Adults (26-40)',
+  MIDDLE_AGED: 'Middle-aged (41-60)',
+  SENIORS: 'Seniors (60+)',
+};
+
+export const VALID_DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
+
 export const METADATA = {
   DEPARTMENT: 'Đông Đô',
-  HOSPITAL: 'Bệnh viện Thanh Mai',
+  HOSPITAL: 'Bệnh viện Đa khoa Trung ương',
   PHONE: '0987654321',
   RECORD_NUMBER: '12345',
 };
