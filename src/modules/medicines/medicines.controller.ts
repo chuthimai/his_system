@@ -28,7 +28,7 @@ export class MedicinesController {
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(ROLES.PATIENT)
+  @Roles(ROLES.PATIENT, ROLES.PHYSICIAN)
   @Get('/prescriptions/:prescriptionIdentifier')
   getOnePrescription(
     @Param('prescriptionIdentifier') prescriptionIdentifier: number,
