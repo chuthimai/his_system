@@ -128,7 +128,7 @@ export function convertDataForSpecialReport(data: ServiceReport): any {
     reportCreatedTime: formatVnFullDateTime(restServiceReport.effectiveTime),
     reportResultTime: formatVnDateWithText(restServiceReport.recordedTime),
 
-    severity: severity,
+    severity: conditionDiagnosisSeverityToVn(severity),
     conclusion: conclusion,
 
     performDoctor: performer.name,

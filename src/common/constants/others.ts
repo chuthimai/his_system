@@ -35,7 +35,7 @@ export const VALID_DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 
 export const METADATA = {
   DEPARTMENT: 'Đông Đô',
-  HOSPITAL: 'Bệnh viện Thanh Mai',
+  HOSPITAL: 'Bệnh viện Đông Đô',
   PHONE: '0987654321',
   RECORD_NUMBER: '12345',
 };

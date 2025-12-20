@@ -438,8 +438,10 @@ export class RecordsService {
       console.log(existedPatientRecord.patientIdentifier)
       const hieFileInfo = await this.hieService.pushRecord(
         {
-          hospitalIdentifier: 1,
-          patientIdentifier: 1,
+          hospitalIdentifier: Number(this.configService.getOrThrow(
+            'HOSPITAL_IDENTIFIER',
+          )),
+          patientIdentifier: Number(existedPatientRecord.patientIdentifier),
         },
         exportFileBuffer,
       );
