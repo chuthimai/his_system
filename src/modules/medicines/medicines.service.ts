@@ -13,7 +13,10 @@ import {
   PROCESS_PATH,
   TEMPLATE_PATH,
 } from 'src/common/constants/others';
-import { convertDataForExportPrescription } from 'src/common/helpers/converter';
+import {
+  convertDataForExportPrescription,
+  getCurrentDateTime,
+} from 'src/common/helpers/converter';
 import { htmlToPdf } from 'src/common/helpers/render';
 import { HttpExceptionWrapper } from 'src/common/helpers/wrapper';
 import { Repository } from 'typeorm';
@@ -219,7 +222,7 @@ export class MedicinesService {
     );
     const exportFilePath: string = path.resolve(
       PROCESS_PATH,
-      `${EXPORT_PATH}${existedPrescription.identifier}.pdf`,
+      `${EXPORT_PATH}prescription_${getCurrentDateTime()}.pdf`,
     );
 
     await htmlToPdf(templatePath, exportFilePath, data);
