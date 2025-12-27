@@ -1,10 +1,10 @@
 import { AuthModule } from '@modules/auth/auth.module';
-import { EthersModule } from '@modules/ethers/ethers.module';
 import { HieModule } from '@modules/hie/hie.module';
 import { PaymentModule } from '@modules/payments/payments.module';
 import { ReportsModule } from '@modules/reports/reports.module';
 import { S3Module } from '@modules/s3/s3.module';
 import { SchedulesModule } from '@modules/schedules/schedules.module';
+import { TaskModule } from '@modules/tasks/task.module';
 import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { BillingModule } from 'src/modules/billing/billing.module';
@@ -18,7 +18,6 @@ import { RecordsService } from './records.service';
 @Module({
   imports: [
     TypeOrmModule.forFeature([PatientRecord]),
-    forwardRef(() => MedicinesModule),
     forwardRef(() => UsersModule),
     forwardRef(() => BillingModule),
     forwardRef(() => AuthModule),
@@ -26,9 +25,9 @@ import { RecordsService } from './records.service';
     forwardRef(() => ReportsModule),
     forwardRef(() => MedicinesModule),
     forwardRef(() => PaymentModule),
-    HieModule,
+    forwardRef(() => TaskModule),
     S3Module,
-    EthersModule,
+    HieModule,
   ],
   controllers: [RecordsController],
   providers: [RecordsService],

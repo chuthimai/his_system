@@ -1,14 +1,12 @@
 import { BillingService } from '@modules/billing/billing.service';
-import { EthersService } from '@modules/ethers/ethers.service';
 import { HieService } from '@modules/hie/hie.service';
-import { MedicinesService } from '@modules/medicines/medicines.service';
-import { PaymentService } from '@modules/payments/payments.service';
 import { DiagnosisReport } from '@modules/reports/entities/diagnosis-report.entity';
 import { ImagingReport } from '@modules/reports/entities/imaging-report.entity';
 import { LaboratoryReport } from '@modules/reports/entities/laboratory-report.entity';
 import { ReportsService, T } from '@modules/reports/reports.service';
 import { S3Service } from '@modules/s3/s3.service';
 import { SchedulesService } from '@modules/schedules/schedules.service';
+import { CloseReportQueue } from '@modules/tasks/queues/close-report.queue';
 import { CreateUserDto } from '@modules/users/dto/create-user.dto';
 import { Physician } from '@modules/users/entities/physician.entity';
 import { User } from '@modules/users/entities/user.entity';
@@ -17,16 +15,8 @@ import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Transactional } from '@nestjs-cls/transactional';
-import path from 'path';
 import { ERROR_MESSAGES } from 'src/common/constants/error-messages';
-import {
-  EXPORT_PATH,
-  PROCESS_PATH,
-  SERVICE_TYPES,
-} from 'src/common/constants/others';
-import { getCurrentDateTime } from 'src/common/helpers/converter';
-import { deleteFiles, mergeFiles } from 'src/common/helpers/render';
-import { extractFileBuffer } from 'src/common/helpers/render';
+import { SERVICE_TYPES } from 'src/common/constants/others';
 import { HttpExceptionWrapper } from 'src/common/helpers/wrapper';
 import { Repository } from 'typeorm';
 
@@ -57,14 +47,11 @@ export class RecordsService {
     private readonly schedulesService: SchedulesService,
     @Inject(forwardRef(() => UsersService))
     private readonly usersService: UsersService,
-    @Inject(forwardRef(() => MedicinesService))
-    private readonly medicinesService: MedicinesService,
-    @Inject(forwardRef(() => PaymentService))
-    private readonly paymentService: PaymentService,
     @Inject(forwardRef(() => S3Service))
     private readonly s3Service: S3Service,
     private readonly hieService: HieService,
-    private readonly ethersService: EthersService,
+    @Inject(forwardRef(() => CloseReportQueue))
+    private readonly closeReportQueue: CloseReportQueue,
   ) {}
 
   async findOne(
@@ -371,14 +358,7 @@ export class RecordsService {
     identifier: number,
     currentUserIdentifier: number,
   ): Promise<void> {
-    const timeout = new Promise<never>((_, reject) =>
-      setTimeout(
-        () => reject(new Error('Close record request timeout after 5 minutes')),
-        300000,
-      ),
-    );
-
-    const task = (async () => {
+    try {
       const existedPatientRecord = await this.findOne(identifier, true);
       if (!existedPatientRecord)
         throw new HttpExceptionWrapper(ERROR_MESSAGES.PATIENT_RECORD_NOT_FOUND);
@@ -390,64 +370,9 @@ export class RecordsService {
         throw new HttpExceptionWrapper(ERROR_MESSAGES.PERMISSION_DENIED);
       }
 
-      const exportFilePaths: string[] = [];
-      for (const serviceReport of existedPatientRecord.serviceReports) {
-        exportFilePaths.push(
-          await this.reportsService.exportReport(serviceReport.identifier),
-        );
-      }
-      if (existedPatientRecord.prescriptionIdentifier) {
-        exportFilePaths.push(
-          await this.medicinesService.exportPrescription(
-            existedPatientRecord.prescriptionIdentifier,
-          ),
-        );
-      }
-
-      const exportFileName = `record_${existedPatientRecord.identifier}_${getCurrentDateTime()}.pdf`;
-      const exportFilePath: string = path.resolve(
-        PROCESS_PATH,
-        `${EXPORT_PATH}${exportFileName}`,
-      );
-      await mergeFiles(exportFilePaths, exportFilePath);
-
-      await this.s3Service.uploadFile(
-        exportFilePath,
-        exportFileName,
-        'application/pdf',
-      );
-
-      existedPatientRecord.status = true;
-      existedPatientRecord.exportFileName = exportFileName;
-      await this.update(existedPatientRecord);
-
-      const exportFileBuffer = await extractFileBuffer(exportFilePath);
-      const hieFileInfo = await this.hieService.pushRecord(
-        {
-          hospitalIdentifier: this.configService.getOrThrow(
-            'HOSPITAL_IDENTIFIER',
-          ),
-          patientIdentifier: existedPatientRecord.patientIdentifier,
-        },
-        exportFileBuffer,
-      );
-      if (!hieFileInfo)
-        throw new HttpExceptionWrapper(
-          ERROR_MESSAGES.UPLOAD_RECORD_TO_CENTER_SYSTEM_FAIL,
-        );
-
-      await this.ethersService.sendTransaction(
-        hieFileInfo.fileId,
-        hieFileInfo.fileHash,
-        hieFileInfo.fileSignature,
-      );
-
-      exportFilePaths.push(exportFilePath);
-      await deleteFiles(exportFilePaths);
-    })();
-
-    try {
-      await Promise.race([task, timeout]);
+      await this.closeReportQueue.add({
+        record: existedPatientRecord,
+      });
     } catch (err) {
       throw new HttpExceptionWrapper(
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
