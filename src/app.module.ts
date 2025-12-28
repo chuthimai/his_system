@@ -2,6 +2,7 @@ import { EthersModule } from '@modules/ethers/ethers.module';
 import { HieModule } from '@modules/hie/hie.module';
 import { MessageModule } from '@modules/messages/messages.module';
 import { S3Module } from '@modules/s3/s3.module';
+import { TaskModule } from '@modules/tasks/task.module';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { getDataSourceToken, TypeOrmModule } from '@nestjs/typeorm';
@@ -67,6 +68,7 @@ import { UsersModule } from './modules/users/users.module';
     S3Module,
     EthersModule,
     HieModule,
+    TaskModule,
   ],
   controllers: [AppController],
   providers: [AppService],

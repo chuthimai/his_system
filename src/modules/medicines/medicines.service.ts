@@ -13,7 +13,10 @@ import {
   PROCESS_PATH,
   TEMPLATE_PATH,
 } from 'src/common/constants/others';
-import {convertDataForExportPrescription, getCurrentDateTime} from 'src/common/helpers/converter';
+import {
+  convertDataForExportPrescription,
+  getCurrentDateTime,
+} from 'src/common/helpers/converter';
 import { htmlToPdf } from 'src/common/helpers/render';
 import { HttpExceptionWrapper } from 'src/common/helpers/wrapper';
 import { Repository } from 'typeorm';
