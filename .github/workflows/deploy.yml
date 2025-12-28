@@ -78,6 +78,8 @@ jobs:
               --env=RPC_URL='${{ secrets.RPC_URL }}' \
               --env=HIE_URL=${{ secrets.HIE_URL }} \
               --env=HOSPITAL_IDENTIFIER=${{ secrets.HOSPITAL_IDENTIFIER }} \
+              --env=REDIS_HOST=${{ secrets.REDIS_HOST }} \
+              --env=REDIS_PORT=${{ secrets.REDIS_PORT }} \
               --network=bridge \
               --restart=no \
               ${{ secrets.DOCKER_USERNAME }}/nestjs-his:latest
