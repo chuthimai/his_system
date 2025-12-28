@@ -25,6 +25,8 @@ RUN apt-get update && apt-get install -y \
   libgtk-3-0 \
   ca-certificates \
   fonts-liberation \
+  redis-server \
+  redis-tools \
   && rm -rf /var/lib/apt/lists/*
 
 # Cài font chữ
@@ -50,4 +52,4 @@ RUN npm run build
 
 EXPOSE 3000
 
-CMD sh -c "npm run start"
+CMD sh -c "redis-server --daemonize yes && npm run start"
