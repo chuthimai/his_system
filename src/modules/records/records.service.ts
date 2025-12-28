@@ -358,10 +358,14 @@ export class RecordsService {
     identifier: number,
     currentUserIdentifier: number,
   ): Promise<void> {
+    console.log('1 >>>>>>>>>>>>');
     try {
+      console.log('2 >>>>>>>>>>>>');
       const existedPatientRecord = await this.findOne(identifier, true);
+      console.log('3 >>>>>>>>>>>>');
       if (!existedPatientRecord)
         throw new HttpExceptionWrapper(ERROR_MESSAGES.PATIENT_RECORD_NOT_FOUND);
+      console.log('4 >>>>>>>>>>>>');
 
       if (
         currentUserIdentifier !==
@@ -370,9 +374,12 @@ export class RecordsService {
         throw new HttpExceptionWrapper(ERROR_MESSAGES.PERMISSION_DENIED);
       }
 
+      console.log('5 >>>>>>>>>>>>');
+
       await this.closeReportQueue.add({
         record: existedPatientRecord,
       });
+      console.log('6 >>>>>>>>>>>>');
     } catch (err) {
       throw new HttpExceptionWrapper(
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
