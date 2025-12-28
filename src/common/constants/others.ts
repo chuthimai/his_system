@@ -31,6 +31,10 @@ export const AGE_GROUP_LABELS = {
   SENIORS: 'Seniors (60+)',
 };
 
+export const QUEUE_NAME = {
+  CLOSE_REPORT: 'close-report',
+};
+
 export const VALID_DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 
 export const METADATA = {
