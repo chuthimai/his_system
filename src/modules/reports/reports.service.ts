@@ -161,18 +161,24 @@ export class ReportsService {
     patientRecordIdentifier: number,
     currentUserIdentifier: number,
   ): Promise<ServiceReport | null> {
+    console.log(">>>>> findOneByPatientRecordIdentifier")
     const staffWorkSchedule =
       await this.schedulesService.findCurrentStaffWorkSchedule(
         currentUserIdentifier,
       );
+    console.log("1 >>>>>>>>>>>>>>>")
+    console.log("staffWorkSchedule: ", staffWorkSchedule);
     if (!staffWorkSchedule)
       throw new HttpExceptionWrapper(
         ERROR_MESSAGES.STAFF_WORK_SCHEDULE_NOT_FOUND,
       );
 
+    console.log("2 >>>>>>>>>>>>>>>")
     const existedPatientRecord = await this.patientRecordService.findOne(
       patientRecordIdentifier,
     );
+
+    console.log("3 >>>>>>>>>>>>>>>")
     if (!existedPatientRecord)
       throw new HttpExceptionWrapper(ERROR_MESSAGES.PATIENT_RECORD_NOT_FOUND);
 

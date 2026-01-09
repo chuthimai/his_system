@@ -253,9 +253,12 @@ export class SchedulesService {
   async findCurrentStaffWorkSchedule(
     currentUserIdentifier: number,
   ): Promise<StaffWorkSchedule | null> {
+    console.log("0.1 >>>>>>>>");
     const now = new Date();
     const currentDate = now.toISOString().split('T')[0];
     const currentTime = now.toTimeString().slice(0, 8);
+    console.log("0.2 >>>>>>>>");
+    console.log(now);
 
     // const currentDate = '2025-10-13';
     // const currentTime = '11:20:20';
