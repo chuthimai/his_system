@@ -192,7 +192,12 @@ export class SchedulesService {
     if (!existedSpecialty)
       throw new HttpExceptionWrapper(ERROR_MESSAGES.SPECIALTY_NOT_FOUND);
 
-    const now = new Date();
+    const now = new Date(
+        new Date().toLocaleString('en-US', {
+          timeZone: 'Asia/Ho_Chi_Minh'
+        })
+    );
+
     const nowPlus30Minutes = new Date(now.getTime() + 30 * 60000);
     const endOfTomorrow = new Date(
       now.getFullYear(),
@@ -253,9 +258,12 @@ export class SchedulesService {
   async findCurrentStaffWorkSchedule(
     currentUserIdentifier: number,
   ): Promise<StaffWorkSchedule | null> {
-    const now = new Date();
-    const currentDate = now.toISOString().split('T')[0];
-    const currentTime = now.toTimeString().slice(0, 8);
+    const hanoiISO = new Date()
+        .toLocaleString('sv-SE', { timeZone: 'Asia/Ho_Chi_Minh' })
+        .replace(' ', 'T');
+
+    const currentDate = hanoiISO.split('T')[0];
+    const currentTime = hanoiISO.slice(0, 8);
 
     // const currentDate = '2025-10-13';
     // const currentTime = '11:20:20';
